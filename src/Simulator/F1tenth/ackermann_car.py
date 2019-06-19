@@ -13,6 +13,9 @@ class Car():
         rospy.init_node("Ackermann_control", anonymous=True)
         self.goal_sent = False
 
+        # What to do if shut down
+        rospy.on_shutdown(self.shutdown)
+
         # Set up subscriber and publisher
         self.pub_vel_left_rear_wheel = rospy.Publisher('/racecar/left_rear_wheel_velocity_controller/command', Float64, queue_size=1)
         self.pub_vel_right_rear_wheel = rospy.Publisher('/racecar/right_rear_wheel_velocity_controller/command', Float64, queue_size=1)
@@ -51,6 +54,16 @@ class Car():
         self.pub_vel_left_front_wheel.publish(throttle)
         self.pub_vel_right_front_wheel.publish(throttle)
 
+    def shutdown(self):
+        rospy.loginfo("Stop Car")
+        self.pub_vel_left_rear_wheel.publish(0)
+        self.pub_vel_right_rear_wheel.publish(0)
+        self.pub_vel_left_front_wheel.publish(0)
+        self.pub_vel_right_front_wheel.publish(0)
+        self.pub_pos_right_steering_hinge.publish(0)
+        self.pub_pos_left_steering_hinge.publish(0)
+        # sleep just makes sure TurtleBot receives the stop command prior to shutting down the script
+        rospy.sleep(1)
 
 if __name__ == '__main__':
     try:

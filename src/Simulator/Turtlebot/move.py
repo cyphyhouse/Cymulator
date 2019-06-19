@@ -44,7 +44,7 @@ def main():
             if next_idx != 0 and difference > 0.01:
                 rospy.loginfo("curSpawn at %d, (%f,%f), Difference is %f", next_idx, curSpawn[0], curSpawn[1],
                               difference)
-                track.create_point(curSpawn[0], curSpawn[1], 0)
+                track.create_point(curSpawn[0], curSpawn[1], 0, next_idx)
                 track.paths[next_idx] = True
 
             if i in track.paths:

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+
 def parse():
     f = open("log3.txt", "r")
     lines = f.readlines()

@@ -81,8 +81,7 @@ class Spawn():
         </sdf>
         """
 
-    def create_point(self, x, y, z):
-        idx = self.count + 1
+    def create_point(self, x, y, z, idx):
         req = self.create_cube_request("waypoint"+str(idx),
                                    x, y, z,  # position
                                    0.0, 0.0, 0.0,  # rotation

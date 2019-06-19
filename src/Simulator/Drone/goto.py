@@ -7,30 +7,27 @@
 '''
 
 import rospy
-from nav_msgs.msg import Odometry
-from tf.transformations import euler_from_quaternion
 from geometry_msgs.msg import Point, Twist
 from math import atan2, sqrt
 from drone import Drone
 
 
 class GoTo():
-    def __init__(self):
-        rospy.init_node('Drone_Test', anonymous=False)
-        self.numberOfDrones = 2
+    def __init__(self, num, goals):
+        self.numberOfDrones = num
         self.drones = []
         self.complete = []
+        self.success = 0
         for i in range(self.numberOfDrones):
             self.drones.append(Drone(i+1))
             self.complete.append(0)
 
         # What to do if shut down
         rospy.on_shutdown(self.shutdown)
+        self.success = self.goto(goals)
 
     def goto(self, goals):
         rospy.loginfo("Ready to move. To stop Drone , press CTRL + C")
-        rospy.loginfo("Drone1 goes to (%f, %f)", pos1['x'], pos2['y'])
-        rospy.loginfo("Drone2 goes to (%f, %f)", pos2['x'], pos2['y'])
         r = rospy.Rate(10)
         move_cmd = Twist()
 
@@ -48,8 +45,6 @@ class GoTo():
                 diff_x = self.drones[i].goal.x - self.drones[i]._x
                 diff_y = self.drones[i].goal.y - self.drones[i]._y
                 diff_z = self.drones[i].goal.z - self.drones[i]._z
-
-                rospy.loginfo("Drone %d is at (%f, %f, %f)", i, self.drones[i]._x, self.drones[i]._y, self.drones[i]._z)
 
                 if sqrt(diff_x*diff_x + diff_y*diff_y + diff_z*diff_z) < 0.05:
                     self.complete[i] = 1 
@@ -86,15 +81,16 @@ class GoTo():
             
         rospy.sleep(1)
 
+
 if __name__ == '__main__': 
     try:
-        navigator = GoTo()
-
+        rospy.init_node('Drone_Test', anonymous=False)
         pos1 = {'x': 5, 'y': 7, 'z': 10}
         pos2 = {'x': -5, 'y': 7, 'z': 10}
-        success = navigator.goto([pos1, pos2])
+        pos3 = {'x': -5, 'y': -7, 'z': 10}
+        navigator = GoTo(3, [pos1, pos2, pos3])
 
-        if success:
+        if navigator.success:
             rospy.loginfo("Yep, we made it!")
         else:
             rospy.loginfo("Something is wrong")

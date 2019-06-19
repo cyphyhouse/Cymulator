@@ -69,8 +69,9 @@ class GoTo():
         self.car.pub_vel_right_front_wheel.publish(0)
         self.car.pub_pos_right_steering_hinge.publish(0)
         self.car.pub_pos_left_steering_hinge.publish(0)
-	    # sleep just makes sure TurtleBot receives the stop command prior to shutting down the script
+        # sleep just makes sure TurtleBot receives the stop command prior to shutting down the script
         rospy.sleep(1)
+
 
 if __name__ == '__main__': 
     try:
