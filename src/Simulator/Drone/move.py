@@ -13,7 +13,13 @@ import sys
 
 Mode = 0
 
+
 def main(argv):
+    '''
+    This function will call move function according to the mode specified
+    :param argv: A list of arguments - [mode, number, positions/logfile name]
+    :return: Nothing
+    '''
     if len(argv) < 3:
         print("You must enter the mode and the number of drones! ")
         exit(0)
@@ -44,6 +50,12 @@ def main(argv):
 
 
 def move(state_msg, pose):
+    '''
+    This function will directly set drone's state (including poses and orientations)
+    :param state_msg: current set model's state message
+    :param pose: the pose to be set
+    :return: Nothing
+    '''
     rospy.loginfo("Currently on (%f, %f)", pose[0], pose[1])
     state_msg.pose.position.x = pose[0]
     state_msg.pose.position.y = pose[1]

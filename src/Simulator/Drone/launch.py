@@ -6,6 +6,12 @@ import subprocess
 
 
 def launch(num, loc):
+    '''
+    This function launches Gazebo-ROS for drone model
+    :param num: number of drones to be spawned
+    :param loc: the locations that drones will be spawned on
+    :return: proc -  the Gazebo-ROS process that is running
+    '''
     modelPath = str(Path.home()) + "/catkin_ws3/src/drone/launch/drone.launch"
     tree = ET.parse(modelPath)
     root = tree.getroot()
