@@ -1,6 +1,8 @@
 import xml.etree.ElementTree as ET
 from pathlib import Path
 import os
+import _thread
+import subprocess
 
 
 def launch(num, loc):
@@ -36,8 +38,12 @@ def launch(num, loc):
         arg = ET.SubElement(include, 'arg', attrib)
 
     tree.write(modelPath)
+    print("roslaunch")
+    # os.system("roslaunch drone drone.launch")
+    # _thread.start_new_thread(os.system, ("roslaunch drone drone.launch",))
+    proc = subprocess.Popen(['roslaunch', 'drone', 'drone.launch'])
 
-    os.system("roslaunch drone drone.launch")
+    return proc
 
 
 if __name__ == '__main__':

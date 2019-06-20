@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 
+# TODO: Subject to later change to adapt to log files
 def parse():
     f = open("log3.txt", "r")
     lines = f.readlines()

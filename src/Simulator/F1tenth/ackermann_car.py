@@ -8,6 +8,7 @@ from std_msgs.msg import Float64
 from math import atan2, sqrt
 from ackermann_msgs.msg import AckermannDriveStamped
 
+
 class Car():
     def __init__(self):
         rospy.init_node("Ackermann_control", anonymous=True)
@@ -24,8 +25,6 @@ class Car():
 
         self.pub_pos_left_steering_hinge = rospy.Publisher('/racecar/left_steering_hinge_position_controller/command', Float64, queue_size=1)
         self.pub_pos_right_steering_hinge = rospy.Publisher('/racecar/right_steering_hinge_position_controller/command', Float64, queue_size=1)
-
-
 
         rospy.loginfo("Subscribe ackermann message!")
         self.ackermann = rospy.Subscriber("/ackermann_cmd", AckermannDriveStamped, self.set_throttle)
@@ -64,6 +63,7 @@ class Car():
         self.pub_pos_left_steering_hinge.publish(0)
         # sleep just makes sure TurtleBot receives the stop command prior to shutting down the script
         rospy.sleep(1)
+
 
 if __name__ == '__main__':
     try:

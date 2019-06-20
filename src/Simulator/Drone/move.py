@@ -17,7 +17,6 @@ def main(argv):
     if len(argv) < 3:
         print("You must enter the mode and the number of drones! ")
         exit(0)
-    print(argv)
     mode = int(argv[1])
     num = int(argv[2])
     rospy.init_node('Move')
@@ -28,7 +27,7 @@ def main(argv):
         drone_msg.model_name = 'drone'+str(i+1)
         drones.append(drone_msg)
 
-    if mode == 0: # reset drones position
+    if mode == 0:  # reset drones position
         for i in range(num):
             move(drones[i], (2*i, 0))
     elif mode == 1:  # Set drones to particular positions
@@ -42,7 +41,6 @@ def main(argv):
     #     for point1, point2 in path:
     #         move(robot1_msg, point1)
     #         move(robot2_msg, point2)
-
 
 
 def move(state_msg, pose):

@@ -84,7 +84,7 @@ class GoTo():
 
 if __name__ == '__main__': 
     try:
-        rospy.init_node('Drone_Test', anonymous=False)
+        rospy.init_node('Drone_Test', anonymous=True)
         pos1 = {'x': 5, 'y': 7, 'z': 10}
         pos2 = {'x': -5, 'y': 7, 'z': 10}
         pos3 = {'x': -5, 'y': -7, 'z': 10}
