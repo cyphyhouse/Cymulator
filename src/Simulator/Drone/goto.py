@@ -7,8 +7,9 @@
 
 import rospy
 from geometry_msgs.msg import Point, Twist
-from math import atan2, sqrt
+from math import sqrt
 from drone import Drone
+import sys
 
 
 class GoTo:
@@ -41,16 +42,17 @@ class GoTo:
 
         # Set up goal
         for i in range(self.numberOfDrones):
-            self.drones[i].goal.x = goals[i]['x']
-            self.drones[i].goal.y = goals[i]['y']
-            self.drones[i].goal.z = goals[i]['z']
+            self.drones[i].goal.x = goals[i][0]
+            self.drones[i].goal.y = goals[i][1]
+            self.drones[i].goal.z = goals[i][2]
+            rospy.loginfo("Drone %d is going to (%f, %f, %f)", i+1, self.drones[i].goal.x, self.drones[i].goal.y, self.drones[i].goal.z)
 
         while not rospy.is_shutdown():
             if sum(self.complete) == self.numberOfDrones:
                 return 1
 
             # Simple controller code for drones
-            # TODO: Might need to be changed
+            # TODO: Controller might need to be changed
             for i in range(self.numberOfDrones):
                 diff_x = self.drones[i].goal.x - self.drones[i]._x
                 diff_y = self.drones[i].goal.y - self.drones[i]._y
@@ -101,10 +103,12 @@ class GoTo:
 if __name__ == '__main__': 
     try:
         rospy.init_node('Drone_Test', anonymous=True)
-        pos1 = {'x': 5, 'y': 7, 'z': 10}
-        pos2 = {'x': -5, 'y': 7, 'z': 10}
-        pos3 = {'x': -5, 'y': -7, 'z': 10}
-        navigator = GoTo(3, [pos1, pos2, pos3])
+        sys.path.append('..')
+        from util import parse_goal_pose
+        num = int(sys.argv[1])
+        goals = parse_goal_pose(num, sys.argv[2:], 'drone')
+
+        navigator = GoTo(num, goals)
 
         if navigator.success:
             rospy.loginfo("Yep, we made it!")

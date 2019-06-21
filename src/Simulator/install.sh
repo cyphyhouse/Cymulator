@@ -33,6 +33,7 @@ wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download
 unzip catkin_ws3.zip
 
 # Prepare dependencies for catkin_make
+sudo chown $USER -R catkin_ws3
 cd ~/catkin_ws3
 find ./ -type f -exec sed -i -e "s/mjiang24/$USER/g" {} \;
 pip3 install catkin_pkg
@@ -45,9 +46,13 @@ sudo apt-get install python3-yaml
 sudo apt-get install python3-catkin-pkg-modules
 sudo apt-get install python3-rospkg-modules
 
-# Build 
-catkin_make
-
 # Environment setup
 echo "source ~/catkin_ws3/devel/setup.bash" >> ~/.bashrc
 source ~/.bashrc
+
+sudo "set(CMAKE_CXX_FLAGS '${CMAKE_CXX_FLAGS} -std=c++14')" >>  ~/catkin_ws3/src/CMakeLists.txt
+
+# Build
+cd ~/catkin_ws3
+catkin_make
+

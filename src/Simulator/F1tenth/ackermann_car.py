@@ -7,10 +7,13 @@ from geometry_msgs.msg import PointStamped, Twist, Pose
 from std_msgs.msg import Float64
 from math import atan2, sqrt
 from ackermann_msgs.msg import AckermannDriveStamped
+import sys
 
 
-class Car():
-    def __init__(self):
+# TODO: this file needs to be changed corresponding to the new MPC controller
+
+class AckermannCar():
+    def __init__(self, num):
         rospy.init_node("Ackermann_control", anonymous=True)
         self.goal_sent = False
 
@@ -67,7 +70,8 @@ class Car():
 
 if __name__ == '__main__':
     try:
-        Car()
+        num = int(sys.argv[1])
+        AckermannCar(num)
 
     except rospy.ROSInterruptException:
         rospy.loginfo("User pressed  Ctrl-C, quit!")

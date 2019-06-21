@@ -8,7 +8,7 @@ from std_msgs.msg import Float64
 from math import atan2, sqrt
 
 class Car():
-    def __init__(self):
+    def __init__(self, number):
         # Robot's position and orientation inforamtion
         self._x = 0.0
         self._y = 0.0
@@ -16,21 +16,20 @@ class Car():
         self.goal = Point()
 
         # Set up subscriber and publisher
-        self.pub_vel_left_rear_wheel = rospy.Publisher('/car1/racecar/left_rear_wheel_velocity_controller/command', Float64, queue_size=1)
-        self.pub_vel_right_rear_wheel = rospy.Publisher('/car1/racecar/right_rear_wheel_velocity_controller/command', Float64, queue_size=1)
-        self.pub_vel_left_front_wheel = rospy.Publisher('/car1/racecar/left_front_wheel_velocity_controller/command', Float64, queue_size=1)
-        self.pub_vel_right_front_wheel = rospy.Publisher('/car1/racecar/right_front_wheel_velocity_controller/command', Float64, queue_size=1)
+        my_number = "/car" + str(number)
+        self.pub_vel_left_rear_wheel = rospy.Publisher(my_number + '/racecar/left_rear_wheel_velocity_controller/command', Float64, queue_size=1)
+        self.pub_vel_right_rear_wheel = rospy.Publisher(my_number + '/racecar/right_rear_wheel_velocity_controller/command', Float64, queue_size=1)
+        self.pub_vel_left_front_wheel = rospy.Publisher(my_number + '/racecar/left_front_wheel_velocity_controller/command', Float64, queue_size=1)
+        self.pub_vel_right_front_wheel = rospy.Publisher(my_number + '/racecar/right_front_wheel_velocity_controller/command', Float64, queue_size=1)
 
-        self.pub_pos_left_steering_hinge = rospy.Publisher('/car1/racecar/left_steering_hinge_position_controller/command', Float64, queue_size=1)
-        self.pub_pos_right_steering_hinge = rospy.Publisher('/car1/racecar/right_steering_hinge_position_controller/command', Float64, queue_size=1)
+        self.pub_pos_left_steering_hinge = rospy.Publisher(my_number + '/racecar/left_steering_hinge_position_controller/command', Float64, queue_size=1)
+        self.pub_pos_right_steering_hinge = rospy.Publisher(my_number + '/racecar/right_steering_hinge_position_controller/command', Float64, queue_size=1)
 
-        self.sub = rospy.Subscriber("/ground_truth/state", Odometry, self.newPos)
-
+        self.sub = rospy.Subscriber(my_number + "/ground_truth/state", Odometry, self.newPos)
 
     def newPos(self, msg):
         self._x = msg.pose.pose.position.x 
-        self._y = msg.pose.pose.position.y 
-        self._z = msg.pose.pose.position.z 
+        self._y = msg.pose.pose.position.y
 
         quat = msg.pose.pose.orientation
         (_, _, self._theta) = euler_from_quaternion([quat.x, quat.y, quat.z, quat.w])

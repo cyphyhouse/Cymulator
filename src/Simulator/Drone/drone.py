@@ -7,6 +7,7 @@ from geometry_msgs.msg import Point, Twist
 from math import atan2, sqrt
 from hector_uav_msgs.srv import EnableMotors
 
+
 class Drone():
     def __init__(self, number):
         # Drone's position and orientation inforamtion
@@ -29,7 +30,6 @@ class Drone():
             resp = enable(True)
         except rospy.ServiceException as e:
             rospy.loginfo("Service call failed with %s", e)
-
 
     def newPos(self, msg):
         self._x = msg.pose.pose.position.x 
