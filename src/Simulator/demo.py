@@ -15,7 +15,8 @@ def main(argv):
     mode = int(mode)
 
     init_poses = [(0,0,0.3), (0,2,0.3), (0,4,0.3), (0,6,0.3)]
-    goals = [(10,10), (10,-10), (-10,10), (-10, -10)]
+    drone_goals = [(10,10,10), (10,-10,10), (-10,10,10), (-10,-10,10)]
+    car_goals = [(10, 10), (10, -10), (-10, 10), (-10, -10)]
 
     if model == 'drone':
         print("Generate drones")
@@ -25,7 +26,7 @@ def main(argv):
         import goto, move
         if mode == 1:
             rospy.init_node('Drone_GoTo', anonymous=True)
-            goto.GoTo(num, goals)
+            goto.GoTo(num, drone_goals)
 
     elif model == 'car' or model == 'f1tenth':
         print("Generate cars")
@@ -35,7 +36,7 @@ def main(argv):
         import goto, move
         if mode == 1:
             rospy.init_node('F1tenth_GoTo', anonymous=True)
-            goto.GoTo(num, goals)
+            goto.GoTo(num, car_goals)
 
     else:
         print("Invalid model type")
