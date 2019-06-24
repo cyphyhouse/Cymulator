@@ -33,7 +33,7 @@ wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download
 unzip catkin_ws3.zip
 
 # Prepare dependencies for catkin_make
-sudo chown $USER -R catkin_ws3
+# sudo chown $USER -R catkin_ws3
 cd ~/catkin_ws3
 find ./ -type f -exec sed -i -e "s/mjiang24/$USER/g" {} \;
 pip3 install catkin_pkg
