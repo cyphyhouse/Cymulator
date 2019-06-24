@@ -1,6 +1,7 @@
 import random
 import sys
 
+
 def parse_init_pose(num, poses):
     init_poses = []
     for pose in poses:
@@ -28,17 +29,9 @@ def parse_goal_pose(num, poses, model):
     return goal_poses
 
 
-def sim_launch(num, model, init_poses):
-    '''
-    This function calls Gazebo simulator with the specified model
-    :param num: number of models to be spawned
-    :param model: the model that to be launched and spawned
-    :param init_poses: initial positions of models
-    :return: ros_proc - the Gazebo-ROS process that is running
-    '''
-    sys.path.insert(0, model)
+def sim_launch(models, loc):
     import launch
-    ros_proc = launch.launch(num, init_poses)
+    ros_proc = launch.launch(models, loc)
     print("============= Simulator starts successful ================")
     # time.sleep(max(num * 6, 10))
     return ros_proc

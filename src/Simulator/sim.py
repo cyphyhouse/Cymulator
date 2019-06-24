@@ -10,25 +10,26 @@ def main(argv):
     :return: Nothing; the program exits when user press Ctrl-C or shutdown Gazebo
     '''
     if len(argv) < 3:
-        print("Please enter arguments in form of: python3 demo.py MODEL_TYPE NUMBER_OF_MODEL INIT_POSITIONS")
+        print("Please enter arguments in form of: ")
+        print("     python3 sim.py NUM_OF_DRONES NUM_OF_CARS INIT_POSITIONS")
         exit(0)
 
-    model, num = argv[1:3]
-    num = int(num)
-    init_poses = parse_init_pose(num, argv[3:])
+    num_drones, num_cars = argv[1:3]
+    num_drones = int(num_drones)
+    num_cars = int(num_cars)
+    loc = {
+        'drone': parse_init_pose(num_drones, argv[3:3+num_drones]),
+        'car': parse_init_pose(num_cars, argv[3+num_drones:3+num_drones+num_cars])
+    }
 
-    if model == 'drone':
-        print("Generate drones")
-        proc = sim_launch(num, './Drone', init_poses)
+    models = {'drone': num_drones, 'car': num_cars}
 
-    elif model == 'car' or model == 'f1tenth':
-        print("Generate cars")
-        proc = sim_launch(num, './F1tenth', init_poses)
+    print("Generate Models")
+    proc = sim_launch(models, loc)
 
     # Infinite loop like ros spin
     while True:
         try:
-            # print("PASS")
             pass
         except KeyboardInterrupt:
             # proc.kill()
@@ -39,5 +40,5 @@ def main(argv):
 
 
 if __name__ == '__main__':
-    # python3 demo.py MODEL_TYPE NUMBER_OF_MODEL INIT_POSITIONS*
+    # python3 sim.py NUM_OF_DRONES NUM_OF_CARS INIT_POSITIONS
     main(sys.argv)

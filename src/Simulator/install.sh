@@ -39,6 +39,7 @@ find ./ -type f -exec sed -i -e "s/mjiang24/$USER/g" {} \;
 pip3 install catkin_pkg
 pip3 install numpy
 pip3 install empy
+pip3 install pathlib
 sudo apt-get install ros-kinetic-geographic-msgs
 sudo apt-get install ros-kinetic-ros-control ros-kinetic-ros-controllers
 sudo apt-get install ros-kinetic-ackermann-msgs
