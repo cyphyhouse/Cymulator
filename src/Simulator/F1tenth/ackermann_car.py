@@ -12,7 +12,7 @@ import sys
 
 # TODO: this file needs to be changed corresponding to the new MPC controller
 
-class AckermannCar():
+class AckermannCar:
     def __init__(self, num):
         rospy.init_node("Ackermann_control", anonymous=True)
         self.goal_sent = False

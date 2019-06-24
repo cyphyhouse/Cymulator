@@ -1,25 +1,30 @@
 import sys
 import os
 from util import parse_init_pose, sim_launch
+import argparse
 
 
-def main(argv):
+def main():
     '''
     This function configure and launch Gazebo-ROS simulator
     :param argv: user command line input in format - MODEL_TYPE, NUMBER_OF_MODEL
     :return: Nothing; the program exits when user press Ctrl-C or shutdown Gazebo
     '''
-    if len(argv) < 3:
-        print("Please enter arguments in form of: ")
-        print("     python3 sim.py NUM_OF_DRONES NUM_OF_CARS INIT_POSITIONS")
-        exit(0)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", "--car", help="Number of cars to be generated", type=int)
+    parser.add_argument("-d", "--drone", help="Number of drones to be generated", type=int)
+    parser.add_argument("-I", "--initial", nargs="+", help="Initial locations of the models")
 
-    num_drones, num_cars = argv[1:3]
-    num_drones = int(num_drones)
-    num_cars = int(num_cars)
+    args = parser.parse_args()
+    num_drones = args.drone
+    num_cars = args.car
+    init_loc = args.initial
+    if not init_loc:
+        init_loc = []
+
     loc = {
-        'drone': parse_init_pose(num_drones, argv[3:3+num_drones]),
-        'car': parse_init_pose(num_cars, argv[3+num_drones:3+num_drones+num_cars])
+        'drone': parse_init_pose(num_drones, init_loc[:num_drones]),
+        'car': parse_init_pose(num_cars, init_loc[num_drones:num_drones+num_cars])
     }
 
     models = {'drone': num_drones, 'car': num_cars}
@@ -33,12 +38,12 @@ def main(argv):
             pass
         except KeyboardInterrupt:
             # proc.kill()
-            os.system("killall -9 rosmaster")
-            os.system("killall -9 gzserver")
+            os.system("killall -2 rosmaster")
+            os.system("killall -2 gzserver")
             print("User pressed Ctrl-C, exit! ")
             sys.exit(0)
 
 
 if __name__ == '__main__':
     # python3 sim.py NUM_OF_DRONES NUM_OF_CARS INIT_POSITIONS
-    main(sys.argv)
+    main()

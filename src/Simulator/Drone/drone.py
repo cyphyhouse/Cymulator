@@ -8,7 +8,7 @@ from math import atan2, sqrt
 from hector_uav_msgs.srv import EnableMotors
 
 
-class Drone():
+class Drone:
     def __init__(self, number):
         # Drone's position and orientation inforamtion
         self._x = 0.0

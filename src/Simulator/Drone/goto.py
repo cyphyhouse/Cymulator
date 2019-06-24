@@ -90,6 +90,10 @@ class GoTo:
             r.sleep()
 
     def shutdown(self):
+        '''
+        Stop all drones when rospy shuts down
+        :return: Nothing
+        '''
         rospy.loginfo("Stop Drones")
         # a default Twist has linear.x of 0 and angular.z of 0.  So it'll stop TurtleBot
 
