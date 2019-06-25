@@ -56,9 +56,3 @@ sudo apt-get install python3-rospkg-modules
 echo "source ~/catkin_ws3/devel/setup.bash" >> ~/.bashrc
 source ~/.bashrc
 
-sudo "set(CMAKE_CXX_FLAGS '${CMAKE_CXX_FLAGS} -std=c++14')" >>  ~/catkin_ws3/src/CMakeLists.txt
-
-# Build
-cd ~/catkin_ws3
-catkin_make
-
