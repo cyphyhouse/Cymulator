@@ -62,7 +62,6 @@ class GoTo:
 
         # Set up goal
         for i in range(self.numberOfCars):
-            print (goals[i])
             self.cars[i].goal.x = goals[i][0]
             self.cars[i].goal.y = goals[i][1]
             rospy.loginfo("Car%d is going to (%f, %f)", i+1, self.cars[i].goal.x, self.cars[i].goal.y)
@@ -79,42 +78,48 @@ class GoTo:
                 # rospy.loginfo("Car%d is currently at (%f, %f)", i+1, self.cars[i]._x, self.cars[i]._y)
 
                 if sqrt(diff_x*diff_x + diff_y*diff_y) < 0.2:
-                    self.cars[i].pub_vel_left_rear_wheel.publish(0)
-                    self.cars[i].pub_vel_right_rear_wheel.publish(0)
-                    self.cars[i].pub_vel_left_front_wheel.publish(0)
-                    self.cars[i].pub_vel_right_front_wheel.publish(0)
-                    self.cars[i].pub_pos_right_steering_hinge.publish(0)
-                    self.cars[i].pub_pos_left_steering_hinge.publish(0)
+                    left_rear_wheel = 0
+                    right_rear_wheel = 0
+                    left_front_wheel = 0
+                    right_front_wheel = 0
+                    right_steering = 0
+                    left_steering = 0
                     self.complete[i] = 1
                 elif angle_to_goal - self.cars[i]._theta > 0.1:
                     # rospy.loginfo("Left turn at (%f, %f)", self.cars[i]._x, self.cars[i]._y)
-                    self.cars[i].pub_pos_left_steering_hinge.publish(0.3)
-                    self.cars[i].pub_pos_right_steering_hinge.publish(0.3)
-                    self.cars[i].pub_vel_left_rear_wheel.publish(5)
-                    self.cars[i].pub_vel_right_rear_wheel.publish(5)
-                    self.cars[i].pub_vel_left_front_wheel.publish(5)
-                    self.cars[i].pub_vel_right_front_wheel.publish(5)
+                    left_steering = 0.3
+                    right_steering = 0.3
+                    left_rear_wheel = 5
+                    right_rear_wheel = 5
+                    left_front_wheel = 5
+                    right_front_wheel = 5
                 elif angle_to_goal - self.cars[i]._theta < -0.1:
                     # rospy.loginfo("Right turn at (%f, %f)", self.cars[i]._x, self.cars[i]._y)
-                    self.cars[i].pub_pos_right_steering_hinge.publish(-0.3)
-                    self.cars[i].pub_pos_left_steering_hinge.publish(-0.3)
-                    self.cars[i].pub_vel_left_rear_wheel.publish(5)
-                    self.cars[i].pub_vel_right_rear_wheel.publish(5)
-                    self.cars[i].pub_vel_left_front_wheel.publish(5)
-                    self.cars[i].pub_vel_right_front_wheel.publish(5)
+                    left_steering = -0.3
+                    right_steering = -0.3
+                    left_rear_wheel = 5
+                    right_rear_wheel = 5
+                    left_front_wheel = 5
+                    right_front_wheel = 5
                 else:
                     # rospy.loginfo("Go straight at (%f, %f)", self.cars[i]._x, self.cars[i]._y)
-                    self.cars[i].pub_vel_left_rear_wheel.publish(10)
-                    self.cars[i].pub_vel_right_rear_wheel.publish(10)
-                    self.cars[i].pub_vel_left_front_wheel.publish(10)
-                    self.cars[i].pub_vel_right_front_wheel.publish(10)
-                    self.cars[i].pub_pos_right_steering_hinge.publish(0)
-                    self.cars[i].pub_pos_left_steering_hinge.publish(0)
+                    left_rear_wheel = 10
+                    right_rear_wheel = 10
+                    left_front_wheel = 10
+                    right_front_wheel = 10
+                    right_steering = 0
+                    left_steering = 0
 
+                self.cars[i].pub_vel_left_rear_wheel.publish(left_rear_wheel)
+                self.cars[i].pub_vel_right_rear_wheel.publish(right_rear_wheel)
+                self.cars[i].pub_vel_left_front_wheel.publish(left_front_wheel)
+                self.cars[i].pub_vel_right_front_wheel.publish(right_front_wheel)
+                self.cars[i].pub_pos_right_steering_hinge.publish(right_steering)
+                self.cars[i].pub_pos_left_steering_hinge.publish(left_steering)
             r.sleep()
 
     def shutdown(self):
-        rospy.loginfo("Stop Car")
+        rospy.loginfo("Stop %d Car", self.numberOfCars)
         for i in range(self.numberOfCars):
             self.cars[i].pub_vel_left_rear_wheel.publish(0)
             self.cars[i].pub_vel_right_rear_wheel.publish(0)
@@ -122,7 +127,8 @@ class GoTo:
             self.cars[i].pub_vel_right_front_wheel.publish(0)
             self.cars[i].pub_pos_right_steering_hinge.publish(0)
             self.cars[i].pub_pos_left_steering_hinge.publish(0)
-        # sleep just makes sure TurtleBot receives the stop command prior to shutting down the script
+        # sleep just makes sure cars receives the stop command prior to shutting down the script
+        rospy.loginfo("complete stop car")
         rospy.sleep(1)
 
 
@@ -132,9 +138,7 @@ if __name__ == '__main__':
         sys.path.append('..')
         from util import parse_goal_pose
         num = int(sys.argv[1])
-        print(sys.argv[2:])
         goals = parse_goal_pose(num, sys.argv[2:], 'car')
-        print(goals)
         navigator = GoTo(num, goals)
 
         if navigator.success:

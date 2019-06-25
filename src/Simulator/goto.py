@@ -4,6 +4,7 @@ from util import parse_goal_pose
 import importlib
 import rospy
 import threading
+import time
 
 
 def main():
@@ -35,6 +36,7 @@ def main():
         carModule = importlib.import_module("F1tenth.goto")
     except AttributeError:
         print("Import goto function failed!")
+        exit(0)
 
     # module.GoTo(num_drones, loc['drone'])
     if num_drones != 0:
@@ -44,8 +46,12 @@ def main():
         carThread = threading.Thread(target=carModule.GoTo, args=(num_cars, loc['car']))
         carThread.start()
     rospy.loginfo("Models start goto method")
-
-
+    # TODO: Debug to stop the cars after SIGINT
+    try:
+        droneThread.join()
+        carThread.join()
+    except Exception as e:
+        pass
 
     rospy.loginfo("----TEST----")
 

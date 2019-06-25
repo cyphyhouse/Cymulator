@@ -130,11 +130,11 @@ class GoTo:
         :return: Nothing
         '''
         rospy.loginfo("Stop Drones")
-        # a default Twist has linear.x of 0 and angular.z of 0.  So it'll stop TurtleBot
+        # a default Twist has linear.x of 0 and angular.z of 0.  So it'll stop Drones
 
         for i in range(self.numberOfDrones):
             self.drones[i].pub.publish(Twist())
-        # sleep just makes sure TurtleBot receives the stop command prior to shutting down the script
+        # sleep just makes sure Drones receives the stop command prior to shutting down the script
             
         rospy.sleep(1)
 
