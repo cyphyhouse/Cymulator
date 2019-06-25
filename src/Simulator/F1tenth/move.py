@@ -16,7 +16,7 @@ def init(num, logfile):
 
     if logfile == "":  # reset drones position
         for i in range(num):
-            move(cars[i], (2 * i, 0))
+            move(cars[i], (0, 2 * i + 1))
     # TODO: Need an agreement on the format logfile before set up this branch
     # else:
     #     path = parse()
