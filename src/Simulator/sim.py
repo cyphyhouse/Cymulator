@@ -19,6 +19,10 @@ def main():
     num_drones = args.drone
     num_cars = args.car
     init_loc = args.initial
+    if not num_drones:
+        num_drones = 0
+    if not num_cars:
+        num_cars = 0
     if not init_loc:
         init_loc = []
 
