@@ -38,6 +38,11 @@ class Drone:
             rospy.loginfo("Service call failed with %s", e)
 
     def newPos(self, msg):
+        '''
+        Callback function to get drone's current location
+        :param msg: Odometry type msg that contains position and orientation of a drone
+        :return: Nothing
+        '''
         self._x = msg.pose.pose.position.x
         self._y = msg.pose.pose.position.y
         self._z = msg.pose.pose.position.z
@@ -70,6 +75,11 @@ class GoTo:
         self.success = self.goto(goals)
 
     def goto(self, goals):
+        '''
+        The actual goto method that drives the drones towards goal points
+        :param goals: the list of goal points
+        :return: 1 - if complete
+        '''
         rospy.loginfo("Ready to move. To stop Drone , press CTRL + C")
         r = rospy.Rate(10)  # Setup ROS spin rate
         move_cmd = Twist()  # Twist messages
@@ -135,7 +145,7 @@ class GoTo:
         for i in range(self.numberOfDrones):
             self.drones[i].pub.publish(Twist())
         # sleep just makes sure Drones receives the stop command prior to shutting down the script
-            
+
         rospy.sleep(1)
 
 

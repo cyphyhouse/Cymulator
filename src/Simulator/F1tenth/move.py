@@ -1,29 +1,36 @@
 #!/usr/bin/env python3
 
 import rospy
-import rospkg
 from gazebo_msgs.msg import ModelState
 from gazebo_msgs.srv import SetModelState
-from logParser import parse
-
-Mode = 0
+import argparse
 
 
-def main():
-    rospy.init_node('Move')
+def init(num, logfile):
+    cars = []
 
-    car_msg = ModelState()
-    car_msg.model_name = 'car1'
+    for i in range(num):
+        car_msg = ModelState()
+        car_msg.model_name = 'car'+str(i+1)
+        cars.append(car_msg)
 
-    if Mode == 0:
-        move(car_msg, (0,0))
-    elif Mode == 1:
-        path = parse()
-        for point1, point2 in path:
-            move(car_msg, point1)
-
+    if logfile == "":  # reset drones position
+        for i in range(num):
+            move(cars[i], (2 * i, 0))
+    # TODO: Need an agreement on the format logfile before set up this branch
+    # else:
+    #     path = parse()
+    #     for point1, point2 in path:
+    #         move(robot1_msg, point1)
+    #         move(robot2_msg, point2)
 
 def move(state_msg, pose):
+    '''
+        This function will directly set drone's state (including poses and orientations)
+        :param state_msg: current set model's state message
+        :param pose: the pose to be set
+        :return: Nothing
+    '''
     rospy.loginfo("Currently on (%f, %f)", pose[0], pose[1])
     state_msg.pose.position.x = pose[0]
     state_msg.pose.position.y = pose[1]
@@ -42,7 +49,13 @@ def move(state_msg, pose):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", "--car", help="Number of cars to be moved", type=int)
+    parser.add_argument("-L", "--log", help="Name of logfile; if leave empty, it'll reset models' location", type=str)
+    args = parser.parse_args()
+    num_cars = args.car
+    logfile = args.log
     try:
-        main()
+        init(num_cars, logfile)
     except:
         rospy.loginfo("User pressed  Ctrl-C, quit!")

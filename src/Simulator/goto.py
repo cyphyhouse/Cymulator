@@ -30,7 +30,7 @@ def main():
         'car': parse_goal_pose(num_cars, goals[num_drones:num_drones+num_cars], 'car')
     }
 
-    rospy.init_node('GoTo_Test', anonymous=True)
+    rospy.init_node('Model_GoTo', anonymous=True)
     try:
         droneModule = importlib.import_module("Drone.goto")
         carModule = importlib.import_module("F1tenth.goto")
@@ -46,14 +46,8 @@ def main():
         carThread = threading.Thread(target=carModule.GoTo, args=(num_cars, loc['car']))
         carThread.start()
     rospy.loginfo("Models start goto method")
-    # TODO: Debug to stop the cars after SIGINT
-    try:
-        droneThread.join()
-        carThread.join()
-    except Exception as e:
-        pass
 
-    rospy.loginfo("----TEST----")
+    # TODO: Debug to stop the cars after SIGINT
 
 
 if __name__ == '__main__':

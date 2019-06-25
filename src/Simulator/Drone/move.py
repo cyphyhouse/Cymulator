@@ -5,27 +5,19 @@
 
 """
 import rospy
-import rospkg
 from gazebo_msgs.msg import ModelState
 from gazebo_msgs.srv import SetModelState
-from logParser import parse
-import sys
+import argparse
 
 Mode = 0
 
 
-def main(argv):
+def init(num, logfile):
     '''
     This function will call move function according to the mode specified
     :param argv: A list of arguments - [mode, number, positions/logfile name]
     :return: Nothing
     '''
-    if len(argv) < 3:
-        print("You must enter the mode and the number of drones! ")
-        exit(0)
-    mode = int(argv[1])
-    num = int(argv[2])
-    rospy.init_node('Move')
     drones = []
 
     for i in range(num):
@@ -33,16 +25,11 @@ def main(argv):
         drone_msg.model_name = 'drone'+str(i+1)
         drones.append(drone_msg)
 
-    if mode == 0:  # reset drones position
+    if logfile == "":  # reset drones position
         for i in range(num):
             move(drones[i], (2*i, 0))
-    elif mode == 1:  # Set drones to particular positions
-        assert (len(argv)-3 == num), "Must provide exact the same number of positions to the number of drones"
-
-        for i in range(3, len(argv)):
-            pose = tuple(int(j) for j in argv[i].strip('()').split(','))
-            move(drones[i-3], pose)
-    # elif mode == 2 :  # Reserved for later log use
+    # TODO: Need an agreement on the format logfile before set up this branch
+    # else:
     #     path = parse()
     #     for point1, point2 in path:
     #         move(robot1_msg, point1)
@@ -74,7 +61,13 @@ def move(state_msg, pose):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-d", "--drone", help="Number of drones to be moved", type=int)
+    parser.add_argument("-L", "--log", help="Name of logfile; if leave empty, it'll reset models' location", type=str)
+    args = parser.parse_args()
+    num_drones = args.drone
+    logfile = args.log
     try:
-        main(sys.argv)
+        init(num_drones, logfile)
     except rospy.ROSInterruptException:
         rospy.loginfo("User pressed  Ctrl-C, quit!")
