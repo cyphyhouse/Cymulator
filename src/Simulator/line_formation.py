@@ -10,6 +10,10 @@ def distanceBetween(a, b):
     return sqrt((a[0]-b[0])*(a[0]-b[0]) + (a[1]-b[1])*(a[1]-b[1]))
 
 
+def line(k, x1, y1, x):
+    return k*(x-x1) + y1
+
+
 def line_formation(num):
     # Subscribe to know locations of all models
     rospy.init_node("Line_Formation", anonymous=True)
@@ -25,7 +29,7 @@ def line_formation(num):
         droneLocs[i+1] = (x, y, z)
 
     print(droneLocs)
-
+    # Find 2 drones with largest distance
     comb = itertools.combinations(range(1, num+1), 2)
     maxDist = 0
     start, end = 0, 0
@@ -41,15 +45,22 @@ def line_formation(num):
     droneList.remove(start)
     droneList.remove(end)
 
-    diff_x = droneLocs[start][0] - droneLocs[end][0]
-    diff_y = droneLocs[start][1] - droneLocs[end][1]
-    if diff_x < 0:
-        diff_x = -diff_x
-    if diff_y < 0:
-        diff_y = -diff_y
+    x1 = droneLocs[start][0]
+    y1 = droneLocs[start][1]
+    x2 = droneLocs[end][0]
+    y2 = droneLocs[end][1]
+    k = (y2-y1)/(x2-x1)
 
     goals = []
     # TODO: Add goals for drones that need to move
+    x = x1 if x1 < x2 else x2
+    diff_x = abs(x2-x1)
+    for _ in range(num-2):
+        x += diff_x
+        y = line(k, x1, y1, x)
+        goals.append([x, y, 5])
+
+    goto.main(num_drones, 0, goals, droneLocs)
 
 
 if __name__ == '__main__':
