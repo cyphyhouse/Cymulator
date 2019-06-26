@@ -108,7 +108,7 @@ Gazebo-ROS Simulator
 
 **3. Real-time Simulation**
   
-  TBD
+  This type of usage is a little bit more complicated than previous ones. 
 
 **4. Real-time Visualization**
 

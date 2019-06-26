@@ -7,7 +7,39 @@ import threading
 import time
 
 
-def main():
+def main(num_drones, num_cars, goals, droneList=[]):
+    '''
+    This function will call each model's goto method to drive models towards goal points
+    :param num_drones: Number of drones to drive
+    :param num_cars: Number of cars to drive
+    :param goals: Goal points the models are driving towards
+    :return: Nothing
+    '''
+    loc = {
+        'drone': parse_goal_pose(num_drones, goals[:num_drones], 'drone'),
+        'car': parse_goal_pose(num_cars, goals[num_drones:num_drones+num_cars], 'car')
+    }
+
+    try:
+        droneModule = importlib.import_module("Drone.goto")
+        carModule = importlib.import_module("F1tenth.goto")
+    except AttributeError:
+        print("Import goto function failed!")
+        exit(0)
+
+    # module.GoTo(num_drones, loc['drone'])
+    if num_drones != 0:
+        droneThread = threading.Thread(target=droneModule.GoTo, args=(num_drones, loc['drone'], droneList))
+        droneThread.start()
+    if num_cars != 0:
+        carThread = threading.Thread(target=carModule.GoTo, args=(num_cars, loc['car']))
+        carThread.start()
+    rospy.loginfo("Models start goto method")
+
+    # TODO: Debug to stop the cars after SIGINT
+
+
+if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--car", help="Number of cars to be driven", type=int)
     parser.add_argument("-d", "--drone", help="Number of drones to be driven", type=int)
@@ -25,30 +57,5 @@ def main():
     if not goals:
         goals = []
 
-    loc = {
-        'drone': parse_goal_pose(num_drones, goals[:num_drones], 'drone'),
-        'car': parse_goal_pose(num_cars, goals[num_drones:num_drones+num_cars], 'car')
-    }
-
     rospy.init_node('Model_GoTo', anonymous=True)
-    try:
-        droneModule = importlib.import_module("Drone.goto")
-        carModule = importlib.import_module("F1tenth.goto")
-    except AttributeError:
-        print("Import goto function failed!")
-        exit(0)
-
-    # module.GoTo(num_drones, loc['drone'])
-    if num_drones != 0:
-        droneThread = threading.Thread(target=droneModule.GoTo, args=(num_drones, loc['drone']))
-        droneThread.start()
-    if num_cars != 0:
-        carThread = threading.Thread(target=carModule.GoTo, args=(num_cars, loc['car']))
-        carThread.start()
-    rospy.loginfo("Models start goto method")
-
-    # TODO: Debug to stop the cars after SIGINT
-
-
-if __name__ == '__main__':
-    main()
+    main(num_drones, num_cars, goals)

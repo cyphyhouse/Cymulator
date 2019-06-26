@@ -55,7 +55,7 @@ class GoTo:
     '''
     This is the class that handles GOTO functionality of drones
     '''
-    def __init__(self, num, goals):
+    def __init__(self, num, goals, droneList = []):
         '''
         Constructor
         :param num: number of drones
@@ -66,9 +66,14 @@ class GoTo:
         self.complete = []
         self.success = 0
         # Setup drones
-        for i in range(self.numberOfDrones):
-            self.drones.append(Drone(i+1))
-            self.complete.append(0)
+        if not droneList:
+            for i in range(self.numberOfDrones):
+                self.drones.append(Drone(i+1))
+                self.complete.append(0)
+        else:
+            for i in droneList:
+                self.drones.append(Drone(i+1))
+                self.complete.append(0)
 
         # What to do if shut down
         rospy.on_shutdown(self.shutdown)

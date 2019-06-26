@@ -15,8 +15,9 @@ Mode = 0
 def init(num, logfile):
     '''
     This function will call move function according to the mode specified
-    :param argv: A list of arguments - [mode, number, positions/logfile name]
-    :return: Nothing
+    :param num: Number of drones to move
+    :param logfile: Name of the logfile
+    :return:
     '''
     drones = []
 
