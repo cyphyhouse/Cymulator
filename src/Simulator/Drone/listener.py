@@ -39,7 +39,7 @@ class Drone:
 
 class Listener:
     def __init__(self, num):
-        rospy.init_node("Listener Drone", anonymous=True)
+        rospy.init_node("Listener_Drone", anonymous=True)
         self.numberOfDrones = num
         self.drones = []
         self.complete = []
