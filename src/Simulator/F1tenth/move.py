@@ -6,6 +6,20 @@ from gazebo_msgs.srv import SetModelState
 import argparse
 
 
+def parseLog(filename):
+    f = open(filename, "r")
+    lines = f.readlines()
+    path = []
+    for x in lines:
+        data = x.split(',')
+        pos = (float(data[1]), float(data[2]), float(data[3]))
+        quat = (float(data[4]), float(data[5]), float(data[6]), float(data[5]))
+        path.append((pos, quat))
+
+    f.close()
+    return path
+
+
 def init(num, logfile):
     cars = []
 
@@ -18,13 +32,13 @@ def init(num, logfile):
         for i in range(num):
             move(cars[i], (0, 2 * i + 1))
     # TODO: Need an agreement on the format logfile before set up this branch
-    # else:
-    #     path = parse()
-    #     for point1, point2 in path:
-    #         move(robot1_msg, point1)
-    #         move(robot2_msg, point2)
+    else:
+        path = parseLog(logfile)
+        for pos, quat in path:
+            move(cars[0], pos, quat)
 
-def move(state_msg, pose):
+
+def move(state_msg, pose, quat):
     '''
         This function will directly set drone's state (including poses and orientations)
         :param state_msg: current set model's state message
@@ -34,11 +48,11 @@ def move(state_msg, pose):
     rospy.loginfo("Currently on (%f, %f)", pose[0], pose[1])
     state_msg.pose.position.x = pose[0]
     state_msg.pose.position.y = pose[1]
-    state_msg.pose.position.z = 0.0
-    state_msg.pose.orientation.x = 0
-    state_msg.pose.orientation.y = 0
-    state_msg.pose.orientation.z = 0
-    state_msg.pose.orientation.w = 0
+    state_msg.pose.position.z = pose[2]
+    state_msg.pose.orientation.x = quat[0]
+    state_msg.pose.orientation.y = quat[1]
+    state_msg.pose.orientation.z = quat[2]
+    state_msg.pose.orientation.w = quat[3]
 
     rospy.wait_for_service('/gazebo/set_model_state')
     try:
