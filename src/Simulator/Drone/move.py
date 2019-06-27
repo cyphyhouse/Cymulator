@@ -12,6 +12,7 @@ import sys
 
 
 def parseLog(filename):
+    print("parse")
     f = open(filename, "r")
     lines = f.readlines()
     path = []

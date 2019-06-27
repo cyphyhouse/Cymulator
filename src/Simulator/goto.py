@@ -7,7 +7,7 @@ import threading
 import time
 
 
-def main(num_drones, num_cars, goals, droneList=[]):
+def main(num_drones, num_cars, goals, wpQueued=False):
     '''
     This function will call each model's goto method to drive models towards goal points
     :param num_drones: Number of drones to drive
@@ -27,9 +27,10 @@ def main(num_drones, num_cars, goals, droneList=[]):
         print("Import goto function failed!")
         exit(0)
 
-    # module.GoTo(num_drones, loc['drone'])
+    droneThread = None
+    carThread = None
     if num_drones != 0:
-        droneThread = threading.Thread(target=droneModule.GoTo, args=(num_drones, loc['drone'], droneList))
+        droneThread = threading.Thread(target=droneModule.GoTo, args=(num_drones, loc['drone'], wpQueued))
         droneThread.start()
     if num_cars != 0:
         carThread = threading.Thread(target=carModule.GoTo, args=(num_cars, loc['car']))
@@ -37,18 +38,24 @@ def main(num_drones, num_cars, goals, droneList=[]):
     rospy.loginfo("Models start goto method")
 
     # TODO: Debug to stop the cars after SIGINT
+    if droneThread:
+        droneThread.join()
+    if carThread:
+        droneThread.join()
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--car", help="Number of cars to be driven", type=int)
     parser.add_argument("-d", "--drone", help="Number of drones to be driven", type=int)
+    parser.add_argument("-w", "--waypoints", help="Will setup a waypoint queue if included", action="store_true")
     parser.add_argument("-G", "--goal", nargs="+", help="Goal locations of the models")
 
     args = parser.parse_args()
     num_drones = args.drone
     num_cars = args.car
     goals = args.goal
+    wpQueued = args.waypoints
 
     if not num_drones:
         num_drones = 0
@@ -58,4 +65,4 @@ if __name__ == '__main__':
         goals = []
 
     rospy.init_node('Model_GoTo', anonymous=True)
-    main(num_drones, num_cars, goals)
+    main(num_drones, num_cars, goals, wpQueued)

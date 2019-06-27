@@ -7,6 +7,7 @@
 
 import rospy
 from geometry_msgs.msg import Point, Twist
+from std_msgs.msg import Float32MultiArray
 from math import sqrt
 import sys
 from hector_uav_msgs.srv import EnableMotors
@@ -15,18 +16,21 @@ from tf.transformations import euler_from_quaternion
 
 
 class Drone:
-    def __init__(self, number):
+    def __init__(self, number, wpQueued=False):
         # Drone's position and orientation inforamtion
         self._x = 0.0
         self._y = 0.0
         self._z = 0.0
         self._theta = 0.0
-        self.goal = Point()
+        self.goals = []
 
         # Set up subscriber and publisher
         my_number = "/drone" + str(number)
         self.sub = rospy.Subscriber(my_number + "/ground_truth/state", Odometry, self.newPos)
         self.pub = rospy.Publisher(my_number + "/cmd_vel", Twist, queue_size=10)
+
+        if wpQueued:
+            self.subGoal = rospy.Subscriber(my_number + "/goals", Float32MultiArray, self.newGoal)
 
         # Enable motors using ROS service
         rospy.wait_for_service(my_number + '/enable_motors')
@@ -50,12 +54,19 @@ class Drone:
         quat = msg.pose.pose.orientation
         (_, _, self._theta) = euler_from_quaternion([quat.x, quat.y, quat.z, quat.w])
 
+    def newGoal(self, msg):
+        new_goal = Point()
+        new_goal.x = msg.data[0]
+        new_goal.y = msg.data[1]
+        new_goal.z = msg.data[2]
+        self.goals.append(new_goal)
+
 
 class GoTo:
     '''
     This is the class that handles GOTO functionality of drones
     '''
-    def __init__(self, num, goals, droneList = []):
+    def __init__(self, num, goals, wpQueued=False):
         '''
         Constructor
         :param num: number of drones
@@ -68,14 +79,15 @@ class GoTo:
         self.complete = []
         self.success = 0
         # Setup drones
-        if not droneList:
-            for i in range(self.numberOfDrones):
-                self.drones.append(Drone(i+1))
-                self.complete.append(0)
-        else:
-            for i in droneList:
-                self.drones.append(Drone(i+1))
-                self.complete.append(0)
+        for i in range(self.numberOfDrones):
+            self.drones.append(Drone(i+1, wpQueued))
+            self.complete.append(0)
+            goal = Point()
+            goal.x = goals[i][0]
+            goal.y = goals[i][1]
+            goal.z = goals[i][2]
+            self.drones[i].goals.append(goal)
+            rospy.loginfo("Drone %d is going to (%f, %f, %f)", i + 1, goal.x, goal.y, goal.z)
 
         # What to do if shut down
         rospy.on_shutdown(self.shutdown)
@@ -91,49 +103,44 @@ class GoTo:
         r = rospy.Rate(10)  # Setup ROS spin rate
         move_cmd = Twist()  # Twist messages
 
-        # Set up goal
-        for i in range(self.numberOfDrones):
-            self.drones[i].goal.x = goals[i][0]
-            self.drones[i].goal.y = goals[i][1]
-            self.drones[i].goal.z = goals[i][2]
-            rospy.loginfo("Drone %d is going to (%f, %f, %f)", i+1, self.drones[i].goal.x, self.drones[i].goal.y, self.drones[i].goal.z)
-
         while not rospy.is_shutdown():
-            if sum(self.complete) == self.numberOfDrones:
-                return 1
-
             # Simple controller code for drones
             # TODO: Controller might need to be changed
             for i in range(self.numberOfDrones):
-                # rospy.loginfo("Drone %d is at (%f, %f, %f)", i+1, self.drones[i]._x, self.drones[i]._y, self.drones[i]._z)
-                diff_x = self.drones[i].goal.x - self.drones[i]._x
-                diff_y = self.drones[i].goal.y - self.drones[i]._y
-                diff_z = self.drones[i].goal.z - self.drones[i]._z
+                curGoal = self.drones[i].goals[0]
+                diff_x = curGoal.x - self.drones[i]._x
+                diff_y = curGoal.y - self.drones[i]._y
+                diff_z = curGoal.z - self.drones[i]._z
 
-                if sqrt(diff_x*diff_x + diff_y*diff_y + diff_z*diff_z) < 0.05:
-                    self.complete[i] = 1 
+                rospy.loginfo("Drone %d has distance away from waypoint is (%f, %f, %f)", i+1, diff_x, diff_y, diff_z) # sqrt(diff_x*diff_x + diff_y*diff_y + diff_z*diff_z))
+
+                # if sqrt(diff_x*diff_x + diff_y*diff_y + diff_z*diff_z) < 1.0:
+                if abs(diff_x) < 0.25 and abs(diff_y) < 0.25 and abs(diff_z) < 0.25:
+                    rospy.loginfo("Drone%d reaches a waypoint", i+1)
+                    if len(self.drones[i].goals) > 1:
+                        self.drones[i].goals.pop(0)
                 else:
-                    if abs(diff_x) > 0.1:
+                    if abs(diff_x) > 0.25:
                         if diff_x > 0:
-                            move_cmd.linear.x = 0.5
+                            move_cmd.linear.x = 0.4
                         else:
-                            move_cmd.linear.x = -0.5
+                            move_cmd.linear.x = -0.4
                     else:
                         move_cmd.linear.x = 0.0
 
-                    if abs(diff_y) > 0.1:
+                    if abs(diff_y) > 0.25:
                         if diff_y > 0:
-                            move_cmd.linear.y = 0.5
+                            move_cmd.linear.y = 0.4
                         else:
-                            move_cmd.linear.y = -0.5
+                            move_cmd.linear.y = -0.4
                     else:
                         move_cmd.linear.y = 0.0
 
-                    if abs(diff_z) > 0.1:
+                    if abs(diff_z) > 0.25:
                         if diff_z > 0:
-                            move_cmd.linear.z = 0.5
+                            move_cmd.linear.z = 0.4
                         else:
-                            move_cmd.linear.z = 0.0
+                            move_cmd.linear.z = -0.4
                     else:
                         move_cmd.linear.z = 0.0
             
@@ -164,12 +171,7 @@ if __name__ == '__main__':
         num = int(sys.argv[1])
         goals = parse_goal_pose(num, sys.argv[2:], 'drone')
 
-        navigator = GoTo(num, goals)
-
-        if navigator.success:
-            rospy.loginfo("Yep, we made it!")
-        else:
-            rospy.loginfo("Something is wrong")
+        GoTo(num, goals, True)
             
         rospy.sleep(1)
     except rospy.ROSInterruptException:

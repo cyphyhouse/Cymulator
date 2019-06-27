@@ -12,6 +12,8 @@ def main(num_drones, num_cars, logfile, random_pos):
         print("Import goto function failed!")
         exit(0)
 
+    droneThread = None
+    carThread = None
     if num_drones != 0:
         droneThread = threading.Thread(target=droneModule.init, args=(num_drones, logfile, random_pos))
         droneThread.start()
@@ -19,6 +21,10 @@ def main(num_drones, num_cars, logfile, random_pos):
         carThread = threading.Thread(target=carModule.init, args=(num_cars, logfile))
         carThread.start()
     rospy.loginfo("Models start move method")
+    if droneThread:
+        droneThread.join()
+    if carThread:
+        carThread.join()
 
 
 if __name__ == '__main__':

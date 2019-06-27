@@ -12,27 +12,8 @@ Gazebo-ROS Simulator
       cd ~/CyPyHous3/src/Simulator
       ./install.sh
     
-    Then, open a new Terminal,  
-
-    .. code-block:: shell
-
-      cd ~/catkin_ws3/src
-      sudo gedit CMakeLists.txt
+    Then, open a new terminal:
     
-    Add
-
-    .. code-block:: shell
-
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
-
-    after
-
-    .. code-block:: shell
-
-      set(CATKIN_TOPLEVEL TRUE)
-
-    Finally, 
-
     .. code-block:: shell
 
       cd ~/catkin_ws3
