@@ -18,7 +18,7 @@ def main(num_drones, num_cars, logfile, random_pos):
         droneThread = threading.Thread(target=droneModule.init, args=(num_drones, logfile, random_pos))
         droneThread.start()
     if num_cars != 0:
-        carThread = threading.Thread(target=carModule.init, args=(num_cars, logfile))
+        carThread = threading.Thread(target=carModule.init, args=(num_cars, logfile, random_pos))
         carThread.start()
     rospy.loginfo("Models start move method")
     if droneThread:

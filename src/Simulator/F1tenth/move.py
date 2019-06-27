@@ -32,7 +32,7 @@ def init(num, logfile, random_pos=False):
     if logfile == "":  # reset drones position
         if not random_pos:
             for i in range(num):
-                move(cars[i], (0, 2 * i + 1))
+                move(cars[i], (0, 2 * i + 1, 0.18))
         else:
             sys.path.append('..')
             from util import parse_init_pose
@@ -56,7 +56,7 @@ def move(state_msg, pose, quat=[0, 0, 0, 0]):
     rospy.loginfo("Currently on (%f, %f)", pose[0], pose[1])
     state_msg.pose.position.x = pose[0]
     state_msg.pose.position.y = pose[1]
-    state_msg.pose.position.z = pose[2]
+    state_msg.pose.position.z = 0
     state_msg.pose.orientation.x = quat[0]
     state_msg.pose.orientation.y = quat[1]
     state_msg.pose.orientation.z = quat[2]
