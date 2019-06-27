@@ -12,7 +12,7 @@ Gazebo-ROS Simulator
       cd ~/CyPyHous3/src/Simulator
       ./install.sh
     
-    Then,  
+    Then, open a new Terminal,  
 
     .. code-block:: shell
 
@@ -23,7 +23,7 @@ Gazebo-ROS Simulator
 
     .. code-block:: shell
 
-      add_compile_options(-std=c++11)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
     after
 
@@ -33,7 +33,7 @@ Gazebo-ROS Simulator
 
     Finally, 
 
-    ..code-block:: shell
+    .. code-block:: shell
 
       cd ~/catkin_ws3
       catkin_make
@@ -100,11 +100,11 @@ Gazebo-ROS Simulator
   
   .. code-block:: shell
 
-    python3 move.py -c NUM_OF_CARS -d NUM_OF_DRONES  -L LOGFILE
+    python3 move.py -c NUM_OF_CARS -d NUM_OF_DRONES -r -L LOGFILE
 
-  where LOGFILE is the name of LOGFILE that is used 
+  where LOGFILE is the name of LOGFILE that is used; if LOGFILE is not specified, the program will reset models' default locations; if *-r* is included, this method will place models on random locations
 
-  NOTE: if LOGFILE is not specified, the program will reset models' default locations
+
 
 **3. Real-time Simulation**
   
