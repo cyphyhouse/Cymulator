@@ -41,26 +41,26 @@ def line_formation(num):
             start = a
             end = b
 
-    droneList = list(range(1, num+1))
-    droneList.remove(start)
-    droneList.remove(end)
-
+    # Get locations where each drone should fly to
     x1 = droneLocs[start][0]
     y1 = droneLocs[start][1]
     x2 = droneLocs[end][0]
     y2 = droneLocs[end][1]
     k = (y2-y1)/(x2-x1)
-
     goals = []
-    # TODO: Add goals for drones that need to move
     x = x1 if x1 < x2 else x2
-    diff_x = abs(x2-x1)
-    for _ in range(num-2):
+    diff_x = abs(x2-x1) if x2 > x1 else abs(x1-x2)
+    diff_x = diff_x/num
+    for i in range(num):
+        if i+1 == start:
+            goals.append([x1, y1, 5])
+            continue
         x += diff_x
         y = line(k, x1, y1, x)
         goals.append([x, y, 5])
 
-    goto.main(num_drones, 0, goals, droneLocs)
+    # Call goto method to drive drones
+    goto.main(num, 0, goals)
 
 
 if __name__ == '__main__':

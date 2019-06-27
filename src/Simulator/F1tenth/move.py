@@ -4,6 +4,7 @@ import rospy
 from gazebo_msgs.msg import ModelState
 from gazebo_msgs.srv import SetModelState
 import argparse
+import sys
 
 
 def parseLog(filename):
@@ -20,7 +21,7 @@ def parseLog(filename):
     return path
 
 
-def init(num, logfile):
+def init(num, logfile, random_pos=False):
     cars = []
 
     for i in range(num):
@@ -29,8 +30,15 @@ def init(num, logfile):
         cars.append(car_msg)
 
     if logfile == "":  # reset drones position
-        for i in range(num):
-            move(cars[i], (0, 2 * i + 1))
+        if not random_pos:
+            for i in range(num):
+                move(cars[i], (0, 2 * i + 1))
+        else:
+            sys.path.append('..')
+            from util import parse_init_pose
+            poses = parse_init_pose(num, [])
+            for i in range(num):
+                move(cars[i], poses[i])
     # TODO: Need an agreement on the format logfile before set up this branch
     else:
         path = parseLog(logfile)
@@ -38,7 +46,7 @@ def init(num, logfile):
             move(cars[0], pos, quat)
 
 
-def move(state_msg, pose, quat):
+def move(state_msg, pose, quat=[0, 0, 0, 0]):
     '''
         This function will directly set drone's state (including poses and orientations)
         :param state_msg: current set model's state message
@@ -65,11 +73,13 @@ def move(state_msg, pose, quat):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--car", help="Number of cars to be moved", type=int)
+    parser.add_argument("-r", "--random", help="Set drones on random states if included", action="store_true")
     parser.add_argument("-L", "--log", help="Name of logfile; if leave empty, it'll reset models' location", type=str)
     args = parser.parse_args()
     num_cars = args.car
     logfile = args.log
+    random_pos = args.random
     try:
-        init(num_cars, logfile)
-    except:
+        init(num_cars, logfile, random_pos)
+    except rospy.ROSInterruptException:
         rospy.loginfo("User pressed  Ctrl-C, quit!")

@@ -16,6 +16,8 @@ def parse_init_pose(num, poses):
 
 
 def parse_goal_pose(num, poses, model):
+    if len(poses) > 0 and type(poses[0]) == list:
+        return poses
     goal_poses = []
     for pose in poses:
         pose = list((int(p) for p in pose.strip('()').split(',')))

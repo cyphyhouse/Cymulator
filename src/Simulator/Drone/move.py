@@ -8,6 +8,7 @@ import rospy
 from gazebo_msgs.msg import ModelState
 from gazebo_msgs.srv import SetModelState
 import argparse
+import sys
 
 
 def parseLog(filename):
@@ -24,7 +25,7 @@ def parseLog(filename):
     return path
 
 
-def init(num, logfile):
+def init(num, logfile, random_pos=False):
     '''
     This function will call move function according to the mode specified
     :param num: Number of drones to move
@@ -38,9 +39,16 @@ def init(num, logfile):
         drone_msg.model_name = 'drone'+str(i+1)
         drones.append(drone_msg)
 
-    if logfile == "":  # reset drones position
-        for i in range(num):
-            move(drones[i], (2*i, 0))
+    if not logfile:  # reset drones position
+        if not random_pos:
+            for i in range(num):
+                move(drones[i], (2*i, 0, 0.18))
+        else:
+            sys.path.append('..')
+            from util import parse_init_pose
+            poses = parse_init_pose(num, [])
+            for i in range(num):
+                move(drones[i], poses[i])
     # TODO: Need an agreement on the format logfile before set up this branch
     else:
         path = parseLog(logfile)
@@ -48,7 +56,7 @@ def init(num, logfile):
             move(drones[0], pos, quat)
 
 
-def move(state_msg, pose, quat):
+def move(state_msg, pose, quat=[0,0,0,0]):
     '''
     This function will directly set drone's state (including poses and orientations)
     :param state_msg: current set model's state message
@@ -75,11 +83,13 @@ def move(state_msg, pose, quat):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--drone", help="Number of drones to be moved", type=int)
+    parser.add_argument("-r", "--random", help="Set drones on random states if included", action="store_true")
     parser.add_argument("-L", "--log", help="Name of logfile; if leave empty, it'll reset models' location", type=str)
     args = parser.parse_args()
     num_drones = args.drone
     logfile = args.log
+    random_pos = args.random
     try:
-        init(num_drones, logfile)
+        init(num_drones, logfile, random_pos)
     except rospy.ROSInterruptException:
         rospy.loginfo("User pressed  Ctrl-C, quit!")

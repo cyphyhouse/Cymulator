@@ -61,6 +61,8 @@ class GoTo:
         :param num: number of drones
         :param goals: the goals that drones are flying to
         '''
+
+        rospy.loginfo("Drone's goto method gets called! ")
         self.numberOfDrones = num
         self.drones = []
         self.complete = []
