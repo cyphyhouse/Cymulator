@@ -15,6 +15,11 @@ def line(k, x1, y1, x):
 
 
 def line_formation(num):
+    '''
+    This function uses goto method to drive multiple drones to form a line
+    :param num: Number of drones to be driven
+    :return: Nothing
+    '''
     # Subscribe to know locations of all models
     rospy.init_node("Line_Formation", anonymous=True)
     droneLocs = {}

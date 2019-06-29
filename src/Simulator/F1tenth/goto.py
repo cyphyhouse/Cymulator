@@ -11,6 +11,10 @@ import sys
 
 class Car():
     def __init__(self, number):
+        '''
+        Constructor of Drone object
+        :param number: the number/index of this drone
+        '''
         # Robot's position and orientation inforamtion
         self._x = 0.0
         self._y = 0.0
@@ -30,6 +34,11 @@ class Car():
         self.sub = rospy.Subscriber(my_number + "/ground_truth/state", Odometry, self.newPos)
 
     def newPos(self, msg):
+        '''
+            Callback function to get car's current location
+            :param msg: Odometry type msg that contains position and orientation of a car
+            :return: Nothing
+        '''
         self._x = msg.pose.pose.position.x
         self._y = msg.pose.pose.position.y
 
@@ -39,7 +48,12 @@ class Car():
 
 class GoTo:
     def __init__(self, num, goals, stop=False):
-
+        '''
+        Constructor
+        :param num: number of cars
+        :param goals: the goals that cars are driving to
+        :param stop: NOTE deprecated variable
+        '''
         self.numberOfCars = num
         self.cars = []
         self.complete = []
@@ -57,6 +71,11 @@ class GoTo:
             self.shutdown()
 
     def goto(self, goals):
+        '''
+            The actual goto method that drives the drones towards goal points
+            :param goals: the list of goal points
+            :return: 1 -- if succeed
+        '''
         rospy.loginfo("Ready to move cars. To stop Cars , press CTRL + C")
         r = rospy.Rate(10)
 
@@ -67,6 +86,7 @@ class GoTo:
             rospy.loginfo("Car%d is going to (%f, %f)", i+1, self.cars[i].goal.x, self.cars[i].goal.y)
 
         while not rospy.is_shutdown():
+            # TODO: car's goto method also needs support of queued waypoints; may follow that same technique of drones
             if sum(self.complete) == self.numberOfCars:
                 return 1
             for i in range(self.numberOfCars):
@@ -119,6 +139,10 @@ class GoTo:
             r.sleep()
 
     def shutdown(self):
+        '''
+            Stop all cars when rospy shuts down
+            :return: Nothing
+        '''
         rospy.loginfo("Stop %d Car", self.numberOfCars)
         for i in range(self.numberOfCars):
             self.cars[i].pub_vel_left_rear_wheel.publish(0)

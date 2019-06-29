@@ -6,6 +6,7 @@ from copy import deepcopy
 from tf.transformations import quaternion_from_euler
 
 
+# TODO: Use this class to create waypoint object and obstacle in Gazebo
 class Spawn:
 
     def __init__(self):
@@ -15,6 +16,7 @@ class Spawn:
         self.count = 0
         self.paths = {}
 
+        # NOTE: This is the object description which is a cube; may be change to other object
         self.sdf_cube = """<?xml version="1.0" ?>
         <sdf version="1.4">
           <model name="MODELNAME">

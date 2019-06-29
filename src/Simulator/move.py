@@ -5,6 +5,14 @@ import threading
 
 
 def main(num_drones, num_cars, logfile, random_pos):
+    '''
+    This function calls each model's move method to make them move according given logile or simply reset positions
+    :param num_drones: Number of drones to be moved
+    :param num_cars: Number of cars to be moved
+    :param logfile: Name of the logfile
+    :param random_pos: Flag indicate whether to reset modles to random positions
+    :return: Nothing
+    '''
     try:
         droneModule = importlib.import_module("Drone.move")
         carModule = importlib.import_module("F1tenth.move")
@@ -12,6 +20,7 @@ def main(num_drones, num_cars, logfile, random_pos):
         print("Import goto function failed!")
         exit(0)
 
+    # Start separate threads for different models
     droneThread = None
     carThread = None
     if num_drones != 0:

@@ -15,6 +15,8 @@ def main(num_drones, num_cars, goals, wpQueued=False):
     :param goals: Goal points the models are driving towards
     :return: Nothing
     '''
+
+    # Parse the input goals of models; if user does not enter any locations, give random locations
     loc = {
         'drone': parse_goal_pose(num_drones, goals[:num_drones], 'drone'),
         'car': parse_goal_pose(num_cars, goals[num_drones:num_drones+num_cars], 'car')
@@ -27,6 +29,7 @@ def main(num_drones, num_cars, goals, wpQueued=False):
         print("Import goto function failed!")
         exit(0)
 
+    # Start separate threads for different models
     droneThread = None
     carThread = None
     if num_drones != 0:
