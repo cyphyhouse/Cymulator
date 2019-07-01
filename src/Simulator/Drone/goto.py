@@ -87,7 +87,7 @@ class GoTo:
         rospy.loginfo("Drone's goto method gets called! ")
         self.numberOfDrones = num
         self.drones = []
-        self.complete = []
+        self.complete = []  # TODO: make it a dictionary, key=pid, value: Bool = whether the drone reaches a waypoint
         self.success = 0
         # Setup drones
         for i in range(self.numberOfDrones):
@@ -103,6 +103,7 @@ class GoTo:
         # What to do if shut down
         rospy.on_shutdown(self.shutdown)
         self.success = self.goto(goals)
+
 
     def goto(self, goals):
         '''
@@ -125,7 +126,7 @@ class GoTo:
 
                 rospy.loginfo("Drone %d has distance away from waypoint is (%f, %f, %f)", i+1, diff_x, diff_y, diff_z) # sqrt(diff_x*diff_x + diff_y*diff_y + diff_z*diff_z))
 
-                # if sqrt(diff_x*diff_x + diff_y*diff_y + diff_z*diff_z) < 1.0:
+                # Waypoint check
                 if abs(diff_x) < 0.25 and abs(diff_y) < 0.25 and abs(diff_z) < 0.25:
                     rospy.loginfo("Drone%d reaches a waypoint", i+1)
                     if len(self.drones[i].goals) > 1:
@@ -181,6 +182,7 @@ class GoTo:
         # sleep just makes sure Drones receives the stop command prior to shutting down the script
 
         rospy.sleep(1)
+
 
 if __name__ == '__main__': 
     try:

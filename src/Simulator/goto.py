@@ -7,6 +7,7 @@ import threading
 import time
 
 
+# TODO: refactor the code to rename this module to simulator object...
 def main(num_drones, num_cars, goals, wpQueued=False):
     '''
     This function will call each model's goto method to drive models towards goal points
@@ -44,7 +45,7 @@ def main(num_drones, num_cars, goals, wpQueued=False):
     if droneThread:
         droneThread.join()
     if carThread:
-        droneThread.join()
+        carThread.join()
 
 
 if __name__ == '__main__':
