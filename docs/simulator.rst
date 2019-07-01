@@ -60,13 +60,15 @@ Gazebo-ROS Simulator
 
 **1. Pure Simulation**
 
-  This Gazebo-ROS Simulator supports pure simulation. User need to choose a model type and specify the goal point, or the program will generate random locations
+  This Gazebo-ROS Simulator supports pure simulation. User may choose to multiple drones and cars at specific goal positions or at random locations
 
   .. code-block:: shell
     
-    python3 goto.py -c NUM_OF_CARS -d NUM_OF_DRONES -G GOAL_LOCATIONS 
+    python3 goto.py -c NUM_OF_CARS -d NUM_OF_DRONES -w -G GOAL_LOCATIONS
 
-  Then, the built-in controllers will drive the models towards the goal points. 
+  Then, the built-in controllers will drive the models towards the goal points.
+
+  NOTE: if -w flag is included, the queued waypoints functionality will be triggered; use may publish next waypoint to ropstopic */drone#/goals*. The message type is: std_msgs/Float32MultiArray
 
 **2. Post-Sim Visualization**
 
@@ -83,13 +85,15 @@ Gazebo-ROS Simulator
 
     python3 move.py -c NUM_OF_CARS -d NUM_OF_DRONES -r -L LOGFILE
 
-  where LOGFILE is the name of LOGFILE that is used; if LOGFILE is not specified, the program will reset models' default locations; if *-r* is included, this method will place models on random locations
+  where LOGFILE is the name of LOGFILE that is used.
+
+  NOTE: if LOGFILE is not specified, the program will reset models' default locations; if *-r* is included, this method will place models on random locations
 
 
 
 **3. Real-time Simulation**
   
-  This type of usage is a little bit more complicated than previous ones. 
+  TBD
 
 **4. Real-time Visualization**
 

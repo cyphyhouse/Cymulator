@@ -3,6 +3,13 @@ import sys
 
 
 def parse_init_pose(num, poses):
+    '''
+    This function parses the initial positions of models; if argument 'poses' is an empty list,
+    set models to random positions
+    :param num: Number of models
+    :param poses: User_input list of initial positions
+    :return: init_poses - parsed initial positions
+    '''
     init_poses = []
     for pose in poses:
         pose = list((int(p) for p in pose.strip('()').split(',')))
@@ -16,6 +23,14 @@ def parse_init_pose(num, poses):
 
 
 def parse_goal_pose(num, poses, model):
+    '''
+    This function parses the goal positions of models; if argument 'poses' is empty,
+    set models' goals to random positions
+    :param num: Number of models
+    :param poses: User_input list of goal positions
+    :param model: the model type
+    :return: goal_poses - parsed goal positions
+    '''
     if len(poses) > 0 and type(poses[0]) == list:
         return poses
     goal_poses = []
@@ -32,6 +47,12 @@ def parse_goal_pose(num, poses, model):
 
 
 def sim_launch(models, loc):
+    '''
+    This function calls launch method to create launch file and use roslaunch to initiate simulator
+    :param models: A dictionary that contains number of drones and number cars
+    :param loc: Initial location of models
+    :return: The initiated Gazebo-ROS process
+    '''
     import launch
     ros_proc = launch.launch(models, loc)
     print("============= Simulator starts successful ================")

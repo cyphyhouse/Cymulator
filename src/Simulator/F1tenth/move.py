@@ -8,6 +8,11 @@ import sys
 
 
 def parseLog(filename):
+    '''
+        This function parses the logfile user passed in
+        :param filename: Name of the logfile
+        :return: Path information that will be used by drones
+    '''
     f = open(filename, "r")
     lines = f.readlines()
     path = []
@@ -22,6 +27,13 @@ def parseLog(filename):
 
 
 def init(num, logfile, random_pos=False):
+    '''
+    This function will call move function according to the mode specified
+    :param num: Number of cars to move
+    :param logfile: Name of the logfile
+    :param random_pos: Flag that indicates whether we use random positions for cars
+    :return: Nothing
+    '''
     cars = []
 
     for i in range(num):
@@ -39,7 +51,6 @@ def init(num, logfile, random_pos=False):
             poses = parse_init_pose(num, [])
             for i in range(num):
                 move(cars[i], poses[i])
-    # TODO: Need an agreement on the format logfile before set up this branch
     else:
         path = parseLog(logfile)
         for pos, quat in path:
@@ -48,7 +59,7 @@ def init(num, logfile, random_pos=False):
 
 def move(state_msg, pose, quat=[0, 0, 0, 0]):
     '''
-        This function will directly set drone's state (including poses and orientations)
+        This function will directly set car's state (including poses and orientations)
         :param state_msg: current set model's state message
         :param pose: the pose to be set
         :return: Nothing

@@ -12,6 +12,11 @@ import sys
 
 
 def parseLog(filename):
+    '''
+    This function parses the logfile user passed in
+    :param filename: Name of the logfile
+    :return: Path information that will be used by drones
+    '''
     print("parse")
     f = open(filename, "r")
     lines = f.readlines()
@@ -31,20 +36,23 @@ def init(num, logfile, random_pos=False):
     This function will call move function according to the mode specified
     :param num: Number of drones to move
     :param logfile: Name of the logfile
-    :return:
+    :param random_pos: Flag that indicates whether we use random positions for drones
+    :return: Nothing
     '''
     drones = []
 
+    # Setup drone's model state message
     for i in range(num):
         drone_msg = ModelState()
         drone_msg.model_name = 'drone'+str(i+1)
         drones.append(drone_msg)
 
+    # If logfile is not specified, we change the mode to reset drone's position
     if not logfile:  # reset drones position
         if not random_pos:
             for i in range(num):
                 move(drones[i], (2*i, 0, 0.18))
-        else:
+        else:   # Set positions randomly
             sys.path.append('..')
             from util import parse_init_pose
             poses = parse_init_pose(num, [])
@@ -73,6 +81,7 @@ def move(state_msg, pose, quat=[0,0,0,0]):
     state_msg.pose.orientation.z = quat[2]
     state_msg.pose.orientation.w = quat[3]
 
+    # Use rosservice
     rospy.wait_for_service('/gazebo/set_model_state')
     try:
         set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)

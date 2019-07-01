@@ -18,6 +18,11 @@ from tf.transformations import euler_from_quaternion
 
 class Drone:
     def __init__(self, number, wpQueued=False):
+        '''
+        Constructor of Drone object
+        :param number: the number/index of this drone
+        :param wpQueued: Flag that indicate whether queued waypoints is used
+        '''
         # Drone's position and orientation inforamtion
         self._x = 0.0
         self._y = 0.0
@@ -56,6 +61,11 @@ class Drone:
         (_, _, self._theta) = euler_from_quaternion([quat.x, quat.y, quat.z, quat.w])
 
     def newGoal(self, msg):
+        '''
+        Callback function to get drone's next waypoint/goal
+        :param msg: Float32MultiArray type msg that contains the new waypoint/goal
+        :return: Nothing
+        '''
         new_goal = Point()
         new_goal.x = msg.data[0]
         new_goal.y = msg.data[1]
@@ -98,7 +108,7 @@ class GoTo:
         '''
         The actual goto method that drives the drones towards goal points
         :param goals: the list of goal points
-        :return: 1 - if complete
+        :return: Nothing
         '''
         rospy.loginfo("Ready to move. To stop Drone , press CTRL + C")
         r = rospy.Rate(10)  # Setup ROS spin rate
