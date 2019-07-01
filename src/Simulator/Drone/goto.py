@@ -3,6 +3,7 @@
 '''
     Use ros messages to drive drones
     Involves physics
+    NOTE: To publish new waypoint, use this format: rostopic pub /drone1/goals std_msgs/Float32MultiArray "data: [0.0, 1.0, 2.0]"
 '''
 
 import rospy
@@ -120,29 +121,38 @@ class GoTo:
                     if len(self.drones[i].goals) > 1:
                         self.drones[i].goals.pop(0)
                 else:
-                    if abs(diff_x) > 0.25:
+                    if abs(diff_x) > 0.5:
                         if diff_x > 0:
-                            move_cmd.linear.x = 0.4
+                            move_cmd.linear.x = 0.5
                         else:
-                            move_cmd.linear.x = -0.4
+                            move_cmd.linear.x = -0.5
                     else:
-                        move_cmd.linear.x = 0.0
+                        if diff_x > 0:
+                            move_cmd.linear.x = 0.05
+                        else:
+                            move_cmd.linear.x = -0.05
 
-                    if abs(diff_y) > 0.25:
+                    if abs(diff_y) > 0.5:
                         if diff_y > 0:
-                            move_cmd.linear.y = 0.4
+                            move_cmd.linear.y = 0.5
                         else:
-                            move_cmd.linear.y = -0.4
+                            move_cmd.linear.y = -0.5
                     else:
-                        move_cmd.linear.y = 0.0
+                        if diff_y > 0:
+                            move_cmd.linear.y = 0.05
+                        else:
+                            move_cmd.linear.y = -0.05
 
-                    if abs(diff_z) > 0.25:
+                    if abs(diff_z) > 0.5:
                         if diff_z > 0:
-                            move_cmd.linear.z = 0.4
+                            move_cmd.linear.z = 0.5
                         else:
-                            move_cmd.linear.z = -0.4
+                            move_cmd.linear.z = -0.5
                     else:
-                        move_cmd.linear.z = 0.0
+                        if diff_z > 0:
+                            move_cmd.linear.z = 0.05
+                        else:
+                            move_cmd.linear.z = -0.05
             
                 self.drones[i].pub.publish(move_cmd)
 
@@ -161,7 +171,6 @@ class GoTo:
         # sleep just makes sure Drones receives the stop command prior to shutting down the script
 
         rospy.sleep(1)
-
 
 if __name__ == '__main__': 
     try:
