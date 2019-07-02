@@ -104,7 +104,6 @@ class GoTo:
         rospy.on_shutdown(self.shutdown)
         self.success = self.goto(goals)
 
-
     def goto(self, goals):
         '''
         The actual goto method that drives the drones towards goal points

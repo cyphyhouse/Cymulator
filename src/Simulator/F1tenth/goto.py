@@ -6,7 +6,7 @@ from tf.transformations import euler_from_quaternion
 from geometry_msgs.msg import Point, Twist
 from std_msgs.msg import Float64
 from math import atan2, sqrt
-import sys
+import sys, os, signal, multiprocessing, threading
 
 
 class Car():
@@ -46,7 +46,7 @@ class Car():
         (_, _, self._theta) = euler_from_quaternion([quat.x, quat.y, quat.z, quat.w])
 
 
-class GoTo:
+class GoTo(threading.Thread):
     def __init__(self, num, goals, stop=False):
         '''
         Constructor
@@ -54,10 +54,14 @@ class GoTo:
         :param goals: the goals that cars are driving to
         :param stop: NOTE deprecated variable
         '''
+        threading.Thread.__init__(self)
+        self.shutdown_flag = threading.Event()
+
         self.numberOfCars = num
         self.cars = []
         self.complete = []
         self.success = 0
+
         # Setup Cars
         for i in range(self.numberOfCars):
             self.cars.append(Car(i+1))
@@ -70,6 +74,11 @@ class GoTo:
         else:
             self.shutdown()
 
+    
+    
+    
+
+
     def goto(self, goals):
         '''
             The actual goto method that drives the drones towards goal points
@@ -79,14 +88,17 @@ class GoTo:
         rospy.loginfo("Ready to move cars. To stop Cars , press CTRL + C")
         r = rospy.Rate(10)
 
+       
+
         # Set up goal
         for i in range(self.numberOfCars):
             self.cars[i].goal.x = goals[i][0]
             self.cars[i].goal.y = goals[i][1]
             rospy.loginfo("Car%d is going to (%f, %f)", i+1, self.cars[i].goal.x, self.cars[i].goal.y)
 
-        while not rospy.is_shutdown():
+        while not rospy.is_shutdown() and not self.shutdown_flag.is_set():
             # TODO: car's goto method also needs support of queued waypoints; may follow that same technique of drones
+            
             if sum(self.complete) == self.numberOfCars:
                 return 1
             for i in range(self.numberOfCars):
