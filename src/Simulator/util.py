@@ -58,7 +58,6 @@ def sim_launch(models, loc):
     print("============= Simulator starts successful ================")
     # time.sleep(max(num * 6, 10))
     return ros_proc
-
-
+    
 if __name__ == '__main__':
     print(parse_goal_pose(2, [], 'car'))

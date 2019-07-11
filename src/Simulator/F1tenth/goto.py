@@ -5,24 +5,35 @@ from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion
 from geometry_msgs.msg import Point, Twist
 from std_msgs.msg import Float64
+from std_msgs.msg import Float32MultiArray
 from math import atan2, sqrt
 import sys, os, signal, multiprocessing, threading
 
 
+
 class Car():
-    def __init__(self, number):
+    def __init__(self, car_id, goals):
         '''
         Constructor of Drone object
         :param number: the number/index of this drone
         '''
         # Robot's position and orientation inforamtion
+  
+        self.shutdown_flag = 0
+       
         self._x = 0.0
         self._y = 0.0
         self._theta = 0.0
+
+        self.id = car_id
+        self.complete = 0
+
         self.goal = Point()
+        self.goal.x = goals[0]
+        self.goal.y = goals[1]
 
         # Set up subscriber and publisher
-        my_number = "/car" + str(number)
+        my_number = "/car" + str(car_id)
         self.pub_vel_left_rear_wheel = rospy.Publisher(my_number + '/racecar/left_rear_wheel_velocity_controller/command', Float64, queue_size=1)
         self.pub_vel_right_rear_wheel = rospy.Publisher(my_number + '/racecar/right_rear_wheel_velocity_controller/command', Float64, queue_size=1)
         self.pub_vel_left_front_wheel = rospy.Publisher(my_number + '/racecar/left_front_wheel_velocity_controller/command', Float64, queue_size=1)
@@ -31,7 +42,22 @@ class Car():
         self.pub_pos_left_steering_hinge = rospy.Publisher(my_number + '/racecar/left_steering_hinge_position_controller/command', Float64, queue_size=1)
         self.pub_pos_right_steering_hinge = rospy.Publisher(my_number + '/racecar/right_steering_hinge_position_controller/command', Float64, queue_size=1)
 
-        self.sub = rospy.Subscriber(my_number + "/ground_truth/state", Odometry, self.newPos)
+        
+        self.sub_pos = rospy.Subscriber(my_number + "/ground_truth/state", Odometry, self.newPos)
+        self.sub_goal = rospy.Subscriber(my_number + "/goals", Float32MultiArray, self.newGoal)
+
+        rospy.on_shutdown(self.shutdown)
+
+
+    def newGoal(self, msg):
+        new_goal = Point()
+        new_goal.x = msg.data[0]
+        new_goal.y = msg.data[1]
+        print("new goal recieved: ",new_goal)
+
+        self.goal = new_goal
+        self.complete = 0
+
 
     def newPos(self, msg):
         '''
@@ -46,142 +72,90 @@ class Car():
         (_, _, self._theta) = euler_from_quaternion([quat.x, quat.y, quat.z, quat.w])
 
 
-class GoTo(threading.Thread):
-    def __init__(self, num, goals, stop=False):
-        '''
-        Constructor
-        :param num: number of cars
-        :param goals: the goals that cars are driving to
-        :param stop: NOTE deprecated variable
-        '''
-        threading.Thread.__init__(self)
-        self.shutdown_flag = threading.Event()
-
-        self.numberOfCars = num
-        self.cars = []
-        self.complete = []
-        self.success = 0
-
-        # Setup Cars
-        for i in range(self.numberOfCars):
-            self.cars.append(Car(i+1))
-            self.complete.append(0)
-
-        # What to do if shut down
-        rospy.on_shutdown(self.shutdown)
-        if not stop:
-            self.success = self.goto(goals)
-        else:
-            self.shutdown()
-
-    
-    
-    
-
-
-    def goto(self, goals):
+    def goto(self):
         '''
             The actual goto method that drives the drones towards goal points
             :param goals: the list of goal points
             :return: 1 -- if succeed
         '''
         rospy.loginfo("Ready to move cars. To stop Cars , press CTRL + C")
-        r = rospy.Rate(10)
+        r = rospy.Rate(1)
 
-       
 
-        # Set up goal
-        for i in range(self.numberOfCars):
-            self.cars[i].goal.x = goals[i][0]
-            self.cars[i].goal.y = goals[i][1]
-            rospy.loginfo("Car%d is going to (%f, %f)", i+1, self.cars[i].goal.x, self.cars[i].goal.y)
+        rospy.loginfo("Car%d is going to (%f, %f)", self.id, self.goal.x, self.goal.y)
 
-        while not rospy.is_shutdown() and not self.shutdown_flag.is_set():
+        while not rospy.is_shutdown() and not self.shutdown_flag:
             # TODO: car's goto method also needs support of queued waypoints; may follow that same technique of drones
-            
-            if sum(self.complete) == self.numberOfCars:
-                return 1
-            for i in range(self.numberOfCars):
-                diff_x = self.cars[i].goal.x - self.cars[i]._x
-                diff_y = self.cars[i].goal.y - self.cars[i]._y
-                angle_to_goal = atan2(diff_y, diff_x)
+            if self.complete:
+                r.sleep()
+                continue
 
-                # rospy.loginfo("Angle to goal %f", angle_to_goal)
-                # rospy.loginfo("Car%d is currently at (%f, %f)", i+1, self.cars[i]._x, self.cars[i]._y)
+            diff_x = self.goal.x - self._x
+            diff_y = self.goal.y - self._y
+            angle_to_goal = atan2(diff_y, diff_x)
 
-                if sqrt(diff_x*diff_x + diff_y*diff_y) < 0.2:
-                    left_rear_wheel = 0
-                    right_rear_wheel = 0
-                    left_front_wheel = 0
-                    right_front_wheel = 0
-                    right_steering = 0
-                    left_steering = 0
-                    self.complete[i] = 1
-                elif angle_to_goal - self.cars[i]._theta > 0.1:
-                    # rospy.loginfo("Left turn at (%f, %f)", self.cars[i]._x, self.cars[i]._y)
-                    left_steering = 0.3
-                    right_steering = 0.3
-                    left_rear_wheel = 5
-                    right_rear_wheel = 5
-                    left_front_wheel = 5
-                    right_front_wheel = 5
-                elif angle_to_goal - self.cars[i]._theta < -0.1:
-                    # rospy.loginfo("Right turn at (%f, %f)", self.cars[i]._x, self.cars[i]._y)
-                    left_steering = -0.3
-                    right_steering = -0.3
-                    left_rear_wheel = 5
-                    right_rear_wheel = 5
-                    left_front_wheel = 5
-                    right_front_wheel = 5
-                else:
-                    # rospy.loginfo("Go straight at (%f, %f)", self.cars[i]._x, self.cars[i]._y)
-                    left_rear_wheel = 10
-                    right_rear_wheel = 10
-                    left_front_wheel = 10
-                    right_front_wheel = 10
-                    right_steering = 0
-                    left_steering = 0
+            # rospy.loginfo("Angle to goal %f", angle_to_goal)
+            # rospy.loginfo("Car%d is currently at (%f, %f)", i+1, self.cars[i]._x, self.cars[i]._y)
 
-                self.cars[i].pub_vel_left_rear_wheel.publish(left_rear_wheel)
-                self.cars[i].pub_vel_right_rear_wheel.publish(right_rear_wheel)
-                self.cars[i].pub_vel_left_front_wheel.publish(left_front_wheel)
-                self.cars[i].pub_vel_right_front_wheel.publish(right_front_wheel)
-                self.cars[i].pub_pos_right_steering_hinge.publish(right_steering)
-                self.cars[i].pub_pos_left_steering_hinge.publish(left_steering)
+            if sqrt(diff_x*diff_x + diff_y*diff_y) < 0.2:
+                left_rear_wheel = 0
+                right_rear_wheel = 0
+                left_front_wheel = 0
+                right_front_wheel = 0
+                right_steering = 0
+                left_steering = 0
+                self.complete = 1
+            elif angle_to_goal - self._theta > 0.1:
+                # rospy.loginfo("Left turn at (%f, %f)", self.cars[i]._x, self.cars[i]._y)
+                left_steering = 0.3
+                right_steering = 0.3
+                left_rear_wheel = 5
+                right_rear_wheel = 5
+                left_front_wheel = 5
+                right_front_wheel = 5
+            elif angle_to_goal - self._theta < -0.1:
+                # rospy.loginfo("Right turn at (%f, %f)", self.cars[i]._x, self.cars[i]._y)
+                left_steering = -0.3
+                right_steering = -0.3
+                left_rear_wheel = 5
+                right_rear_wheel = 5
+                left_front_wheel = 5
+                right_front_wheel = 5
+            else:
+                # rospy.loginfo("Go straight at (%f, %f)", self.cars[i]._x, self.cars[i]._y)
+                left_rear_wheel = 10
+                right_rear_wheel = 10
+                left_front_wheel = 10
+                right_front_wheel = 10
+                right_steering = 0
+                left_steering = 0
+
+            self.pub_vel_left_rear_wheel.publish(left_rear_wheel)
+            self.pub_vel_right_rear_wheel.publish(right_rear_wheel)
+            self.pub_vel_left_front_wheel.publish(left_front_wheel)
+            self.pub_vel_right_front_wheel.publish(right_front_wheel)
+            self.pub_pos_right_steering_hinge.publish(right_steering)
+            self.pub_pos_left_steering_hinge.publish(left_steering)
             r.sleep()
+        
+        self.shutdown()
 
     def shutdown(self):
         '''
             Stop all cars when rospy shuts down
             :return: Nothing
         '''
-        rospy.loginfo("Stop %d Car", self.numberOfCars)
-        for i in range(self.numberOfCars):
-            self.cars[i].pub_vel_left_rear_wheel.publish(0)
-            self.cars[i].pub_vel_right_rear_wheel.publish(0)
-            self.cars[i].pub_vel_left_front_wheel.publish(0)
-            self.cars[i].pub_vel_right_front_wheel.publish(0)
-            self.cars[i].pub_pos_right_steering_hinge.publish(0)
-            self.cars[i].pub_pos_left_steering_hinge.publish(0)
+        rospy.loginfo("Stop %d Car", self.id)
+        self.pub_vel_left_rear_wheel.publish(0)
+        self.pub_vel_right_rear_wheel.publish(0)
+        self.pub_vel_left_front_wheel.publish(0)
+        self.pub_vel_right_front_wheel.publish(0)
+        self.pub_pos_right_steering_hinge.publish(0)
+        self.pub_pos_left_steering_hinge.publish(0)
         # sleep just makes sure cars receives the stop command prior to shutting down the script
         rospy.loginfo("complete stop car")
         rospy.sleep(1)
 
 
-if __name__ == '__main__': 
-    try:
-        rospy.init_node('F1tenth', anonymous=True)
-        sys.path.append('..')
-        from util import parse_goal_pose
-        num = int(sys.argv[1])
-        goals = parse_goal_pose(num, sys.argv[2:], 'car')
-        navigator = GoTo(num, goals)
 
-        if navigator.success:
-            rospy.loginfo("Yep, we made it!")
-        else:
-            rospy.loginfo("Something is wrong")
-            
-        rospy.sleep(1)
-    except rospy.ROSInterruptException:
-        rospy.loginfo("User pressed  Ctrl-C, quit!")
+

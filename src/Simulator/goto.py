@@ -63,9 +63,11 @@ def main(num_drones, num_cars, goals, wpQueued=False):
         droneThread = threading.Thread(target=droneModule.GoTo, args=(num_drones, loc['drone'], wpQueued))
         droneThread.start()
     if num_cars != 0:
-        # carThread = threading.Thread(target=carModule.GoTo, args=(num_cars, loc['car']))
-        carThread = carModule.GoTo(num_cars, loc['car'])
-        carThread.start()
+        carList = [ carModule.Car(i + 1, loc['car'][i]) for i in range( num_cars) ]
+        carThreadList = [ threading.Thread(target=car.goto) for car in carList ]
+        for carThread in carThreadList:
+            carThread.start()
+
     rospy.loginfo("Models start goto method")
 
     while True:
@@ -75,14 +77,16 @@ def main(num_drones, num_cars, goals, wpQueued=False):
         except ServiceExit:
             # Terminate the running threads.
             # Set the shutdown flag on each thread to trigger a clean shutdown of each thread.
-            if(not carThread == None):
-                carThread.shutdown_flag.set()
-            # Wait for the threads to close...
-            # TODO: Debug to stop the cars after SIGINT
+            if(not carList == None):
+                for car in carList:
+                    car.shutdown_flag = 1
+
             if droneThread:
                 droneThread.join()
-            if carThread:
-                carThread.join()
+            if carThreadList:
+                for carThread in carThreadList:
+                    carThread.join()
+            break
  
     print('Exiting main program')
 
