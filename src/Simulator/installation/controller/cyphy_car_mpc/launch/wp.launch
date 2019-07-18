@@ -1,0 +1,13 @@
+<!-- -*- mode: XML -*- -->
+<launch>
+
+  <node name="waypoint_node" pkg="cyphy_car_mpc" type="mpc_wp_node" output="screen" >
+    <rosparam subst_value="true">
+      bot_num: 1
+    </rosparam>
+  </node>
+
+  
+
+</launch>
+
