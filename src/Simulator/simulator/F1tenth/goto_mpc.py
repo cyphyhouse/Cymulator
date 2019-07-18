@@ -7,7 +7,7 @@ import rospy, sys, time
 
 
 # TODO: this file needs to be changed corresponding to the new MPC controller
-class AckermannCar:
+class Car:
     def __init__(self, car_id, goals):
 
         # Car attributes
@@ -31,19 +31,19 @@ class AckermannCar:
         self.pub_vel_right_front_wheel = rospy.Publisher(identification + '/racecar/right_front_wheel_velocity_controller/command', Float64, queue_size=1)
         self.pub_pos_left_steering_hinge = rospy.Publisher(identification + '/racecar/left_steering_hinge_position_controller/command', Float64, queue_size=1)
         self.pub_pos_right_steering_hinge = rospy.Publisher(identification + '/racecar/right_steering_hinge_position_controller/command', Float64, queue_size=1)
-
-        # Interface Atrributes
-        self.pub_reach = rospy.Publisher(identification + '/reached', String, queue_size=1)
+        
         self.ackermann = rospy.Subscriber(identification + "/ackermann_cmd", AckermannDriveStamped, self.set_throttle)
-
-        # Status monitoring Attributes 
         self.sub_pos = rospy.Subscriber(identification + "/ground_truth/state", Odometry, self.newPos)
-        self.sub_goal = rospy.Subscriber(identification + "/waypoint", PoseStamped, self.newGoal)
-        self.pub_controller = rospy.Publisher(identification + '/position', PoseStamped, queue_size=1)
+        # self.sub_goal = rospy.Subscriber(identification + "/waypoint", PoseStamped, self.newGoal)
+        
+        # Outter Interface 
+        self.pub_reach = rospy.Publisher(identification + '/reached', String, queue_size=1)
+        self.pub_position = rospy.Publisher(identification + '/vrpn_client', PoseStamped, queue_size=1)
+
 
         # Behavior defining
         rospy.on_shutdown(self.shutdown)
-        self.controller()
+        # self.controller()
 
 
     def set_throttle(self, data):
@@ -59,15 +59,14 @@ class AckermannCar:
         self.lastSignal = time.time()
       
 
+    # def newGoal(self, msg):
+    #     new_goal = Point()
+    #     new_goal.x = msg.pose.position.x
+    #     new_goal.y = msg.pose.position.y
+    #     print("new goal recieved: ",new_goal)
 
-    def newGoal(self, msg):
-        new_goal = Point()
-        new_goal.x = msg.pose.position.x
-        new_goal.y = msg.pose.position.y
-        print("new goal recieved: ",new_goal)
-
-        self.goal = new_goal
-        self.complete = 0
+    #     self.goal = new_goal
+    #     self.complete = 0
 
 
     def newPos(self, msg):
@@ -79,17 +78,19 @@ class AckermannCar:
         self._x = msg.pose.pose.position.x
         self._y = msg.pose.pose.position.y
 
-        pose = PoseStamped()
-        pose.header.stamp = rospy.Time.now()
-        pose.header.frame_id = "0"
-        pose.pose.position.x = self._x
-        pose.pose.position.y = self._y
-        pose.pose.position.z = 0
-        pose.pose.orientation.x = 0
-        pose.pose.orientation.y = 0
-        pose.pose.orientation.z = 0
-        pose.pose.orientation.w = 0
-        self.pub_controller.publish(pose)
+        # TODO: Translating the location
+        # pose = PoseStamped()
+        # pose.header.stamp = rospy.Time.now()
+        # pose.header.frame_id = "0"
+        # pose.pose.position.x = 5.0
+        # pose.pose.position.y = 1.0
+        # pose.pose.position.z = 0.0
+                
+        # pose.pose.orientation.x = 0.0
+        # pose.pose.orientation.y = 0.0
+        # pose.pose.orientation.z = 0.0
+        # pose.pose.orientation.w = 0.0
+        # self.pub_position.publish(pose)
 
     def controller(self):
         r = rospy.Rate(30)
@@ -113,22 +114,26 @@ class AckermannCar:
         self.pub_pos_left_steering_hinge.publish(0)
 
     def shutdown(self):
-        rospy.loginfo("Stop Car")
-        self.ackermann.unregister()
+        '''
+            Stop all cars when rospy shuts down
+            :return: Nothing
+        '''
+        rospy.loginfo("Stop %d Car", self.id)
         self.pub_vel_left_rear_wheel.publish(0)
         self.pub_vel_right_rear_wheel.publish(0)
         self.pub_vel_left_front_wheel.publish(0)
         self.pub_vel_right_front_wheel.publish(0)
         self.pub_pos_right_steering_hinge.publish(0)
         self.pub_pos_left_steering_hinge.publish(0)
+        # sleep just makes sure cars receives the stop command prior to shutting down the script
+        rospy.loginfo("complete stop car")
         rospy.sleep(1)
+
 
 
 if __name__ == '__main__':
     rospy.init_node('car', anonymous=True)
-    AckermannCar(1, [0,0])
-    AckermannCar.controller()
-
-
+    Car(1, [0,0])
+    Car.controller(Car)
 
 

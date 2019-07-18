@@ -109,7 +109,6 @@ class Car():
                 right_steering = 0
                 left_steering = 0
                 self.complete = 1
-                print("--------------------reached-------------------")
                 self.pub_reach.publish("True")
 
             elif angle_to_goal - self._theta > 0.1:
