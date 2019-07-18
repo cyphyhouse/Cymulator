@@ -1,9 +1,0 @@
-.idea
-__pycache__
-_build
-conf.py 
-index.rst
-make.bat
-Makefile
-_static
-_templates
