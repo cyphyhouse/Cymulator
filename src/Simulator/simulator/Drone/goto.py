@@ -6,13 +6,13 @@
     NOTE: To publish new waypoint, use this format: rostopic pub /drone1/goals std_msgs/Float32MultiArray "data: [0.0, 1.0, 2.0]"
 '''
 
-import rospy, sys
-from geometry_msgs.msg      import PoseStamped, Pose, Point, Twist
+import rospy, sys, queue
 from math                   import sqrt
+from geometry_msgs.msg      import PoseStamped, Pose, Point, Twist
 from hector_uav_msgs.srv    import EnableMotors
 from nav_msgs.msg           import Odometry
 from tf.transformations     import euler_from_quaternion
-
+from std_msgs.msg           import String
 
 class Drone:
     def __init__(self, drone_id, goal, wpQueued=False):
@@ -28,23 +28,23 @@ class Drone:
         self._z = 0.0
         self._theta = 0.0
 
-
-        # Drone attributes
-        self.goals = []
+        # Waypoint attributes
+        self.goals = queue.Queue()
         self.goal = Point()
         self.goal.x = goal[0]
         self.goal.y = goal[1]
         self.goal.z = goal[2]
-
-        self.goals.append(self.goal)
+        self.goals.put(self.goal)
 
         # Set up subscriber and publisher
         identification = "/drone" + str(drone_id)
         self.sub = rospy.Subscriber(identification + "/ground_truth/state", Odometry, self.newPos)
         self.pub = rospy.Publisher(identification + "/cmd_vel", Twist, queue_size=10)
+        self.pub_reach = rospy.Publisher(identification + '/reached', String, queue_size=1)
 
         if wpQueued:
-            self.subGoal = rospy.Subscriber(identification + "/goals", PoseStamped, self.newGoal)
+            self.subGoal = rospy.Subscriber(identification + "/waypoint", PoseStamped, self.newGoal)
+
 
         # Enable motors using ROS service
         rospy.wait_for_service(identification + '/enable_motors')
@@ -82,7 +82,7 @@ class Drone:
         new_goal.x = msg.pose.position.x
         new_goal.y = msg.pose.position.y
         new_goal.z = msg.pose.position.z
-        self.goals.append(new_goal)
+        self.goals.put(new_goal)
 
 
     def controller(self):
@@ -91,7 +91,7 @@ class Drone:
         :param goals: the list of goal points
         :return: Nothing
         '''
-        rospy.loginfo("Ready to move. To stop Drone , press CTRL + C")
+
         r = rospy.Rate(10)  # Setup ROS spin rate
         move_cmd = Twist()  # Twist messages
 
@@ -99,18 +99,18 @@ class Drone:
             # Simple controller code for drones
             # TODO: Controller might need to be changed
 
-            curGoal = self.goals[0]
-            diff_x = curGoal.x - self._x
-            diff_y = curGoal.y - self._y
-            diff_z = curGoal.z - self._z
+            diff_x = self.goal.x - self._x
+            diff_y = self.goal.y - self._y
+            diff_z = self.goal.z - self._z
             # rospy.loginfo("Drone %d has distance away from waypoint is (%f, %f, %f)", self.id, diff_x, diff_y, diff_z) # sqrt(diff_x*diff_x + diff_y*diff_y + diff_z*diff_z))
             
             # Waypoint check
             if abs(diff_x) < 0.25 and abs(diff_y) < 0.25 and abs(diff_z) < 0.25:
                 rospy.loginfo("Drone%d reaches a waypoint", self.id)
-                if len(self.goals) > 1:
-                    self.goals.pop(0)
+                self.pub_reach.publish("True")
+                self.goal = self.goals.get()
             else:
+                self.pub_reach.publish("False")
                 if abs(diff_x) > 0.5:
                     if diff_x > 0:
                         move_cmd.linear.x = 0.5
@@ -141,6 +141,7 @@ class Drone:
                         move_cmd.linear.z = 0.05
                     else:
                         move_cmd.linear.z = -0.05
+                
             self.pub.publish(move_cmd)
 
             r.sleep()

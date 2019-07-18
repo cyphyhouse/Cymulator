@@ -33,12 +33,12 @@ class AckermannCar:
         self.pub_pos_right_steering_hinge = rospy.Publisher(identification + '/racecar/right_steering_hinge_position_controller/command', Float64, queue_size=1)
 
         # Interface Atrributes
-        self.pub_reach = rospy.Publisher(identification + '/Reached', String, queue_size=1)
-        self.ackermann = rospy.Subscriber('carbot1' + "/ackermann_cmd", AckermannDriveStamped, self.set_throttle)
+        self.pub_reach = rospy.Publisher(identification + '/reached', String, queue_size=1)
+        self.ackermann = rospy.Subscriber(identification + "/ackermann_cmd", AckermannDriveStamped, self.set_throttle)
 
         # Status monitoring Attributes 
         self.sub_pos = rospy.Subscriber(identification + "/ground_truth/state", Odometry, self.newPos)
-        self.sub_goal = rospy.Subscriber(identification + "/goals", PoseStamped, self.newGoal)
+        self.sub_goal = rospy.Subscriber(identification + "/waypoint", PoseStamped, self.newGoal)
         self.pub_controller = rospy.Publisher(identification + '/position', PoseStamped, queue_size=1)
 
         # Behavior defining
@@ -127,6 +127,7 @@ class AckermannCar:
 if __name__ == '__main__':
     rospy.init_node('car', anonymous=True)
     AckermannCar(1, [0,0])
+    AckermannCar.controller()
 
 
 

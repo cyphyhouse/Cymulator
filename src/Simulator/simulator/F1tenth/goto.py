@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 
-import rospy
-from nav_msgs.msg import Odometry
+import rospy, sys, os, signal, multiprocessing, threading
+from nav_msgs.msg       import Odometry
 from tf.transformations import euler_from_quaternion
-from geometry_msgs.msg import Point, Twist
-from geometry_msgs.msg import PoseStamped, Pose
-from std_msgs.msg import Float64
-from std_msgs.msg import String
-from math import atan2, sqrt
-import sys, os, signal, multiprocessing, threading
+from geometry_msgs.msg  import Point, Twist
+from geometry_msgs.msg  import PoseStamped, Pose
+from std_msgs.msg       import Float64, String
+from math               import atan2, sqrt
 
 
 
@@ -44,12 +42,9 @@ class Car():
         self.pub_pos_left_steering_hinge = rospy.Publisher(my_number + '/racecar/left_steering_hinge_position_controller/command', Float64, queue_size=1)
         self.pub_pos_right_steering_hinge = rospy.Publisher(my_number + '/racecar/right_steering_hinge_position_controller/command', Float64, queue_size=1)
 
-        self.pub_reach = rospy.Publisher(my_number + '/Reached', String, queue_size=1)
-
+        self.pub_reach = rospy.Publisher(my_number + '/reached', String, queue_size=1)
         self.sub_pos = rospy.Subscriber(my_number + "/ground_truth/state", Odometry, self.newPos)
-        self.sub_goal = rospy.Subscriber(my_number + "/goals", PoseStamped, self.newGoal)
-        print("********************************************** car: ", self.id)
-
+        self.sub_goal = rospy.Subscriber(my_number + "/waypoint", PoseStamped, self.newGoal)
 
         rospy.on_shutdown(self.shutdown)
 
