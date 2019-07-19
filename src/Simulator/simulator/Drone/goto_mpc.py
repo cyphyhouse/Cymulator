@@ -13,10 +13,10 @@ from hector_uav_msgs.srv    import EnableMotors
 from nav_msgs.msg           import Odometry
 from tf.transformations     import euler_from_quaternion
 from std_msgs.msg           import String
-from ackermann_msgs.msg import AckermannDriveStamped
+from ackermann_msgs.msg     import AckermannDriveStamped
 
 class Drone:
-    def __init__(self, drone_id, goal, wpQueued=False):
+    def __init__(self, drone_id):
         '''
         Constructor of Drone object
         :param number: the number/index of this drone
@@ -29,12 +29,6 @@ class Drone:
         self._z = 0.0
         self._theta = 0.0
 
-        # Waypoint attributes
-        self.goal = Point()
-        self.goal.x = goal[0]
-        self.goal.y = goal[1]
-        self.goal.z = goal[2]
-
         # Controller interface
         identification = "/drone" + str(drone_id)
         self.sub = rospy.Subscriber(identification + "/ground_truth/state", Odometry, self.newPos)
@@ -42,7 +36,7 @@ class Drone:
 
         # Outter interface 
         self.pub_position = rospy.Publisher(identification + '/vrpn_client_node', PoseStamped, queue_size=1)
-        self.ackermann = rospy.Subscriber(identification + "/ackermann_cmd", AckermannDriveStamped, self.set_throttle)
+        self.sub_ackermann = rospy.Subscriber(identification + "/ackermann_cmd", AckermannDriveStamped, self.set_throttle)
 
         # Enable motors using ROS service
         rospy.wait_for_service(identification + '/enable_motors')
@@ -101,7 +95,7 @@ class Drone:
 if __name__ == '__main__': 
     try:
         rospy.init_node('Drone', anonymous=True)
-        Drone(1, [0,0])
+        Drone(1)
         Drone.controller(Drone)
 
     except rospy.ROSInterruptException:
