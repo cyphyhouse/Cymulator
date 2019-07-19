@@ -70,7 +70,7 @@ def main(num_drones, num_cars, goals, wpQueued=False):
         # droneThread.start()
     if num_cars != 0:
         carList = [ carModule.Car(i + 1, loc['car'][i]) for i in range( num_cars) ]
-        carThreadList = [ threading.Thread(target=car.goto) for car in carList ]
+        carThreadList = [ threading.Thread(target=car.controller) for car in carList ]
         for carThread in carThreadList:
             carThread.start()
 

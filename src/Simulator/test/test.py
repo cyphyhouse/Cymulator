@@ -63,24 +63,53 @@ rospy.init_node('controller', anonymous=True)
 #     time.sleep(0.5)
 
 
-drive_pub = rospy.Publisher( '/car1/waypoint', PoseStamped, queue_size=1)
+drive_pub = rospy.Publisher( '/car2/waypoint', PoseStamped, queue_size=1)
 
-for i in range (10):
-    pose = PoseStamped()
-    pose.header.stamp = rospy.Time.now()
-    pose.header.frame_id = "0"
-    pose.pose.position.x = 5.0
-    pose.pose.position.y = 1.0
-    pose.pose.position.z = 0.0
+pose = PoseStamped()
+pose.header.stamp = rospy.Time.now()
+pose.header.frame_id = "0"
+pose.pose.position.x = 7.0
+pose.pose.position.y = 5.0
+pose.pose.position.z = 0.0
             
-    pose.pose.orientation.x = 0.0
-    pose.pose.orientation.y = 0.0
-    pose.pose.orientation.z = 0.0
-    pose.pose.orientation.w = 0.0
+pose.pose.orientation.x = 0.0
+pose.pose.orientation.y = 0.0
+pose.pose.orientation.z = 0.0
+pose.pose.orientation.w = 0.0
         
-    drive_pub.publish(pose)
+drive_pub.publish(pose)
+time.sleep(1)
 
 
+pose = PoseStamped()
+pose.header.stamp = rospy.Time.now()
+pose.header.frame_id = "0"
+pose.pose.position.x = 45.0
+pose.pose.position.y = -5.0
+pose.pose.position.z = 0.0
+            
+pose.pose.orientation.x = 0.0
+pose.pose.orientation.y = 0.0
+pose.pose.orientation.z = 0.0
+pose.pose.orientation.w = 0.0
+        
+drive_pub.publish(pose)
+time.sleep(1)
+
+pose = PoseStamped()
+pose.header.stamp = rospy.Time.now()
+pose.header.frame_id = "0"
+pose.pose.position.x = -3.0
+pose.pose.position.y = -5.0
+pose.pose.position.z = 0.0
+            
+pose.pose.orientation.x = 0.0
+pose.pose.orientation.y = 0.0
+pose.pose.orientation.z = 0.0
+pose.pose.orientation.w = 0.0
+        
+drive_pub.publish(pose)
+time.sleep(1)
 
 
 
@@ -88,8 +117,8 @@ for i in range (10):
 pose = PoseStamped()
 pose.header.stamp = rospy.Time.now()
 pose.header.frame_id = "1"
-pose.pose.position.x = 5.0
-pose.pose.position.y = 1.0
+pose.pose.position.x = -5.0
+pose.pose.position.y = 5.0
 pose.pose.position.z = 0.0
         
 pose.pose.orientation.x = 0.0
