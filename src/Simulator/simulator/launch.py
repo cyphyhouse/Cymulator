@@ -62,6 +62,13 @@ def launch(models, loc):
         include = ET.SubElement(root, 'include', attrib)
         attrib = {'name': 'name', 'value': 'car' + str(i + 1)}
         arg = ET.SubElement(include, 'arg', attrib)
+        
+
+    car_controller_launch_file_generator(models['car'])
+    attrib = {'file': '$(find cyphy_car_mpc)/launch/wp.launch'}
+    include = ET.SubElement(root, 'include', attrib)
+    
+
 
     tree.write(modelPath)
     print("roslaunch")
@@ -71,8 +78,26 @@ def launch(models, loc):
 
     return proc
 
+def car_controller_launch_file_generator(num_car):
+    content = '''
+    <!-- -*- mode: XML -*- -->
+    <launch>
+    '''
+    for i in range(num_car):
+        content += "\t<node name=\"car"+ str(i+1) +"\" pkg=\"cyphy_car_mpc\" type=\"mpc_wp_node\" output=\"screen\" > </node>\n"
+
+    content += "</launch>"
+
+    path = str(Path.home()) + "/catkin_ws3/src/cyphy_car_mpc/launch/wp.launch"
+    f = open(path, "w")
+    f.write(content)
+    f.close()
+
 
 if __name__ == '__main__':
     loc = {'drone': [[0, 0, 0.3], [0, 5, 0.3]], 'car': [[5, 5, 0.3], [5, 0, 0.3]]}
     models = {'drone': 2, 'car': 2}
     launch(loc, models)
+
+
+# <include file="$(find package_name)/directory/another.launch"/>

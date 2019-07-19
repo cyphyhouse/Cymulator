@@ -63,7 +63,7 @@ rospy.init_node('controller', anonymous=True)
 #     time.sleep(0.5)
 
 
-drive_pub = rospy.Publisher( '/waypoint/waypoint', PoseStamped, queue_size=1)
+drive_pub = rospy.Publisher( '/car1/waypoint', PoseStamped, queue_size=1)
 
 for i in range (10):
     pose = PoseStamped()
@@ -99,4 +99,4 @@ pose.pose.orientation.w = 0.0
 drive_pub.publish(pose)
 
 
-rostopic pub /waypoint/waypoint geometry_msgs/PoseStamped '{header: {stamp: {}, frame_id: "1"}, pose: {position: {x: 1.0, y: 0.0, z: 0.0}, orientation: {w: 1.0}}}'
+# rostopic pub /waypoint/waypoint geometry_msgs/PoseStamped '{header: {stamp: {}, frame_id: "1"}, pose: {position: {x: 1.0, y: 0.0, z: 0.0}, orientation: {w: 1.0}}}'

@@ -21,7 +21,7 @@ class Car:
         self.goal = Point()
         self.goal.x = goals[0]
         self.goal.y = goals[1]
-        self.lastSignal = time.time()
+        self.lastsignal = time.time()
 
         # Wheels controller attributes (ROS)
         identification = '/car' + str(car_id)
@@ -56,7 +56,7 @@ class Car:
         self.pub_vel_right_rear_wheel.publish(throttle)
         self.pub_vel_left_front_wheel.publish(throttle)
         self.pub_vel_right_front_wheel.publish(throttle)
-        self.lastSignal = time.time()
+        self.lastsignal = time.time()
       
 
     # def newGoal(self, msg):
@@ -97,10 +97,10 @@ class Car:
         
         while True:
             r.sleep()
-            if( ( time.time() - self.lastSignal) > 0.5 ):
-                print("stop car")
-                self.stop()
-                continue
+            # if( ( time.time() - self.lastsignal) > 0.5 ):
+            #     print("stop car")
+            #     self.stop()
+            #     continue
 
 
             
