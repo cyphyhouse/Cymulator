@@ -34,7 +34,6 @@ class Car:
         
         self.ackermann = rospy.Subscriber(identification + "/ackermann_cmd", AckermannDriveStamped, self.set_throttle)
         self.sub_pos = rospy.Subscriber(identification + "/ground_truth/state", Odometry, self.newPos)
-        # self.sub_goal = rospy.Subscriber(identification + "/waypoint", PoseStamped, self.newGoal)
         
         # Outter Interface 
         self.pub_reach = rospy.Publisher(identification + '/reached', String, queue_size=1)
@@ -69,10 +68,8 @@ class Car:
         self._x = msg.pose.pose.position.x
         self._y = msg.pose.pose.position.y
 
-        # TODO: Translating the location
         pose = PoseStamped()
         pose.pose = msg.pose.pose
-        # print(pose)
         self.pub_position.publish(pose)
 
     def controller(self):

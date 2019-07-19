@@ -13,6 +13,7 @@ from hector_uav_msgs.srv    import EnableMotors
 from nav_msgs.msg           import Odometry
 from tf.transformations     import euler_from_quaternion
 from std_msgs.msg           import String
+from ackermann_msgs.msg import AckermannDriveStamped
 
 class Drone:
     def __init__(self, drone_id, goal, wpQueued=False):
@@ -40,9 +41,8 @@ class Drone:
         self.pub = rospy.Publisher(identification + "/cmd_vel", Twist, queue_size=10)
 
         # Outter interface 
-        self.pub_reach = rospy.Publisher(identification + '/reached', String, queue_size=1)
-        self.pub_position = rospy.Publisher(identification + '/vrpn_client', PoseStamped, queue_size=1)
-
+        self.pub_position = rospy.Publisher(identification + '/vrpn_client_node', PoseStamped, queue_size=1)
+        self.ackermann = rospy.Subscriber(identification + "/ackermann_cmd", AckermannDriveStamped, self.set_throttle)
 
         # Enable motors using ROS service
         rospy.wait_for_service(identification + '/enable_motors')
@@ -57,6 +57,11 @@ class Drone:
         rospy.on_shutdown(self.shutdown)
 
 
+    def set_throttle(self, data):
+        # TODO: get the ackermann_cmd from /ackermann_cmd topic and publish the correponding command to  /cmd_vel
+        pass
+   
+
     def newPos(self, msg):
         '''
         Callback function to get drone's current location
@@ -67,94 +72,17 @@ class Drone:
         self._y = msg.pose.pose.position.y
         self._z = msg.pose.pose.position.z
 
-        # TODO: Translating the location
-        # pose = PoseStamped()
-        # pose.header.stamp = rospy.Time.now()
-        # pose.header.frame_id = "0"
-        # pose.pose.position.x = 5.0
-        # pose.pose.position.y = 1.0
-        # pose.pose.position.z = 0.0
-                
-        # pose.pose.orientation.x = 0.0
-        # pose.pose.orientation.y = 0.0
-        # pose.pose.orientation.z = 0.0
-        # pose.pose.orientation.w = 0.0
-        # self.pub_position.publish(pose)
+        pose = PoseStamped()
+        pose.pose = msg.pose.pose
+        self.pub_position.publish(pose)
 
 
-
-    # def newGoal(self, msg):
-    #     '''
-    #     Callback function to get drone's next waypoint/goal
-    #     :param msg: Float32MultiArray type msg that contains the new waypoint/goal
-    #     :return: Nothing
-    #     '''
-    #     new_goal = Point()
-    #     new_goal.x = msg.pose.position.x
-    #     new_goal.y = msg.pose.position.y
-    #     new_goal.z = msg.pose.position.z
-    #     self.goals.put(new_goal)
 
 
     def controller(self):
-        '''
-        The actual goto method that drives the drones towards goal points
-        :param goals: the list of goal points
-        :return: Nothing
-        '''
-
-        r = rospy.Rate(10)  # Setup ROS spin rate
-        move_cmd = Twist()  # Twist messages
-
-        while not rospy.is_shutdown():
-            # Simple controller code for drones
-            # TODO: Controller might need to be changed
-
-            diff_x = self.goal.x - self._x
-            diff_y = self.goal.y - self._y
-            diff_z = self.goal.z - self._z
-            # rospy.loginfo("Drone %d has distance away from waypoint is (%f, %f, %f)", self.id, diff_x, diff_y, diff_z) # sqrt(diff_x*diff_x + diff_y*diff_y + diff_z*diff_z))
-            
-            # Waypoint check
-            if abs(diff_x) < 0.25 and abs(diff_y) < 0.25 and abs(diff_z) < 0.25:
-                rospy.loginfo("Drone%d reaches a waypoint", self.id)
-                self.pub_reach.publish("True")
-                # self.goal = self.goals.get()
-            else:
-                self.pub_reach.publish("False")
-                if abs(diff_x) > 0.5:
-                    if diff_x > 0:
-                        move_cmd.linear.x = 0.5
-                    else:
-                        move_cmd.linear.x = -0.5
-                else:
-                    if diff_x > 0:
-                        move_cmd.linear.x = 0.05
-                    else:
-                        move_cmd.linear.x = -0.05
-                if abs(diff_y) > 0.5:
-                    if diff_y > 0:
-                        move_cmd.linear.y = 0.5
-                    else:
-                        move_cmd.linear.y = -0.5
-                else:
-                    if diff_y > 0:
-                        move_cmd.linear.y = 0.05
-                    else:
-                        move_cmd.linear.y = -0.05
-                if abs(diff_z) > 0.5:
-                    if diff_z > 0:
-                        move_cmd.linear.z = 0.5
-                    else:
-                        move_cmd.linear.z = -0.5
-                else:
-                    if diff_z > 0:
-                        move_cmd.linear.z = 0.05
-                    else:
-                        move_cmd.linear.z = -0.05
-                
-            self.pub.publish(move_cmd)
-
+        r = rospy.Rate(30)
+        
+        while True:
             r.sleep()
 
     def shutdown(self):
@@ -172,12 +100,9 @@ class Drone:
 
 if __name__ == '__main__': 
     try:
-        rospy.init_node('Drone_Test', anonymous=True)
-
-        id = 1
-        goals = [3,4,5]
-        Drone(id, goals)
-        rospy.sleep(1)
+        rospy.init_node('Drone', anonymous=True)
+        Drone(1, [0,0])
+        Drone.controller(Drone)
 
     except rospy.ROSInterruptException:
         rospy.loginfo("User pressed  Ctrl-C, quit!")

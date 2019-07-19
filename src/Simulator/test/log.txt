@@ -1,0 +1,66 @@
+header: 
+  seq: 272
+  stamp: 
+    secs: 19
+    nsecs: 548000000
+  frame_id: "world"
+child_frame_id: "base_link"
+pose: 
+  pose: 
+    position: 
+      x: 5.130497250318733
+      y: -5.671412349958807
+      z: -6.926502973403359e-07
+    orientation: 
+      x: 9.484897433616173e-08
+      y: 9.094377353632508e-07
+      z: -0.1694479641079817
+      w: 0.9855391354273173
+  covariance: [0.0001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0001]
+twist: 
+  twist: 
+    linear: 
+      x: -0.022173461047172473
+      y: -0.01426971543177851
+      z: 0.0037680827288696745
+    angular: 
+      x: -0.0034677700105873468
+      y: 0.004743176339941367
+      z: 0.0007879172440291246
+  covariance: [0.0001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0001]
+
+
+
+
+http://docs.ros.org/diamondback/api/nav_msgs/html/msg/Odometry.html
+
+
+
+http://docs.ros.org/api/geometry_msgs/html/msg/Pose.html
+
+
+pose = PoseStamped()
+pose.header.stamp = rospy.Time.now()
+pose.header.frame_id = "1"
+pose.pose.position.x = 5.0
+pose.pose.position.y = 1.0
+pose.pose.position.z = 0.0
+        
+pose.pose.orientation.x = 0.0
+pose.pose.orientation.y = 0.0
+pose.pose.orientation.z = 0.0
+pose.pose.orientation.w = 0.0
+drive_pub.publish(pose)
+
+
+pose: 
+  position: 
+    x: -2.4093596443111163
+    y: 0.43125703617606953
+    z: -6.873400411749886e-07
+  orientation: 
+    x: 3.269358924736616e-07
+    y: 9.463783256920657e-07
+    z: -0.441301691367094
+    w: 0.8973588007010014
+covariance: [0.0001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0001]
