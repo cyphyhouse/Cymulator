@@ -66,14 +66,18 @@ echo "------------------------ dependency installation finished ----------------
 perl -plne 'print "set(CMAKE_CXX_FLAGS \"\$\{CMAKE_CXX_FLAGS\} -std=c++14\")" if(/set\(CATKIN_TOPLEVEL TRUE\)/);' /opt/ros/kinetic/share/catkin/cmake/toplevel.cmake > toplevel.cmake
 sudo rm /opt/ros/kinetic/share/catkin/cmake/toplevel.cmake
 sudo mv toplevel.cmake /opt/ros/kinetic/share/catkin/cmake/
-cd ~/catkin_ws3
-catkin_make
+
 
 
 
 #build car mpc
-wget https://www.coin-or.org/download/source/Ipopt/Ipopt-3.12.13.zip -P $HOME
+wget https://www.coin-or.org/download/source/Ipopt/Ipopt-3.12.13.zip -P ~/
+cd ~/
 unzip Ipopt-3.12.13.zip
 rm Ipopt-3.12.13.zip
+cd CyPyHous3/src/Simulator/installation
+sudo bash install_ipopt.sh $HOME/Ipopt-3.12.13/
 sudo apt install cppad
 echo "export LD_LIBRARY_PATH=/usr/local/lib/:${LD_LIBRARY_PATH}" >> ~/.bashrc
+cd ~/catkin_ws3
+catkin_make
