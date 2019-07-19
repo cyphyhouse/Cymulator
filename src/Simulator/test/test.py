@@ -84,7 +84,7 @@ time.sleep(1)
 pose = PoseStamped()
 pose.header.stamp = rospy.Time.now()
 pose.header.frame_id = "0"
-pose.pose.position.x = 45.0
+pose.pose.position.x = 15.0
 pose.pose.position.y = -5.0
 pose.pose.position.z = 0.0
             

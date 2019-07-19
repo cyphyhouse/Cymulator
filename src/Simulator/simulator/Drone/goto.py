@@ -103,7 +103,7 @@ class Drone:
             
             # Waypoint check
             if abs(diff_x) < 0.25 and abs(diff_y) < 0.25 and abs(diff_z) < 0.25:
-                rospy.loginfo("Drone%d reaches a waypoint", self.id)
+                # rospy.loginfo("Drone%d reaches a waypoint", self.id)
                 self.pub_reach.publish("True")
                 if(not self.goals.empty()):
                     self.goal = self.goals.get()

@@ -18,7 +18,7 @@ def main(num_drones, num_cars):
     :param goals: Goal points the models are driving towards
     :return: Nothing
     '''
-
+    rospy.init_node('Model_GoTo', anonymous=True)
     try:
         droneModule = importlib.import_module("Drone.goto")
         carModule = importlib.import_module("F1tenth.goto")
@@ -66,5 +66,5 @@ if __name__ == '__main__':
     if not num_cars:
         num_cars = 0
 
-    rospy.init_node('Model_GoTo', anonymous=True)
+    
     main(num_drones, num_cars)

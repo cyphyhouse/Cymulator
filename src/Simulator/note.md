@@ -1,15 +1,8 @@
-## July 18
+# July 19
 
-currently, drone and car both use multithreading to control.
+- combine sim.py and goto.py
+- find a good name for goto.py
+- look into move.py
 
-the next step would be:
-
-- clearing the interface 
-
-- modify the installation script to install the car and drone mpc
-
-  - Create  drone_mpc.py
-
-  - Improve car_mpc.py
-
-    
+- Look into spawn.py
+- Drone mpc intergration 
