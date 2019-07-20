@@ -1,56 +1,6 @@
 import sys, os, argparse, multiprocessing
 from util import parse_init_pose, sim_launch
 import argparse
-import _thread
-from util import parse_goal_pose
-import importlib
-import rospy
-import threading
-import time
-import os
-import multiprocessing
-import signal
-
-
-def main1(num_drones, num_cars):
-    '''
-    This function will call each model's goto method to drive models towards goal points
-    :param num_drones: Number of drones to drive
-    :param num_cars: Number of cars to drive
-    :param goals: Goal points the models are driving towards
-    :return: Nothing
-    '''
-    rospy.init_node('Model_GoTo', anonymous=True)
-    
-    try:
-        droneModule = importlib.import_module("Drone.goto")
-        carModule = importlib.import_module("F1tenth.goto")
-    except AttributeError:
-        print("Import goto function failed!")
-        exit(0)
-
-    # Start separate threads for different models
-    droneThread = None
-    carThread = None
-    
-    if num_drones != 0:
-        droneList = [ droneModule.Drone(i + 1) for i in range( num_drones) ]
-        droneThreadList = [ threading.Thread(target=drone.controller) for drone in droneList ]
-        for droneThread in droneThreadList:
-            droneThread.start()
-
-    if num_cars != 0:
-        carList = [ carModule.Car(i + 1) for i in range( num_cars) ]
-        carThreadList = [ threading.Thread(target=car.controller) for car in carList ]
-        for carThread in carThreadList:
-            carThread.start()
-
-    rospy.loginfo("Models start goto method")
-
-    while True:
-        time.sleep(0.5)
-
-    print('Exiting main program')
 
 
 
@@ -103,13 +53,4 @@ if __name__ == '__main__':
     if not init_loc:
         init_loc = []
 
-    gazebo = multiprocessing.Process(target=main, args=(num_drones, num_cars, init_loc) )
-    
-
-    model = multiprocessing.Process(target=main1, args=(num_drones, num_cars) )
-
-    gazebo.start()
-    time.sleep( 10 + 1.5 * (num_drones +  num_cars) )
-    model.start()
-    print("********************************** initilization finished **************************************")
-
+    main(num_drones, num_cars, init_loc)

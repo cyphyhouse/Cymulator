@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-import rospy
-from gazebo_msgs.srv import SpawnModel, SpawnModelRequest, SpawnModelResponse, DeleteModel
-from copy import deepcopy
+import rospy, time
+from gazebo_msgs.srv    import SpawnModel, SpawnModelRequest, SpawnModelResponse, DeleteModel
+from copy               import deepcopy
 from tf.transformations import quaternion_from_euler
-
+from geometry_msgs.msg  import Point, PointStamped, Twist, Pose, PoseStamped
+from std_msgs.msg       import Float64, String
 
 # TODO: Use this class to create waypoint object and obstacle in Gazebo
 class Spawn:
@@ -78,7 +79,7 @@ class Spawn:
               </velocity_decay>
               <self_collide>0</self_collide>
               <kinematic>0</kinematic>
-              <gravity>1</gravity>
+              <gravity>0</gravity>
             </link>
           </model>
         </sdf>
@@ -128,11 +129,36 @@ class Spawn:
         return req
 
 
+
+def remove(msg, args):
+    print("******")
+    print(type(str(msg)))
+    print(str(msg))
+    if('TRUE' in str(msg) ):
+        print("_____________remove___________________")
+        track = args
+        for point in range(track.count):
+            track.delete_point(point)
+            time.sleep(0.5)
+    
+
+def add(msg, args):
+    print("_____________add___________________")
+    track = args
+    pos_x = msg.pose.position.x
+    pos_y = msg.pose.position.y
+    pos_z = msg.pose.position.z
+    track.create_point(pos_x, pos_y, pos_z, track.count)
+
+
 if __name__ == '__main__':
     rospy.init_node("Spawn_model", anonymous=True)
-    track = Spawn()
-    for i in range(1,10):
-        track.create_point(i, i, 0, i)
 
-    for i in range(1, 10):
-        track.delete_point(i)
+    track = Spawn()
+    remover = rospy.Subscriber("/car1/reached", String, remove, (track))
+    adder   = rospy.Subscriber("/car1/waypoint", PoseStamped, add, (track))
+
+    rospy.spin()
+
+    
+   

@@ -63,13 +63,13 @@ rospy.init_node('controller', anonymous=True)
 #     time.sleep(0.5)
 
 
-drive_pub = rospy.Publisher( '/car2/waypoint', PoseStamped, queue_size=1)
+drive_pub = rospy.Publisher( '/car1/waypoint', PoseStamped, queue_size=1)
 
 pose = PoseStamped()
 pose.header.stamp = rospy.Time.now()
 pose.header.frame_id = "0"
-pose.pose.position.x = 7.0
-pose.pose.position.y = 5.0
+pose.pose.position.x = 3.0
+pose.pose.position.y = 3.0
 pose.pose.position.z = 0.0
             
 pose.pose.orientation.x = 0.0
