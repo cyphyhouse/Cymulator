@@ -24,7 +24,7 @@ class Spawn:
             <static>0</static>
             <link name="link">
               <inertial>
-                <mass>1.0</mass>
+                <mass>5000.0</mass>
                 <inertia>
                   <ixx>0.01</ixx>
                   <ixy>0.0</ixy>
@@ -129,11 +129,8 @@ class Spawn:
         return req
 
 
-
+# ----------------------------------------------------
 def remove(msg, args):
-    print("******")
-    print(type(str(msg)))
-    print(str(msg))
     if('TRUE' in str(msg) ):
         print("_____________remove___________________")
         track = args
@@ -151,7 +148,8 @@ def add(msg, args):
     track.create_point(pos_x, pos_y, pos_z, track.count)
 
 
-if __name__ == '__main__':
+
+def main():
     rospy.init_node("Spawn_model", anonymous=True)
 
     track = Spawn()
@@ -159,6 +157,13 @@ if __name__ == '__main__':
     adder   = rospy.Subscriber("/car1/waypoint", PoseStamped, add, (track))
 
     rospy.spin()
+
+
+
+
+if __name__ == '__main__':
+    main()
+    
 
     
    

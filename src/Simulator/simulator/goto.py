@@ -1,13 +1,6 @@
-import argparse
-import _thread
-from util import parse_goal_pose
-import importlib
-import rospy
-import threading
-import time
-import os
-import multiprocessing
-import signal
+import argparse, _thread, importlib, rospy, threading, time, os, multiprocessing
+from util import parse_goal_pose 
+
 
 
 def main(num_drones, num_cars):

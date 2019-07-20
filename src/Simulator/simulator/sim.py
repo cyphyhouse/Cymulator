@@ -53,4 +53,5 @@ if __name__ == '__main__':
     if not init_loc:
         init_loc = []
 
+    print(init_loc)
     main(num_drones, num_cars, init_loc)
