@@ -1,10 +1,10 @@
 #!/bin/bash
 
 cd ~
-sudo apt install -y  python3-pip
 
 if [ ! "$(rosversion -d)" ]; then
     # Setup your sources.list
+    # TODO Use `add-apt-repository` instead
     sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
 
     # Set up your keys
@@ -28,21 +28,26 @@ source ~/.bashrc
 # Install Gazebo
 if [ ! -x "$(command -v gazebo)" ]; then
     curl -sSL http://get.gazebosim.org | sh
-    echo "export SVGA_VGPU10=0" >> ~/.bashrc
+    echo "export SVGA_VGPU10=0" >> ~/.bashrc  # For running Gazebo in virtual machine
     source ~/.bashrc
 fi
 
-pip3 install catkin_pkg
-pip3 install numpy
-pip3 install empy
-pip3 install pathlib
-sudo apt-get install -y ros-kinetic-geographic-msgs
-sudo apt-get install -y ros-kinetic-ros-control ros-kinetic-ros-controllers
-sudo apt-get install -y ros-kinetic-ackermann-msgs
-sudo apt-get install -y python3-yaml
-sudo apt-get install -y python3-catkin-pkg-modules
-sudo apt-get install -y python3-rospkg-modules
-sudo apt-get install -y ros-kinetic-tf2-bullet
+# Other ROS packages
+
+sudo apt install -y \
+    ros-kinetic-ackermann-msgs ros-kinetic-geographic-msgs \
+    ros-kinetic-ros-control ros-kinetic-ros-controllers \
+    ros-kinetic-tf2-bullet
+
+
+# Python Packages
+sudo apt install -y python3 python3-pip
+pip3 install --user pip --upgrade
+pip3 install --user \
+    catkin_pkg catkin-pkg-modules rospkg-modules \
+    empy numpy \
+    pathlib pyyaml
+
 
 #-------------------------------------------------------------------------
 # Download the catkin workspace
@@ -53,24 +58,26 @@ unzip catkin_ws3.zip
 # Prepare dependencies for catkin_make
 # sudo chown $USER -R catkin_ws3
 cd ~/catkin_ws3
+# FIXME Rebuild the zip file with the following string replaced
 find ./ -type f -exec sed -i -e "s/mjiang24/$USER/g" {} \;
 
 
 # Environment setup
 echo "source ~/catkin_ws3/devel/setup.bash" >> ~/.bashrc
-echo "export SVGA_VGPU10=0" >> ~/.bashrc
+echo "export SVGA_VGPU10=0" >> ~/.bashrc  # TODO Duplication. Why?
 source ~/.bashrc
 
 
 echo "------------------------ dependency installation finished -----------------------------"
+# FIXME Can we just add a compiler option or create a local toplevel.cmake in our repo and override?
+# Why touch the system file?
 perl -plne 'print "set(CMAKE_CXX_FLAGS \"\$\{CMAKE_CXX_FLAGS\} -std=c++14\")" if(/set\(CATKIN_TOPLEVEL TRUE\)/);' /opt/ros/kinetic/share/catkin/cmake/toplevel.cmake > toplevel.cmake
 sudo rm /opt/ros/kinetic/share/catkin/cmake/toplevel.cmake
 sudo mv toplevel.cmake /opt/ros/kinetic/share/catkin/cmake/
 
 
-
-
 #build car mpc
+# TODO Why not apt install coinor-libipopt-dev or ROS ros-kinetic-ifopt
 wget https://www.coin-or.org/download/source/Ipopt/Ipopt-3.12.13.zip -P ~/
 cd ~/
 unzip Ipopt-3.12.13.zip
@@ -81,3 +88,5 @@ sudo apt install cppad
 echo "export LD_LIBRARY_PATH=/usr/local/lib/:${LD_LIBRARY_PATH}" >> ~/.bashrc
 cd ~/catkin_ws3
 catkin_make
+
+# TODO Move all `source` commands to one place
