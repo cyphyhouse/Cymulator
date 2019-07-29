@@ -69,13 +69,6 @@ source ~/.bashrc
 
 
 echo "------------------------ dependency installation finished -----------------------------"
-# FIXME Can we just add a compiler option or create a local toplevel.cmake in our repo and override?
-# Why touch the system file?
-perl -plne 'print "set(CMAKE_CXX_FLAGS \"\$\{CMAKE_CXX_FLAGS\} -std=c++14\")" if(/set\(CATKIN_TOPLEVEL TRUE\)/);' /opt/ros/kinetic/share/catkin/cmake/toplevel.cmake > toplevel.cmake
-sudo rm /opt/ros/kinetic/share/catkin/cmake/toplevel.cmake
-sudo mv toplevel.cmake /opt/ros/kinetic/share/catkin/cmake/
-
-
 #build car mpc
 # TODO Why not apt install coinor-libipopt-dev or ROS ros-kinetic-ifopt
 wget https://www.coin-or.org/download/source/Ipopt/Ipopt-3.12.13.zip -P ~/
@@ -87,6 +80,7 @@ sudo bash install_ipopt.sh $HOME/Ipopt-3.12.13/
 sudo apt install cppad
 echo "export LD_LIBRARY_PATH=/usr/local/lib/:${LD_LIBRARY_PATH}" >> ~/.bashrc
 cd ~/catkin_ws3
-catkin_make
+
+catkin_make --cmake-args -DCMAKE_CXX_STANDARD=14  # Compile with c++14
 
 # TODO Move all `source` commands to one place
