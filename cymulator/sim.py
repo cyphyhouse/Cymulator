@@ -1,7 +1,8 @@
-import sys, os, argparse, multiprocessing
-from util import parse_init_pose, sim_launch
 import argparse
+import os
+import sys
 
+from cymulator import util
 
 
 def main(num_drones, num_cars, init_loc):
@@ -14,14 +15,14 @@ def main(num_drones, num_cars, init_loc):
     '''
 
     loc = {
-        'drone': parse_init_pose(num_drones, init_loc[:num_drones]),
-        'car': parse_init_pose(num_cars, init_loc[num_drones:num_drones+num_cars])
+        'drone': util.parse_init_pose(num_drones, init_loc[:num_drones]),
+        'car': util.parse_init_pose(num_cars, init_loc[num_drones:num_drones+num_cars])
     }
 
     models = {'drone': num_drones, 'car': num_cars}
 
     print("Generate Models")
-    proc = sim_launch(models, loc)
+    proc = util.launch(models, loc)
 
     # Infinite loop like ros spin
     while True:
@@ -36,10 +37,12 @@ def main(num_drones, num_cars, init_loc):
 
 
 if __name__ == '__main__':
-    # python3 sim.py NUM_OF_DRONES NUM_OF_CARS INIT_POSITIONS
+    # python3 -m cymulator.sim NUM_OF_DRONES NUM_OF_CARS INIT_POSITIONS
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--car", help="Number of cars to be generated", type=int)
     parser.add_argument("-d", "--drone", help="Number of drones to be generated", type=int)
+    # TODO parse to coordinate like type directly
+    # E.g., https://stackoverflow.com/questions/9978880/python-argument-parser-list-of-list-or-tuple-of-tuples
     parser.add_argument("-I", "--initial", nargs="+", help="Initial locations of the models")
 
     args = parser.parse_args()

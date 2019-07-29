@@ -138,18 +138,3 @@ def car_controller_launch_file_generator(num_car):
     f.write(content)
     f.close()
 
-def sim_launch(models, loc):
-    '''
-    This function calls launch method to create launch file and use roslaunch to initiate simulator
-    :param models: A dictionary that contains number of drones and number cars
-    :param loc: Initial location of models
-    :return: The initiated Gazebo-ROS process
-    '''
-    # import launch
-    ros_proc = launch(models, loc)
-    print("============= Simulator starts successful ================")
-    # time.sleep(max(num * 6, 10))
-    return ros_proc
-    
-if __name__ == '__main__':
-    pass
