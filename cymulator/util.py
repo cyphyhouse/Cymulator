@@ -1,8 +1,9 @@
-import random, sys, os, _thread, subprocess
+import random
+import subprocess
 import xml.etree.ElementTree as ET
 from pathlib import Path
- 
-# -------------------------------------------------------------------------------------------------------------------
+
+
 def parse_init_pose(num, poses):
     '''
     This function parses the initial positions of models; if argument 'poses' is an empty list,
@@ -41,100 +42,82 @@ def parse_goal_pose(num, poses, model):
         goal_poses.append(tuple(pose))
     if len(poses) < num:
         for _ in range(num - len(poses)):
-            if model == 'car': pose = (random.uniform(-20, 20), random.uniform(-20, 20), 0)
-            elif model == 'drone': pose = (random.uniform(-20, 20), random.uniform(-20, 20), random.uniform(1, 10))
+            if model == 'car':
+                pose = (random.uniform(-20, 20), random.uniform(-20, 20), 0)
+            elif model == 'drone':
+                pose = (random.uniform(-20, 20), random.uniform(-20, 20), random.uniform(1, 10))
+            else:
+                raise ValueError("Unknown model: " + model)
             goal_poses.append(pose)
     return goal_poses
 
 
-# -------------------------------------------------------------------------------------------------------------------
-
-
 def launch(models, loc):
-    '''
+    """
     This script creates a XML like .launch file inside catkin_ws3, and it will be launched
     :param loc: dictionary of initial locations of cars and drones
     :param models: a dictionary indicating number of cars and drones
     :return:
-    '''
-    modelPath = str(Path.home()) + "/catkin_ws3/src/cyphyhouse/launch/cyphyhouse.launch"
-    tree = ET.parse(modelPath)
-    root = tree.getroot()
-    root.clear()
-
+    """
+    root = ET.Element(tag='launch')
     # include world file
-    attrib = {'file': '$(find gazebo_ros)/launch/empty_world.launch'}
-    include = ET.SubElement(root, 'include', attrib)
-    attrib = {'name': 'world_name', 'value': '$(find cyphyhouse)/worlds/cyphyhouse.world'}
-    arg = ET.SubElement(include, 'arg', attrib)
+    include = ET.SubElement(
+        parent=root, tag='include',
+        attrib={'file': '$(find gazebo_ros)/launch/empty_world.launch'})
+    arg = ET.SubElement(
+        parent=include, tag='arg',
+        attrib={'name': 'world_name', 'value': '$(find cyphyhouse)/worlds/cyphyhouse.world'})
 
     # add drones
     for i in range(models['drone']):
+        id_str = "drone" + str(i+1)
+        group = ET.SubElement(
+            parent=root, tag='group',
+            attrib={'ns': id_str})
+        include = ET.SubElement(
+            parent=group, tag='include',
+            attrib={'file': '$(find hector_quadrotor_gazebo)/launch/spawn_quadrotor.launch'})
+        ET.SubElement(
+            parent=include, tag='arg',
+            attrib={'name': 'name', 'value': id_str})
+        ET.SubElement(
+            parent=include, tag='arg',
+            attrib={'name': 'model',
+                    'value': '$(find hector_quadrotor_description)/urdf/quadrotor_hokuyo_utm30lx.gazebo.xacro'})
+        ET.SubElement(
+            parent=include, tag='arg',
+            attrib={'name': 'controllers', 'value': 'controller/attitude controller/velocity controller/position'})
+
         x, y, z = loc['drone'][i]
-        attrib = {'ns': 'drone'+str(i+1)}
-        group = ET.SubElement(root, 'group', attrib)
-        attrib = {'file': '$(find hector_quadrotor_gazebo)/launch/spawn_quadrotor.launch'}
-        include = ET.SubElement(group, 'include', attrib)
-        attrib = {'name': 'name', 'value': 'drone'+str(i+1)}
-        arg = ET.SubElement(include, 'arg', attrib)
-        attrib = {'name': 'model', 'value': '$(find hector_quadrotor_description)/urdf/quadrotor_hokuyo_utm30lx.gazebo.xacro'}
-        arg = ET.SubElement(include, 'arg', attrib)
-        attrib = {'name': 'controllers', 'value': 'controller/attitude controller/velocity controller/position'}
-        arg = ET.SubElement(include, 'arg', attrib)
-        attrib = {'name': 'x', 'value': str(x)}
-        arg = ET.SubElement(include, 'arg', attrib)
-        attrib = {'name': 'y', 'value': str(y)}
-        arg = ET.SubElement(include, 'arg', attrib)
-        attrib = {'name': 'z', 'value': str(z)}
-        arg = ET.SubElement(include, 'arg', attrib)
+        ET.SubElement(parent=include, tag='arg', attrib={'name': 'x', 'value': str(x)})
+        ET.SubElement(parent=include, tag='arg', attrib={'name': 'y', 'value': str(y)})
+        ET.SubElement(parent=include, tag='arg', attrib={'name': 'z', 'value': str(z)})
 
     for i in range(models['car']):
+        id_str = "car" + str(i + 1)
+        group = ET.SubElement(parent=root, tag='group', attrib={'ns': id_str})
+        include = ET.SubElement(parent=group, tag='include', attrib={'file': '$(find f1tenth)/launch/car.launch'})
+        ET.SubElement(parent=include, tag='arg', attrib={'name': 'name', 'value': id_str})
+
         x, y, z = loc['car'][i]
-        attrib = {'ns': 'car' + str(i + 1)}
-        group = ET.SubElement(root, 'group', attrib)
-        attrib = {'file': '$(find f1tenth)/launch/car.launch'}
-        include = ET.SubElement(group, 'include', attrib)
-        attrib = {'name': 'name', 'value': 'car' + str(i + 1)}
-        arg = ET.SubElement(include, 'arg', attrib)
-        attrib = {'name': 'x', 'value': str(x)}
-        arg = ET.SubElement(include, 'arg', attrib)
-        attrib = {'name': 'y', 'value': str(y)}
-        arg = ET.SubElement(include, 'arg', attrib)
-        attrib = {'name': 'z', 'value': str(z)}
-        arg = ET.SubElement(include, 'arg', attrib)
+        ET.SubElement(parent=include, tag='arg', attrib={'name': 'x', 'value': str(x)})
+        ET.SubElement(parent=include, tag='arg', attrib={'name': 'y', 'value': str(y)})
+        ET.SubElement(parent=include, tag='arg', attrib={'name': 'z', 'value': str(z)})
 
-        attrib = {'file': '$(find f1tenth)/launch/car_control.launch'}
-        include = ET.SubElement(root, 'include', attrib)
-        attrib = {'name': 'name', 'value': 'car' + str(i + 1)}
-        arg = ET.SubElement(include, 'arg', attrib)
-        
+        include = ET.SubElement(
+            parent=root, tag='include',
+            attrib={'file': '$(find f1tenth)/launch/car_control.launch'})
+        ET.SubElement(include, tag='arg', attrib={'name': 'name', 'value': id_str})
 
-    car_controller_launch_file_generator(models['car'])
-    attrib = {'file': '$(find cyphy_car_mpc)/launch/wp.launch'}
-    include = ET.SubElement(root, 'include', attrib)
-    
+        include = ET.SubElement(
+            parent=root, tag='include',
+            attrib={'file': '$(find cyphy_car_mpc)/launch/mpc_controller.launch'})
+        ET.SubElement(include, tag='arg', attrib={'name': 'name', 'value': id_str})
 
-
-    tree.write(modelPath)
+    tree = ET.ElementTree(root)
+    model_path = str(Path.home()) + "/catkin_ws3/src/cyphyhouse/launch/cyphyhouse.launch"
+    tree.write(model_path)
     print("roslaunch")
-    # os.system("roslaunch drone drone.launch")
-    # _thread.start_new_thread(os.system, ("roslaunch drone drone.launch",))
     proc = subprocess.Popen(['roslaunch', 'cyphyhouse', 'cyphyhouse.launch'])
 
     return proc
-
-def car_controller_launch_file_generator(num_car):
-    content = '''
-    <!-- -*- mode: XML -*- -->
-    <launch>
-    '''
-    for i in range(num_car):
-        content += "\t<node name=\"car"+ str(i+1) +"\" pkg=\"cyphy_car_mpc\" type=\"mpc_wp_node\" output=\"screen\" > </node>\n"
-
-    content += "</launch>"
-
-    path = str(Path.home()) + "/catkin_ws3/src/cyphy_car_mpc/launch/wp.launch"
-    f = open(path, "w")
-    f.write(content)
-    f.close()
-
