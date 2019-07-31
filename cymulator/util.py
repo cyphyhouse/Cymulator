@@ -69,48 +69,31 @@ def gen_launch_element_tree(models, loc) -> ET.ElementTree:
     # add drones
     for i in range(models['drone']):
         id_str = "drone" + str(i+1)
-        group = ET.SubElement(
-            root, 'group',
-            attrib={'ns': id_str})
         include = ET.SubElement(
-            group, 'include',
-            attrib={'file': '$(find hector_quadrotor_gazebo)/launch/spawn_quadrotor.launch'})
+            root, 'include',
+            attrib={'file': '$(find cym_device)/launch/cym_drone.launch'})
         ET.SubElement(
             include, 'arg',
             attrib={'name': 'name', 'value': id_str})
-        ET.SubElement(
-            include, 'arg',
-            attrib={'name': 'model',
-                    'value': '$(find hector_quadrotor_description)/urdf/quadrotor_hokuyo_utm30lx.gazebo.xacro'})
-        ET.SubElement(
-            include, 'arg',
-            attrib={'name': 'controllers', 'value': 'controller/attitude controller/velocity controller/position'})
-
         x, y, z = loc['drone'][i]
         ET.SubElement(include, 'arg', attrib={'name': 'x', 'value': str(x)})
         ET.SubElement(include, 'arg', attrib={'name': 'y', 'value': str(y)})
         ET.SubElement(include, 'arg', attrib={'name': 'z', 'value': str(z)})
-
+    # add cars
+    # TODO Merge for loops for drone and car to remove duplicate code?
     for i in range(models['car']):
         id_str = "car" + str(i + 1)
-        group = ET.SubElement(root, 'group', attrib={'ns': id_str})
-        include = ET.SubElement(group, 'include', attrib={'file': '$(find f1tenth)/launch/car.launch'})
-        ET.SubElement(include, 'arg', attrib={'name': 'name', 'value': id_str})
-
+        include = ET.SubElement(
+            root, 'include',
+            attrib={'file': '$(find cym_device)/launch/cym_car.launch'})
+        ET.SubElement(
+            include, 'arg',
+            attrib={'name': 'name', 'value': id_str})
         x, y, z = loc['car'][i]
         ET.SubElement(include, 'arg', attrib={'name': 'x', 'value': str(x)})
         ET.SubElement(include, 'arg', attrib={'name': 'y', 'value': str(y)})
         ET.SubElement(include, 'arg', attrib={'name': 'z', 'value': str(z)})
 
-        include = ET.SubElement(
-            root, 'include',
-            attrib={'file': '$(find f1tenth)/launch/car_control.launch'})
-        ET.SubElement(include, 'arg', attrib={'name': 'name', 'value': id_str})
-
-        include = ET.SubElement(
-            root, 'include',
-            attrib={'file': '$(find cyphy_car_mpc)/launch/waypoint_node.launch'})
-        ET.SubElement(include, 'arg', attrib={'name': 'name', 'value': id_str})
 
     return ET.ElementTree(root)
 

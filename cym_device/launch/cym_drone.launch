@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name= "name" doc="Namespace for this simulated drone" />
+  <arg name= "x" default="0.0" />
+  <arg name= "y" default="0.0" />
+  <arg name= "z" default="0.3" />
+  <group ns="$(arg name)">
+    <include file="$(find hector_quadrotor_gazebo)/launch/spawn_quadrotor.launch">
+      <arg name="name" value="$(arg name)" />
+      <arg name="model" value="$(find hector_quadrotor_description)/urdf/quadrotor_hokuyo_utm30lx.gazebo.xacro" />
+      <arg name="controllers" value="controller/attitude controller/velocity controller/position" />
+      <arg name="x" value="$(arg x)" />
+      <arg name="y" value="$(arg y)" />
+      <arg name="z" value="$(arg z)" />
+    </include>
+  </group>
+</launch>
