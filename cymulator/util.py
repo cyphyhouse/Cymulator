@@ -1,7 +1,5 @@
 import random
-import subprocess
 import xml.etree.ElementTree as ET
-from pathlib import Path
 
 
 def parse_init_pose(num, poses):
@@ -52,12 +50,12 @@ def parse_goal_pose(num, poses, model):
     return goal_poses
 
 
-def launch(models, loc):
+def gen_launch_element_tree(models, loc) -> ET.ElementTree:
     """
     This script creates a XML like .launch file inside catkin_ws3, and it will be launched
     :param loc: dictionary of initial locations of cars and drones
     :param models: a dictionary indicating number of cars and drones
-    :return:
+    :return: an ElementTree representing desired XML for launch config
     """
     root = ET.Element('launch')
     # include world file
@@ -114,10 +112,5 @@ def launch(models, loc):
             attrib={'file': '$(find cyphy_car_mpc)/launch/waypoint_node.launch'})
         ET.SubElement(include, 'arg', attrib={'name': 'name', 'value': id_str})
 
-    tree = ET.ElementTree(root)
-    model_path = str(Path.home()) + "/catkin_ws3/src/cyphyhouse/launch/cyphyhouse.launch"
-    tree.write(model_path)
-    print("roslaunch")
-    proc = subprocess.Popen(['roslaunch', 'cyphyhouse', 'cyphyhouse.launch'])
+    return ET.ElementTree(root)
 
-    return proc
