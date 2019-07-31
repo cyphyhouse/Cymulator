@@ -1,5 +1,7 @@
 import argparse
 import os
+from pathlib import Path
+import subprocess
 import sys
 
 from cymulator import util
@@ -22,7 +24,11 @@ def main(num_drones, num_cars, init_loc):
     models = {'drone': num_drones, 'car': num_cars}
 
     print("Generate Models")
-    proc = util.launch(models, loc)
+    tree = util.gen_launch_element_tree(models, loc)
+    model_path = str(Path.home()) + "/catkin_ws3/src/cyphyhouse/launch/cyphyhouse.launch"
+    tree.write(model_path)
+    print("roslaunch")
+    proc = subprocess.Popen(['roslaunch', 'cyphyhouse', 'cyphyhouse.launch'])
 
     # Infinite loop like ros spin
     while True:
