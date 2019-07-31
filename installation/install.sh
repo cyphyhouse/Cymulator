@@ -49,16 +49,17 @@ pip3 install --user \
 echo "Please find Chiao to get an updated zip file with catkin workspace for now"
 exit 0
 
-# Environment setup
+echo "------------------------ dependency installation finished -----------------------------"
+
+
+# Compile all ROS packages
+cd ~/catkin_ws3
+source /opt/ros/kinetic/setup.bash
+catkin_make --cmake-args -DPYTHON_VERSION=3.5 -DCMAKE_CXX_STANDARD=14  # Build with Python>=3.5 and c++14
+
+
+# Development Environment setup
 echo "source /opt/ros/kinetic/setup.bash" >> ~/.bashrc
 echo "source ~/catkin_ws3/devel/setup.bash" >> ~/.bashrc
 echo "export SVGA_VGPU10=0" >> ~/.bashrc  # For running Gazebo in virtual machine
 source ~/.bashrc
-
-
-echo "------------------------ dependency installation finished -----------------------------"
-
-# Compile all ROS packages
-cd ~/catkin_ws3
-catkin_make --cmake-args -DCMAKE_CXX_STANDARD=14  # Compile with c++14
-
