@@ -126,6 +126,14 @@ def main(argv) -> None:
     except rospy.ServiceException as e:
         rospy.loginfo("Service call failed with %s", e)
 
+    def shutdown() -> None:  # TODO Better place for this code
+        """Stop the drone when this ROS node shuts down"""
+        pub_cmd_vel.publish(Twist())  # Default Twist will stop the drone
+        # TODO Safe landing
+        rospy.loginfo("Stop the drone")
+
+    rospy.on_shutdown(shutdown)
+
     rate = rospy.Rate(10)  # 10 hz TODO Pass sleep rate as a parameter?
     while not rospy.is_shutdown():
         # Simple controller code for drones # TODO Need better controller
@@ -135,13 +143,13 @@ def main(argv) -> None:
         if ds.is_reached():
             ds.set_next_waypoint()
 
-        try:
-            rate.sleep()
-        except rospy.exceptions.ROSInterruptException:
-            rospy.loginfo("Shutting down CymVRPN")
-            break
+        rate.sleep()
 
 
 if __name__ == "__main__":
     import sys
-    main(sys.argv)
+
+    try:
+        main(rospy.myargv(argv=sys.argv))
+    except rospy.exceptions.ROSInterruptException:
+        rospy.loginfo("Shutting down CymWaypointDriveDrone")
