@@ -13,9 +13,14 @@ from std_msgs.msg import String
 
 
 class __DroneStates:
-    def __init__(self, init_pose, init_twist):
+    def __init__(self,
+                 init_pose: PoseStamped,
+                 init_twist: TwistStamped,
+                 init_waypoint: PoseStamped):
         assert init_pose
         assert init_twist
+        assert init_waypoint
+        self._curr_waypoint = init_waypoint
         self._waypoints = Queue()  # Thread safe Queue is required because pub and sub can be in different threads
         self._pose = init_pose
         self._twist = init_twist
@@ -44,25 +49,26 @@ class __DroneStates:
         """
         self._twist = deepcopy(msg)  # In case `msg` is overwritten
 
-    def pub_values(self) -> Tuple[str, Twist]:
-        if not self._waypoints:  # No waypoint to go
-            return "True", Twist()
-        # else
-        # TODO figure out how not to store current waypoint
-        curr_waypoint = self._waypoints.get()
-        goal = curr_waypoint.pose.position
+    def is_reached(self) -> bool:
+        goal = self._curr_waypoint.pose.position
         curr = self._pose.pose.position
 
         # FIXME pass a function to decide whether the waypoint is reached?
-        dist_2 = (goal.x - curr.x)**2 + \
-                 (goal.y - curr.y)**2 + \
-                 (goal.z - curr.z)**2
-        return dist_2 < (0.25**2)  # sqrt(dist_2) < 0.25
+        dist_2 = (goal.x - curr.x) ** 2 + \
+                 (goal.y - curr.y) ** 2 + \
+                 (goal.z - curr.z) ** 2
+        return dist_2 < (0.25 ** 2)  # sqrt(dist_2) < 0.25
 
-    def _cmd_vel(self) -> Twist:
-        if self._is_reached():  # Already reached
-            return Twist()  # Default is 0 for every field
-        goal = self._waypoints[0].pose.position
+    def set_next_waypoint(self):
+        if not self._waypoints.empty():
+            self._curr_waypoint = self._waypoints.get()
+        # else: _curr_waypoint remains so is_reached should be true
+
+    def cmd_vel(self) -> Twist:
+        if self.is_reached():
+            return Twist()  # Stop movement
+        # else:
+        goal = self._curr_waypoint.pose.position
         curr = self._pose.pose.position
 
         # FIXME pass a function to calculate velocity?
@@ -93,15 +99,17 @@ def main(argv) -> None:
     # Wait for positioning system to start
     pose_topic_name = "/vrpn_client_node/" + tracker_id + "/pose"
     twist_topic_name = "/vrpn_client_node/" + tracker_id + "/twist"
+    waypoint_topc_name = "~waypoint"
     init_pose = rospy.wait_for_message(pose_topic_name, PoseStamped)
     init_twist = rospy.wait_for_message(twist_topic_name, TwistStamped)
+    init_waypoint = rospy.wait_for_message(waypoint_topc_name, PoseStamped)
 
-    ds = __DroneStates(init_pose, init_twist)
+    ds = __DroneStates(init_pose, init_twist, init_waypoint)
     # For positioning
-    sub_pose = rospy.Subscriber(pose_topic_name, PoseStamped, ds.store_pose)
-    sub_twist = rospy.Subscriber(twist_topic_name, TwistStamped, ds.store_twist)
+    _ = rospy.Subscriber(pose_topic_name, PoseStamped, ds.store_pose)
+    _ = rospy.Subscriber(twist_topic_name, TwistStamped, ds.store_twist)
     # For middleware
-    sub_waypoint = rospy.Subscriber("~waypoint", PoseStamped, ds.store_waypoint)
+    _ = rospy.Subscriber(waypoint_topc_name, PoseStamped, ds.store_waypoint)
     pub_reached = rospy.Publisher("~reached", String, queue_size=1)  # FIXME how to decide queue_size
     # For driving the simulated drone
     pub_cmd_vel = rospy.Publisher("cmd_vel", Twist, queue_size=10)  # FIXME how to decide queue_size
@@ -122,9 +130,10 @@ def main(argv) -> None:
     while not rospy.is_shutdown():
         # Simple controller code for drones # TODO Need better controller
 
-        is_reached_str, cmd_vel = ds.pub_values()
-        pub_reached.publish(is_reached_str)
-        pub_cmd_vel.publish(cmd_vel)
+        pub_reached.publish(str(ds.is_reached()))
+        pub_cmd_vel.publish(ds.cmd_vel())
+        if ds.is_reached():
+            ds.set_next_waypoint()
 
         try:
             rate.sleep()
