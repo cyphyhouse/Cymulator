@@ -25,6 +25,7 @@ def get_position(model_name: str) -> Optional[Tuple[PoseStamped, TwistStamped]]:
     rospy.wait_for_service(service_name)
     get_model_state = rospy.ServiceProxy(service_name, GetModelState)
 
+    # TODO Handle service exception. E.g., Gazebo may be shutdown before this node so no service.
     model_state = get_model_state(model_name, "world")
     if not model_state.success:
         return None
@@ -48,7 +49,7 @@ def main(argv: List[str]) -> None:
     :param argv:
     """
     # TODO Read from parameter server instead
-    tracker_list = [arg for arg in argv[1:] if ":" not in arg]
+    tracker_list = argv[1:]
     rospy.init_node('vrpn_client_node')
     # Queue size is 1 since old positions are not needed
     pub = {}
@@ -73,13 +74,13 @@ def main(argv: List[str]) -> None:
                 pose, twist = position
                 pub[tracker_id].pose.publish(pose)
                 pub[tracker_id].twist.publish(twist)
-        try:
             rate.sleep()
-        except rospy.exceptions.ROSInterruptException:
-            rospy.loginfo("Shutting down CymVRPN")
-            break
 
 
 if __name__ == "__main__":
     import sys
-    main(sys.argv)
+
+    try:
+        main(rospy.myargv(argv=sys.argv))
+    except rospy.exceptions.ROSInterruptException:
+        rospy.loginfo("Shutting down CymVRPN")
