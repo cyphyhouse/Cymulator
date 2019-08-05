@@ -3,6 +3,7 @@
 """ROS node to drive a drone following given waypoints"""
 
 from copy import deepcopy
+from math import copysign
 from queue import Queue
 from typing import Tuple
 
@@ -73,11 +74,8 @@ class __DroneStates:
 
         # FIXME pass a function to calculate velocity?
         def cal_vel(diff: float) -> float:
-            if abs(diff) > 0.5:
-                ret = 0.5 if diff > 0.0 else -0.5
-            else:
-                ret = 0.05 if diff > 0.0 else -0.05
-            return ret
+            magnitude = max(abs(diff), 0.5)
+            return copysign(magnitude, diff)
 
         move_cmd = Twist()
         move_cmd.linear.x = cal_vel(goal.x - curr.x)
