@@ -62,19 +62,25 @@ def gen_launch_element_tree(models, loc) -> ET.ElementTree:
     include = ET.SubElement(
         root, 'include',
         attrib={'file': '$(find gazebo_ros)/launch/empty_world.launch'})
-    arg = ET.SubElement(
+    ET.SubElement(
         include, 'arg',
         attrib={'name': 'world_name', 'value': '$(find cyphyhouse)/worlds/cyphyhouse.world'})
+
+    id_str_list = []
 
     # add drones
     for i in range(models['drone']):
         id_str = "drone" + str(i+1)
+        id_str_list.append(id_str)
         include = ET.SubElement(
             root, 'include',
             attrib={'file': '$(find cym_device)/launch/cym_drone.launch'})
         ET.SubElement(
             include, 'arg',
             attrib={'name': 'name', 'value': id_str})
+        ET.SubElement(
+            include, 'arg',
+            attrib={'name': 'pos_tracker', 'value': id_str})  # FIXME distinguish pos_tracker with id_str
         x, y, z = loc['drone'][i]
         ET.SubElement(include, 'arg', attrib={'name': 'x', 'value': str(x)})
         ET.SubElement(include, 'arg', attrib={'name': 'y', 'value': str(y)})
@@ -83,17 +89,29 @@ def gen_launch_element_tree(models, loc) -> ET.ElementTree:
     # TODO Merge for loops for drone and car to remove duplicate code?
     for i in range(models['car']):
         id_str = "car" + str(i + 1)
+        id_str_list.append(id_str)
         include = ET.SubElement(
             root, 'include',
             attrib={'file': '$(find cym_device)/launch/cym_car.launch'})
         ET.SubElement(
             include, 'arg',
             attrib={'name': 'name', 'value': id_str})
+        ET.SubElement(
+            include, 'arg',
+            attrib={'name': 'pos_tracker', 'value': id_str})  # FIXME distinguish pos_tracker with id_str
         x, y, z = loc['car'][i]
         ET.SubElement(include, 'arg', attrib={'name': 'x', 'value': str(x)})
         ET.SubElement(include, 'arg', attrib={'name': 'y', 'value': str(y)})
         ET.SubElement(include, 'arg', attrib={'name': 'z', 'value': str(z)})
 
+    # add VRPN
+    ET.SubElement(
+        root, 'node',
+        attrib={'name': 'vrpn_client_node',
+                'pkg': 'cym_device',
+                'type':'cym_vrpn.py',
+                'args': ' '.join(id_str_list)}  # FIXME Pass pos_trackers as ROS param
+    )
 
     return ET.ElementTree(root)
 
