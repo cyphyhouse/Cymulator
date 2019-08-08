@@ -68,7 +68,7 @@ def gen_launch_element_tree(device_list: List[DeviceInitInfo]) -> ET.ElementTree
     return ET.ElementTree(root)
 
 
-class MyROSLaunch(roslaunch.scriptapi.ROSLaunch):
+class _MyROSLaunch(roslaunch.scriptapi.ROSLaunch):
     def __init__(self, launch_xml: ET.ElementTree):
         """
         Create a ROSLaunch instance from a given ElementTree.
@@ -85,3 +85,8 @@ class MyROSLaunch(roslaunch.scriptapi.ROSLaunch):
             is_core=True,  # is_core=True: throw error if ROS master is already running in background
             roslaunch_strs=launch_strs)
         self.started = False
+
+
+def create_roslaunch_instance(device_list: List[DeviceInitInfo]) -> roslaunch.scriptapi.ROSLaunch:
+    xml = gen_launch_element_tree(device_list)
+    return _MyROSLaunch(xml)
