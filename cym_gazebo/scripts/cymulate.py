@@ -2,7 +2,7 @@
 
 from geometry_msgs.msg import Point
 
-from cym_gazebo import DeviceInitInfo, gen_launch_element_tree, MyROSLaunch
+from cym_gazebo import DeviceInitInfo, create_roslaunch_instance
 
 devices = [
     DeviceInitInfo("hotdec_car", "CAR", Point(1, 1, 0.3)),
@@ -10,8 +10,7 @@ devices = [
     DeviceInitInfo("f1car", "CAR", Point(3, 3, 0.3)),
 ]
 
-xml = gen_launch_element_tree(devices)
-launch = MyROSLaunch(xml)
+launch = create_roslaunch_instance(devices)
 try:
     launch.start()
     launch.spin()
