@@ -23,8 +23,10 @@
             cyphy_car_mpc has to support /ackermann_cmd in C++ code for deploying to a device.
             We remap it back for distinct topic names in simulation.
          -->
-        <!-- TODO We can map to different navigation topics for different priorities -->
-        <remap from="/ackermann_cmd" to="vesc/high_level/ackermann_cmd_mux/input/nav_0" />
+        <!-- TODO We can map to different navigation topics for different priorities.
+              Right now we skip the mux and directly output to the topic subscribed by servo_command
+         -->
+        <remap from="/ackermann_cmd" to="vesc/low_level/ackermann_cmd_mux/output" />
     </node>
   </group>
 </launch>
