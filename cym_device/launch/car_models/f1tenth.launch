@@ -8,7 +8,6 @@
 
   <!-- REGION Code modified from $(find racecar_gazebo)/launch/racecar.launch -->
   <!-- Define arguments for launch file -->
-  <arg name="gui" default="true" />
   <arg name="run_camera" default="false"/>
   <arg name="name" doc="Unique namespace for spawning this car"/>
 
