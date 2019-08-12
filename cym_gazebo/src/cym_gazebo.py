@@ -29,6 +29,12 @@ def gen_launch_element_tree(device_list: List[DeviceInitInfo]) -> ET.ElementTree
     include = ET.SubElement(
         root, 'include',
         attrib={'file': '$(find gazebo_ros)/launch/empty_world.launch'})
+    _ = ET.SubElement(
+        include, 'arg',
+        attrib={'name': 'gui', 'value': 'true'})
+    _ = ET.SubElement(
+        include, 'arg',
+        attrib={'name': 'use_sim_time', 'value': 'true'})
 
     id_str_list = []
 
