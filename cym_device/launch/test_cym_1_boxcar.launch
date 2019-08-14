@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+    <include file="$(find gazebo_ros)/launch/empty_world.launch"/>
+    <param name="boxcar_description"
+        textfile="$(find cym_device)/urdf/boxcar.urdf"/>
+    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+            args="-urdf -model car1 -param boxcar_description"/>
+    <node name="waypoint_node" pkg="cym_device" type="cym_waypoint_driver_boxcar.py" args="car1"/>
+    <node name="vrpn_client_node" pkg="cym_device" type="cym_vrpn.py" args="car1"/>
+</launch>
