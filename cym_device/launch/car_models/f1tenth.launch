@@ -96,7 +96,7 @@
   </group>
 
   <!-- Allow for Gazebo to broadcast odom -->
-  <!-- XXX Skip for now
+  <!-- XXX Skipped because we use VRPN node to broadcast device positions. Also we directly use PoseStamped instead of Odometry
   <node pkg="racecar_gazebo" name="gazebo_odometry_node" type="gazebo_odometry.py"/>
   -->
   <!-- ENDREGION -->
