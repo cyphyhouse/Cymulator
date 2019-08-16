@@ -51,10 +51,21 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>rospy</build_depend>
   <build_export_depend>rospy</build_export_depend>
+  <!-- System dependencies -->
+  <exec_depend>ackermann_msgs</exec_depend>
+  <exec_depend>controller_manager</exec_depend>
+  <exec_depend>gazebo_ros</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>rospy</exec_depend>
+  <exec_depend>rostopic</exec_depend>
+  <exec_depend>topic_tools</exec_depend>
+  <exec_depend>xacro</exec_depend>
+  <!-- Install from source -->
+  <exec_depend>ackermann_cmd_mux</exec_depend>
   <exec_depend>cyphy_car_mpc</exec_depend>
   <exec_depend>hector_quadrotor_description</exec_depend>
   <exec_depend>hector_quadrotor_gazebo</exec_depend>
+  <exec_depend>racecar_control</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
