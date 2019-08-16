@@ -29,7 +29,7 @@ fi
 # Other ROS packages
 
 sudo apt install -y \
-    ros-kinetic-ackermann-msgs ros-kinetic-geographic-msgs \
+    ros-kinetic-ackermann-msgs ros-kinetic-geographic-msgs ros-kinetic-serial \
     ros-kinetic-ros-control ros-kinetic-ros-controllers \
     ros-kinetic-tf2-bullet
 
