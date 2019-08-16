@@ -13,7 +13,8 @@ if [ ! "$(rosversion -d)" ]; then
     ## First, make sure your Debian package index is up-to-date:
     sudo apt-get update
     ## Install ROS Kinetic Desktop Full: ROS, rqt, rviz, robot-generic libraries, 2D/3D simulators, navigation and 2D/3D perception
-    sudo apt-get -y install ros-kinetic-desktop-full
+    # We don't install ros-kinetic-desktop-full because we want to use Gazebo 9
+    sudo apt-get -y install ros-kinetic-desktop
 
     # Initialize rosdep
     sudo rosdep init
@@ -21,9 +22,15 @@ if [ ! "$(rosversion -d)" ]; then
 fi
 
 
-# Install Gazebo
+# Install Gazebo 9
 if [ ! -x "$(command -v gazebo)" ]; then
-    curl -sSL http://get.gazebosim.org | sh
+    # curl -sSL http://get.gazebosim.org | sh
+    sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
+    wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
+    sudo apt-get update
+    sudo apt install -y \
+        ros-kinetic-gazebo9-ros ros-kinetic-gazebo9-ros-control \
+        ros-kinetic-gazebo9-plugins ros-kinetic-gazebo9-ros-pkgs
 fi
 
 # Other ROS packages
