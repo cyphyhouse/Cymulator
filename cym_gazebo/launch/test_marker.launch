@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="use_sim_time" value="true"/>
+    </include>
+    <node name="marker_node" pkg="cym_gazebo" type="cym_marker"/>
+</launch>
