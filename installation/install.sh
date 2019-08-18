@@ -62,7 +62,7 @@ echo "------------------------ dependency installation finished ----------------
 # Compile all ROS packages
 cd ~/catkin_ws3
 source /opt/ros/kinetic/setup.bash
-catkin_make --cmake-args -DPYTHON_VERSION=3.5 -DCMAKE_CXX_STANDARD=14  # Build with Python>=3.5 and c++14
+catkin_make --cmake-args -DPYTHON_VERSION=3.5  # Build with Python>=3.5
 
 
 # Development Environment setup
