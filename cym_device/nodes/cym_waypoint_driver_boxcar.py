@@ -1,29 +1,43 @@
 #!/usr/bin/env python3
 
-"""ROS node to drive a boxcar following given waypoints"""
-
 from copy import deepcopy
 import math
-
+from gazebo_msgs.msg import ModelState
+from gazebo_msgs.srv import GetModelState
+from ackermann_msgs.msg import AckermannDriveStamped
 from geometry_msgs.msg import PoseStamped, Twist, TwistStamped, Quaternion
+from std_msgs.msg import Int32
+from std_msgs.msg import String
+
+
 import rospy
+
+from scipy.spatial.transform import Rotation as R
 from std_msgs.msg import Float64
-from tf.transformations import euler_from_quaternion
+
+
 
 
 class __DeviceState(object):
+
     HALF_CYCLE = 5.0  # sec
     ABS_VEL = 2.0
     ABS_ANG_VEL = 2.0 * math.pi / 10
 
-    def __init__(self,
-                 init_pose: PoseStamped,
-                 init_twist: TwistStamped):
+    def __init__(self, init_pose: PoseStamped, init_twist: TwistStamped, tracker_id: String):
         assert init_pose
         assert init_twist
+
         self._pose = init_pose
         self._twist = init_twist
         self._cycle_begin = rospy.get_time()
+
+        self.state = ModelState()
+
+        self.tracker_id = tracker_id
+
+
+
 
     def store_pose(self, msg: PoseStamped) -> None:
         """
@@ -44,26 +58,35 @@ class __DeviceState(object):
     def is_first_half(self) -> bool:
         return rospy.get_time() < self._cycle_begin + self.HALF_CYCLE
 
-    def cmd_vel(self) -> Twist:
-        if rospy.get_time() >= self._cycle_begin + 2 * self.HALF_CYCLE:
-            # Roughly finished a cycle. Reset
-            self._cycle_begin = rospy.get_time()
 
-        vel = self.ABS_VEL if self.is_first_half() else -self.ABS_VEL
-        ang_vel = self.ABS_ANG_VEL if self.is_first_half() else -self.ABS_ANG_VEL
 
-        theta = euler_from_quaternion(
-            [self._pose.pose.orientation.w,
-             self._pose.pose.orientation.x,
-             self._pose.pose.orientation.y,
-             self._pose.pose.orientation.z,
-             ])
+    def set_state(self, msg: AckermannDriveStamped) -> ModelState:
 
-        cmd = Twist()
-        cmd.linear.x = vel * math.sin(theta[2])
-        cmd.linear.y = vel * math.cos(theta[2])
-        cmd.angular.z = ang_vel
-        return cmd
+        modelInfo = rospy.ServiceProxy('/gazebo/get_model_state',GetModelState)
+        currState = modelInfo(model_name=self.tracker_id)
+        vel = msg.drive.speed
+        steering_angle = msg.drive.steering_angle
+
+
+        quaternion = (currState.pose.orientation.x,
+                      currState.pose.orientation.y,
+                      currState.pose.orientation.z,
+                      currState.pose.orientation.w)
+
+        r = R.from_quat(quaternion)
+        euler = r.as_euler('zyx', degrees=True)
+        #euler2 = euler_from_quaternion(quaternion) #(roll,pitch,yaw)
+
+
+        self.state = ModelState()
+        self.state.model_name = self.tracker_id
+        self.state.twist.linear.x = vel * math.cos(math.radians(euler[0]))
+        self.state.twist.linear.y = vel * math.sin(math.radians(euler[0]))
+        self.state.twist.angular.z = vel * (math.tan(steering_angle)/0.5)
+
+        #rospy.loginfo('[%f, %f, %f, %f]',math.radians(euler[0]), math.radians(euler[1]), math.radians(euler[2]), euler2[0])
+
+
 
 
 def main(argv) -> None:
@@ -74,26 +97,36 @@ def main(argv) -> None:
     :param argv:
     """
     tracker_id = argv[1]  # TODO Read from parameter server instead
+    #tracker_id = 'car1'
 
     rospy.init_node('waypoint_node')
     # Wait for positioning system to start
     # FIXME Read topic names from parameter server
     pose_topic_name = "/vrpn_client_node/" + tracker_id + "/pose"
     twist_topic_name = "/vrpn_client_node/" + tracker_id + "/twist"
+    ackermann_topic_name = "/ackermann_client/" + tracker_id
 
     init_pose = rospy.wait_for_message(pose_topic_name, PoseStamped)
     init_twist = rospy.wait_for_message(twist_topic_name, TwistStamped)
 
-    ds = __DeviceState(init_pose, init_twist)
+    ds = __DeviceState(init_pose, init_twist, tracker_id)
     # For positioning
     _ = rospy.Subscriber(pose_topic_name, PoseStamped, ds.store_pose)
     _ = rospy.Subscriber(twist_topic_name, TwistStamped, ds.store_twist)
+    # For ackermann
+    _ = rospy.Subscriber(ackermann_topic_name, AckermannDriveStamped, ds.set_state)
+
+    modelInfo = rospy.ServiceProxy('/gazebo/get_model_state',GetModelState)
+
+
     # For driving the simulated drone
-    pub_cmd_vel = rospy.Publisher("cmd_vel", Twist, queue_size=10)  # FIXME how to decide queue_size
+    pub_model_state = rospy.Publisher("/gazebo/set_model_state", ModelState, queue_size=10)  # FIXME how to decide queue_size
 
     def shutdown() -> None:  # TODO Better place for this code
         """Stop the drone when this ROS node shuts down"""
-        pub_cmd_vel.publish(Twist())  # Default Twist will stop the drone
+        state = ModelState()
+        state.model_name = 'car1'
+        pub_model_state.publish(state)  # Default Twist will stop the drone
         # TODO Safe landing
         rospy.loginfo("Stop the drone")
 
@@ -101,7 +134,22 @@ def main(argv) -> None:
 
     rate = rospy.Rate(100)  # 100 Hz
     while not rospy.is_shutdown():
-        pub_cmd_vel.publish(ds.cmd_vel())
+        state = modelInfo(model_name=tracker_id)
+
+        newState = ModelState()
+        newState.model_name = tracker_id
+        newState.pose.position.x = state.pose.position.x
+        newState.pose.position.y = state.pose.position.y
+        newState.pose.orientation.x = state.pose.orientation.x
+        newState.pose.orientation.y = state.pose.orientation.y
+        newState.pose.orientation.z = state.pose.orientation.z
+        newState.pose.orientation.w = state.pose.orientation.w
+        newState.twist.linear.x = ds.state.twist.linear.x
+        newState.twist.linear.y = ds.state.twist.linear.y
+        newState.twist.angular.z = ds.state.twist.angular.z
+
+
+        pub_model_state.publish(newState)
         rate.sleep()
 
 
