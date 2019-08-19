@@ -47,7 +47,7 @@ sudo apt install -y cppad coinor-libipopt-dev  # For MPC controller
 sudo apt install -y python3 python3-pip
 pip3 install --user pip --upgrade
 pip3 install --user \
-    catkin_pkg catkin-pkg-modules rospkg-modules \
+    catkin_pkg rospkg \
     empy numpy \
     pathlib pyyaml
 
