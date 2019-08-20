@@ -5,6 +5,7 @@
 <launch>
   <!-- Define constants -->
   <arg name="racecar_version" value="racecar-v2" />
+  <arg name="description_param" value="/robot_description" /> <!-- XXX default used in gazebo_ros_control-->
 
   <!-- REGION Code modified from $(find racecar_gazebo)/launch/racecar.launch -->
   <!-- Define arguments for launch file -->
@@ -16,17 +17,16 @@
   <arg name="z" default="0.05"/>
 
   <!-- urdf xml robot description loaded on the Parameter Server, converting the xacro into a proper urdf file-->
-  <!-- XXX Minghao modified $(find racecar_description)/urdf/racecar.xacro to take "prefix" as an argument. -->
-  <!-- FIXME If possible, we can creat a new racecar.xacro in this repo. -->
-  <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find racecar_description)/urdf/racecar.xacro' prefix:=$(arg name)" />
+  <param name="$(arg description_param)" command="$(find xacro)/xacro --inorder '$(find racecar_description)/urdf/racecar.xacro'" />
 
   <!-- push robot_description to factory and spawn robot in gazebo -->
   <node name="racecar_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="
-          -param robot_description
+          -param $(arg description_param)
           -urdf
           -x $(arg x)
           -y $(arg y)
           -z $(arg z)
+          -robot_namespace $(arg name)/racecar
           -model $(arg name)" respawn="false" />
 
   <!-- XXX Replace <include file="$(find racecar_control)/launch/racecar_control.launch" /> -->
