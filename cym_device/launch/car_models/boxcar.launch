@@ -43,6 +43,6 @@
     <!-- ENDREGION -->
 
     <!-- Our boxcar servo -->
-    <node ns="low_level" name="ackermann_servo_node" pkg="cym_device" type="cym_waypoint_driver_boxcar.py" args="$(arg name)"/>
+    <node ns="low_level" name="ackermann_servo_node" pkg="cym_device" type="cym_ackermann_servo_boxcar.py" args="$(arg name)"/>
   </group>
 </launch>
