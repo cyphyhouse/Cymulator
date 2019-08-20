@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Define constants -->
+  <arg name="racecar_version" value="racecar-v2" />
+  <!-- Define arguments for launch file -->
+  <arg name="name" doc="Unique namespace for spawning this car"/>
+  <arg name="x" default="0.0"/>
+  <arg name="y" default="0.0"/>
+  <arg name="z" default="0.05"/>
+  <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find racecar_description)/urdf/racecar.xacro' prefix:=$(arg name)" />
+
+   <!-- push robot_description to factory and spawn robot in gazebo -->
+   <node name="racecar_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="
+           -param robot_description
+           -urdf
+           -x $(arg x)
+           -y $(arg y)
+           -z $(arg z)
+           -model $(arg name)" respawn="false" />
+
+  <!-- Spawn the MUXs -->
+  <!-- XXX Replace <include file="$(find racecar)/launch/mux.launch" ns="vesc" /> -->
+  <group ns="vesc">
+    <!-- REGION Code modified from $(find racecar)/launch/mux.launch -->
+    <!-- Chain the MUXs -->
+    <node name="mux_chainer" pkg="topic_tools" type="relay"
+          args="high_level/ackermann_cmd_mux/output low_level/ackermann_cmd_mux/input/navigation" />
+
+    <!-- default (zero) ackermann command for high level MUX -->
+    <node name="zero_ackermann_cmd" pkg="rostopic" type="rostopic" args="pub -r 6 high_level/ackermann_cmd_mux/input/default ackermann_msgs/AckermannDriveStamped '{header: auto, drive: {steering_angle: 0.0, speed: 0.0} }'" />
+
+    <!-- High level MUX -->
+    <include file="$(find ackermann_cmd_mux)/launch/standalone.launch" ns="high_level">
+      <arg name="nodelet_manager_name" value="ackermann_cmd_mux_nodelet_manager" />
+      <arg name="config_file" value="$(find racecar)/config/$(arg racecar_version)/high_level_mux.yaml" />
+    </include>
+
+    <!-- Low level MUX -->
+    <include file="$(find ackermann_cmd_mux)/launch/standalone.launch" ns="low_level">
+      <arg name="nodelet_manager_name" value="ackermann_cmd_mux_nodelet_manager" />
+      <arg name="config_file" value="$(find racecar)/config/$(arg racecar_version)/low_level_mux.yaml" />
+    </include>
+    <!-- ENDREGION -->
+
+    <!-- Our boxcar servo -->
+    <node ns="low_level" name="ackermann_servo_node" pkg="cym_device" type="cym_waypoint_driver_boxcar.py" args="$(arg name)"/>
+  </group>
+</launch>

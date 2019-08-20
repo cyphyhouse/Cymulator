@@ -1,25 +1,13 @@
 <?xml version="1.0"?>
 <launch>
+    <arg name="name" default="hotdec_car"/>
     <include file="$(find gazebo_ros)/launch/empty_world.launch"/>
-
-<!--
-    <param name="boxcar_description"
-        textfile="$(find cym_device)/urdf/boxcar.urdf"/>
-    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
-            args="-urdf -model car1 -param boxcar_description"/>
--->
-
-<param name="robot_description" command="$(find xacro)/xacro --inorder '$(find racecar_description)/urdf/racecar.xacro' prefix:=car1" />
-
-     <!-- push robot_description to factory and spawn robot in gazebo -->
-     <node name="racecar_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="
-             -param robot_description
-             -urdf
-             -x 0
-             -y 0
-             -z 0
-             -model car1" respawn="false" />
-
-    <node name="waypoint_node" pkg="cym_device" type="cym_waypoint_driver_boxcar.py" args="car1"/>
-    <node name="vrpn_client_node" pkg="cym_device" type="cym_vrpn.py" args="car1"/>
+    <include file="$(find cym_device)/launch/cym_car.launch">
+      <arg name="name" value="$(arg name)"/>
+      <arg name="pos_tracker" value="$(arg name)"/>
+      <arg name="car_model" value="boxcar"/>
+      <arg name= "x" default="0.0" />
+      <arg name= "y" default="0.0" />
+    </include>
+    <node name="vrpn_client_node" pkg="cym_device" type="cym_vrpn.py" args="$(arg name)"/>
 </launch>
