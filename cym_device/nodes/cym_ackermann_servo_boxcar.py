@@ -103,4 +103,4 @@ if __name__ == "__main__":
     try:
         main(rospy.myargv(argv=sys.argv))
     except rospy.exceptions.ROSInterruptException:
-        rospy.loginfo("Shutting down CymWaypointDriveBoxcar")
+        rospy.loginfo("Shutting down CymAckermannServoBoxcar")
