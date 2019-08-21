@@ -38,9 +38,11 @@ fi
 sudo apt install -y \
     ros-kinetic-ackermann-msgs ros-kinetic-geographic-msgs ros-kinetic-serial \
     ros-kinetic-ros-control ros-kinetic-ros-controllers \
+    ros-kinetic-hector-localization ros-kinetic-hector-models \
     ros-kinetic-tf2-bullet
 
 # Other System packages
+sudo apt install -y git
 sudo apt install -y cppad coinor-libipopt-dev  # For MPC controller
 
 # Python Packages
@@ -51,21 +53,27 @@ pip3 install --user \
     empy numpy scipy\
     pathlib pyyaml
 
+echo "-------------------- System dependency installation finished -------------------------"
 
-# TODO Download the catkin workspace
-echo "Please find Chiao to get an updated zip file with catkin workspace for now"
-exit 0
 
-echo "------------------------ dependency installation finished -----------------------------"
-
+# Download source code of all needed ROS packages
+mkdir -p catkin_ws3/src
+cd catkin_ws3/src
+# TODO look into using .rosinstall to automatically download these repositories
+git clone https://github.com/tu-darmstadt-ros-pkg/hector_quadrotor.git --branch kinetic-devel
+git clone https://github.com/tu-darmstadt-ros-pkg/hector_gazebo.git --branch kinetic-devel
+git clone https://github.com/RacecarJ/racecar.git --branch RacecarJTransitory
+git clone https://github.com/cyphyhouse/racecar_gazebo.git --branch master
+git clone https://github.com/cyphyhouse/Cymulator.git --branch master
+# TODO Download only cym_car_mpc
 
 # Compile all ROS packages
-cd ~/catkin_ws3
+cd ..  # Go back to catkin workspace
 source /opt/ros/kinetic/setup.bash
 catkin_make --cmake-args -DPYTHON_VERSION=3.5  # Build with Python>=3.5
 
 
-# Development Environment setup
+# (Optional) Development Environment setup
 echo "source /opt/ros/kinetic/setup.bash" >> ~/.bashrc
 echo "source ~/catkin_ws3/devel/setup.bash" >> ~/.bashrc
 echo "export SVGA_VGPU10=0" >> ~/.bashrc  # For running Gazebo in virtual machine
