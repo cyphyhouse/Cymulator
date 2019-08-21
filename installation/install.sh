@@ -64,13 +64,13 @@ git clone https://github.com/tu-darmstadt-ros-pkg/hector_quadrotor.git --branch 
 git clone https://github.com/tu-darmstadt-ros-pkg/hector_gazebo.git --branch kinetic-devel
 git clone https://github.com/RacecarJ/racecar.git --branch RacecarJTransitory
 git clone https://github.com/cyphyhouse/racecar_gazebo.git --branch master
+git clone https://github.com/cyphyhouse/Decawave.git --branch for-cymulator
 git clone https://github.com/cyphyhouse/Cymulator.git --branch master
-# TODO Download only cym_car_mpc
 
 # Compile all ROS packages
 cd ..  # Go back to catkin workspace
 source /opt/ros/kinetic/setup.bash
-catkin_make --cmake-args -DPYTHON_VERSION=3.5  # Build with Python>=3.5
+catkin_make --only-pkg-with-deps cym_gazebo --cmake-args -DPYTHON_VERSION=3.5  # Build only cym_gazebo with Python>=3.5
 
 
 # (Optional) Development Environment setup
