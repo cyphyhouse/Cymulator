@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<launch>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch"/>
+  <include file="$(find cym_device)/launch/cym_car.launch">
+    <arg name="name" value="car1"/>
+    <arg name="pos_tracker" value="car1"/>
+    <arg name="car_model" value="boxcar"/>
+    <arg name="x" value="1"/>
+    <arg name="y" value="1"/>
+  </include>
+  <include file="$(find cym_device)/launch/cym_car.launch">
+    <arg name="name" value="car2"/>
+    <arg name="pos_tracker" value="car2"/>
+    <arg name="car_model" value="boxcar"/>
+    <arg name="x" value="1"/>
+    <arg name="y" value="3"/>
+  </include>
+  <include file="$(find cym_device)/launch/cym_drone.launch">
+    <arg name="name" value="drone1"/>
+    <arg name="pos_tracker" value="drone1"/>
+    <arg name="x" value="9"/>
+    <arg name="y" value="5"/>
+  </include>
+  <include file="$(find cym_device)/launch/cym_drone.launch">
+    <arg name="name" value="drone2"/>
+    <arg name="pos_tracker" value="drone2"/>
+    <arg name="x" value="1"/>
+    <arg name="y" value="7"/>
+  </include>
+  <include file="$(find cym_device)/launch/cym_drone.launch">
+    <arg name="name" value="drone3"/>
+    <arg name="pos_tracker" value="drone3"/>
+    <arg name="x" value="9"/>
+    <arg name="y" value="9"/>
+  </include>
+  <node name="vrpn_client_node" pkg="cym_device" type="cym_vrpn.py" args="car1 car2 drone1 drone2 drone3">
+  </node>
+</launch>
