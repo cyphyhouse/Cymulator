@@ -26,6 +26,8 @@ class __DeviceState(object):
         rospy.wait_for_service('/gazebo/get_model_state')
         modelInfo = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
         currState = modelInfo(model_name=self.tracker_id)
+        if not currState.success:
+            return  # Keep old state
         # TODO Handle not success
         vel = msg.drive.speed
         steering_angle = msg.drive.steering_angle
@@ -60,9 +62,6 @@ def main(argv) -> None:
     # For ackermann
     _ = rospy.Subscriber(ackermann_topic_name, AckermannDriveStamped, ds.set_state)
 
-    rospy.wait_for_service('/gazebo/get_model_state')
-    modelInfo = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
-
     # For driving the simulated drone
     pub_model_state = rospy.Publisher("/gazebo/set_model_state", ModelState, queue_size=10)  # FIXME how to decide queue_size
 
@@ -79,7 +78,10 @@ def main(argv) -> None:
     rate = rospy.Rate(100)  # 100 Hz
     while not rospy.is_shutdown():
         rospy.wait_for_service('/gazebo/get_model_state')
+        modelInfo = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
         state = modelInfo(model_name=tracker_id)
+        if not state.success:
+            continue  # Do not publish
 
         newState = ModelState()
         newState.model_name = tracker_id
