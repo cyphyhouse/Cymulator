@@ -94,6 +94,12 @@ def main(argv) -> None:
     tracker_id = argv[1]  # TODO Read from parameter server instead
 
     rospy.init_node('waypoint_node')
+    # Register publishers first
+    pub_reached = rospy.Publisher("~reached", String, queue_size=1)  # FIXME how to decide queue_size
+    # For driving the simulated drone
+    pub_cmd_vel = rospy.Publisher("cmd_vel", Twist, queue_size=10)  # FIXME how to decide queue_size
+
+    # Register subscribers
     # Wait for positioning system to start
     pose_topic_name = "/vrpn_client_node/" + tracker_id + "/pose"
     twist_topic_name = "/vrpn_client_node/" + tracker_id + "/twist"
@@ -108,9 +114,6 @@ def main(argv) -> None:
     _ = rospy.Subscriber(twist_topic_name, TwistStamped, ds.store_twist)
     # For middleware
     _ = rospy.Subscriber(waypoint_topc_name, PoseStamped, ds.store_waypoint)
-    pub_reached = rospy.Publisher("~reached", String, queue_size=1)  # FIXME how to decide queue_size
-    # For driving the simulated drone
-    pub_cmd_vel = rospy.Publisher("cmd_vel", Twist, queue_size=10)  # FIXME how to decide queue_size
 
     # Enable motors using ROS service
     service_name = "enable_motors"
