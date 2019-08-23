@@ -2,8 +2,9 @@
 
 from copy import deepcopy
 import math
+
 from gazebo_msgs.msg import ModelState
-from gazebo_msgs.srv import GetModelState
+from gazebo_msgs.srv import GetModelState, GetModelStateResponse
 from ackermann_msgs.msg import AckermannDriveStamped
 from geometry_msgs.msg import PoseStamped, Twist, TwistStamped, Quaternion
 from std_msgs.msg import Float64, Int32, String
@@ -22,10 +23,20 @@ class __DeviceState(object):
         self.twist = Twist()
         self.tracker_id = tracker_id
 
-    def set_state(self, msg: AckermannDriveStamped) -> ModelState:
+    def get_state(self) -> GetModelStateResponse:
         rospy.wait_for_service('/gazebo/get_model_state')
-        modelInfo = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
-        currState = modelInfo(model_name=self.tracker_id)
+        try:
+            modelInfo = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
+            resp = modelInfo(model_name=self.tracker_id)
+        except rospy.ServiceException as e:
+            rospy.loginfo("Service call failed with %s", e)
+            resp = GetModelStateResponse()
+            resp.success = False
+
+        return resp
+
+    def set_state(self, msg: AckermannDriveStamped) -> None:
+        currState = self.get_state()
         if not currState.success:
             return  # Keep old state
         # TODO Handle not success
@@ -66,7 +77,7 @@ def main(argv) -> None:
     pub_model_state = rospy.Publisher("/gazebo/set_model_state", ModelState, queue_size=10)  # FIXME how to decide queue_size
 
     def shutdown() -> None:  # TODO Better place for this code
-        """Stop the drone when this ROS node shuts down"""
+        """Stop the car when this ROS node shuts down"""
         state = ModelState()
         state.model_name = tracker_id
         pub_model_state.publish(state)  # Default Twist will reset the car
@@ -77,9 +88,8 @@ def main(argv) -> None:
 
     rate = rospy.Rate(100)  # 100 Hz
     while not rospy.is_shutdown():
-        rospy.wait_for_service('/gazebo/get_model_state')
-        modelInfo = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
-        state = modelInfo(model_name=tracker_id)
+        rate.sleep()  # Wait a while before trying to get a new state
+        state = ds.get_state()
         if not state.success:
             continue  # Do not publish
 
@@ -96,7 +106,6 @@ def main(argv) -> None:
         newState.twist.angular.z = ds.twist.angular.z
 
         pub_model_state.publish(newState)
-        rate.sleep()
 
 
 if __name__ == "__main__":
