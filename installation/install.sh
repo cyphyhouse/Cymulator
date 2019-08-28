@@ -51,6 +51,7 @@ pip3 install --user pip --upgrade
 pip3 install --user \
     catkin_pkg rospkg \
     empy numpy scipy\
+    defusedxml netifaces \
     pathlib pyyaml
 
 echo "-------------------- System dependency installation finished -------------------------"
