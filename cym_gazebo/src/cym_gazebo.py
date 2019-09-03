@@ -25,6 +25,10 @@ def gen_launch_element_tree(device_list: List[DeviceInitInfo]) -> ET.ElementTree
     :return: an ElementTree representing desired XML for launch config
     """
     root = ET.Element('launch')
+    # enable statistics
+    _ = ET.SubElement(
+        root, 'param',
+        attrib={'name': 'enable_statistics', 'type': 'bool', 'value': 'true'})
     # include world file
     include = ET.SubElement(
         root, 'include',
