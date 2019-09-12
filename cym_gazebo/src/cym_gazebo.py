@@ -28,7 +28,7 @@ def gen_launch_element_tree(device_list: List[DeviceInitInfo]) -> ET.ElementTree
     # enable statistics
     _ = ET.SubElement(
         root, 'param',
-        attrib={'name': 'enable_statistics', 'type': 'bool', 'value': 'true'})
+        attrib={'name': 'enable_statistics', 'type': 'bool', 'value': 'false'})
     # include world file
     include = ET.SubElement(
         root, 'include',
