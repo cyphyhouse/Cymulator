@@ -2,7 +2,7 @@
 <launch>
   <arg name= "name" doc="Namespace for this simulated car" />
   <arg name= "pos_tracker" doc="Tracker ID for model position"/>
-  <arg name= "car_model" default="f1tenth"/>
+  <arg name= "car_model" default="boxcar"/>
   <arg name= "x" default="0.0" />
   <arg name= "y" default="0.0" />
   <arg name= "z" default="0.05" />
