@@ -56,7 +56,7 @@ int main(int _argc, char **_argv)
 
     ros::init(_argc, _argv, "gazebo_marker");
     ros::NodeHandle n;
-    ros::Subscriber sub = n.subscribe("gazebo_marker", 10,
+    ros::Subscriber sub = n.subscribe("gazebo_marker", 0,  // XXX Infinite length queue
             &GazeboMarker::sendMarkerRequest, &marker);
 
     ros::spin();
