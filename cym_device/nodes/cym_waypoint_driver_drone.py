@@ -72,7 +72,13 @@ class __DroneStates:
     def set_curr_waypoint(self):
         assert not self._waypoints.empty()
         self._curr_waypoint = self._waypoints.get()
-        print("Set new waypoint to", self._curr_waypoint)
+
+    @property
+    def curr_waypoint(self):
+        return self._curr_waypoint
+
+    def reset_curr_waypoint(self):
+        self._curr_waypoint = None
 
     def cmd_pose(self) -> PoseStamped:
         assert self._curr_waypoint
@@ -149,7 +155,9 @@ def main(argv) -> None:
         else:  # DRIVING
             pub_cmd_pose.publish(ds.cmd_pose())
             if ds.has_reached():
-                pub_reached.publish(str(True))
+                assert ds.curr_waypoint
+                if ds.curr_waypoint.header.frame_id == "1":
+                    pub_reached.publish(str(True))
                 is_driving = False
             # else: is_driving = True  # Keep driving
 
