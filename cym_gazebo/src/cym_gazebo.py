@@ -39,6 +39,9 @@ def gen_launch_element_tree(device_list: List[DeviceInitInfo]) -> ET.ElementTree
     _ = ET.SubElement(
         include, 'arg',
         attrib={'name': 'use_sim_time', 'value': 'true'})
+    _ = ET.SubElement(
+        include, 'arg',
+        attrib={'name': 'world_name', 'value': '$(find cym_gazebo)/worlds/irl_arena.world'})
 
     id_str_list = []
 
