@@ -1,6 +1,13 @@
 <?xml version="1.0"?>
 <sdf version='1.6'>
   <world name='irl_arena'>
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose frame=''>0.03381 -19.3262 15.7294 0 0.723643 1.57219</pose>
+        <view_controller>orbit</view_controller>
+        <projection_type>perspective</projection_type>
+      </camera>
+    </gui>
     <include>
       <uri>model://sun</uri>
     </include>
