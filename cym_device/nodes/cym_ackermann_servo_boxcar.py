@@ -2,6 +2,7 @@
 
 from copy import deepcopy
 import math
+import numpy as np
 
 from gazebo_msgs.msg import ModelState
 from gazebo_msgs.srv import GetModelState, GetModelStateResponse
@@ -56,6 +57,15 @@ class __DeviceState(object):
         self.twist.angular.z = vel * (math.tan(steering_angle)/self.CAR_LENGTH)
 
 
+def forceNotRoll(orientation: Quaternion):
+    quaternion = (orientation.x, orientation.y, orientation.z, orientation.w)
+    r = R.from_quat(quaternion)
+    e = r.as_euler('zyx', degrees=True)
+    euler = np.array([e[0], 0.0, 0.0], dtype=np.float64)
+    r = R.from_euler('zyx', euler, degrees=True)
+    return r.as_quat()
+
+
 def main(argv) -> None:
     """
      Main entry point
@@ -93,17 +103,19 @@ def main(argv) -> None:
         if not state.success:
             continue  # Do not publish
 
+        orientation = forceNotRoll(state.pose.orientation)
+
         newState = ModelState()
         newState.model_name = tracker_id
         newState.pose.position.x = state.pose.position.x
         newState.pose.position.y = state.pose.position.y
-        newState.pose.orientation.x = state.pose.orientation.x
-        newState.pose.orientation.y = state.pose.orientation.y
-        newState.pose.orientation.z = state.pose.orientation.z
-        newState.pose.orientation.w = state.pose.orientation.w
-        newState.twist.linear.x = ds.twist.linear.x
-        newState.twist.linear.y = ds.twist.linear.y
-        newState.twist.angular.z = ds.twist.angular.z
+        newState.pose.orientation.x = orientation[0]
+        newState.pose.orientation.y = orientation[1]
+        newState.pose.orientation.z = orientation[2]
+        newState.pose.orientation.w = orientation[3]
+        newState.twist.linear.x = ds.twist.linear.x*0.25
+        newState.twist.linear.y = ds.twist.linear.y*0.25
+        newState.twist.angular.z = ds.twist.angular.z*0.2
 
         pub_model_state.publish(newState)
 
