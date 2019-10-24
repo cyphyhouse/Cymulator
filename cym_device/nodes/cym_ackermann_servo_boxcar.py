@@ -113,9 +113,9 @@ def main(argv) -> None:
         newState.pose.orientation.y = orientation[1]
         newState.pose.orientation.z = orientation[2]
         newState.pose.orientation.w = orientation[3]
-        newState.twist.linear.x = ds.twist.linear.x*0.25
-        newState.twist.linear.y = ds.twist.linear.y*0.25
-        newState.twist.angular.z = ds.twist.angular.z*0.2
+        newState.twist.linear.x = ds.twist.linear.x
+        newState.twist.linear.y = ds.twist.linear.y
+        newState.twist.angular.z = ds.twist.angular.z
 
         pub_model_state.publish(newState)
 
