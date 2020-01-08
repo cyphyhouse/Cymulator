@@ -1,6 +1,8 @@
 Cymulator: Gazebo based Simulator for CyPhyHouse
 ================================================
 
+[![License](https://img.shields.io/github/license/cyphyhouse/Cymulator)](LICENSE)
+
 Cymulator is a [Gazebo](url-gazebo) based simulation environment for CyPhyHouse
 project. In Cymulator, the same distributed [Koord](url-koord) program can be
 deployed to multiple simulated drones and cars in Gazebo simulator. You can test
