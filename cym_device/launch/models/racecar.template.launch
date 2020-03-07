@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- XXX We intentionally expand several launch files in this launch script to
+         expose all hacks for matching namespaces defined by the racecar project -->
+    <!-- Define constants -->
+    <arg name="racecar_version" value="racecar-v2" />
+    <arg name="description_param" value="/robot_description" /> <!-- XXX default used in gazebo_ros_control-->
+ 
+    <!-- REGION Code modified from $(find racecar_gazebo)/launch/racecar.launch -->
+    <!-- Define arguments for launch file -->
+    <arg name="name" doc="Unique namespace for spawning this car"/>
+ 
+    <arg name="x"/>
+    <arg name="y"/>
+    <arg name="z"/>
+ 
+    <!-- urdf xml robot description loaded on the Parameter Server, converting the xacro into a proper urdf file-->
+    <param name="$(arg description_param)" command="$(find xacro)/xacro --inorder '$(find racecar_description)/urdf/racecar.xacro'" />
+ 
+    <!-- push robot_description to factory and spawn robot in gazebo -->
+    <node name="racecar_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="
+            -param $(arg description_param)
+            -urdf
+            -x $(arg x)
+            -y $(arg y)
+            -z $(arg z)
+            -robot_namespace $(arg name)/racecar
+            -model $(arg name)" respawn="false" />
+ 
+    <!-- Spawn the MUXs -->
+    <group ns="racecar">
+        <!-- REGION Code modified from $(find racecar)/launch/mux.launch -->
+        <!-- default (zero) ackermann command for high level MUX -->
+        <node name="zero_ackermann_cmd" pkg="rostopic" type="rostopic" args="pub -r 6 ackermann_cmd_mux/input/navigation ackermann_msgs/AckermannDriveStamped '{header: auto, drive: {steering_angle: 0.0, speed: 0.0} }'" />
+       
+        <!-- Low Level MUX -->
+        <include file="$(find ackermann_cmd_mux)/launch/standalone.launch">
+            <arg name="nodelet_manager_name" value="ackermann_cmd_mux_nodelet_manager" />
+            <arg name="config_file" value="$(find racecar)/config/$(arg racecar_version)/low_level_mux.yaml" />
+        </include>
+        <!-- ENDREGION -->
+    </group>
+    <!-- ENDREGION -->
+
+    <node name="waypoint_node" pkg="cyphy_car_mpc" type="mpc_wp_node" output="screen">
+        <rosparam subst_value="true">
+            vicon_obj: $(arg name)
+        </rosparam>
+        <!-- XXX Because racecar remaps from ackermann_cmd to /ackermann_cmd when including
+            `racecar/launch/includes/racecar-v2/vesc.launch`.
+            cyphy_car_mpc has to support /ackermann_cmd in C++ code for deploying to a device.
+            We remap it back for distinct topic names in simulation. -->
+        <!-- NOTE We can map to different navigation topics for different priorities. -->
+        <remap from="/ackermann_cmd" to="racecar/ackermann_cmd_mux/input/safety" />
+    </node>
+</launch>

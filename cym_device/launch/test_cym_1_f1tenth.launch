@@ -4,7 +4,7 @@
     <include file="$(find gazebo_ros)/launch/empty_world.launch"/>
     <include file="$(find cym_device)/launch/spawn_cym_device.launch">
       <arg name="name" value="$(arg name)"/>
-      <arg name="device_model" value="boxcar"/>
+      <arg name="device_model" value="f1tenth"/>
       <arg name= "x" value="0.0" />
       <arg name= "y" value="0.0" />
     </include>

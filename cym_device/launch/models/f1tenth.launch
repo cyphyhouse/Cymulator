@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="name" doc="Unique namespace for spawning this car"/>
+    <arg name="x"/>
+    <arg name="y"/>
+    <arg name="z"/>
+
+    <include file="$(find cym_device)/launch/models/racecar.template.launch">
+        <arg name="name" value="$(arg name)"/>
+        <arg name="x" value="$(arg x)"/>
+        <arg name="y" value="$(arg y)"/>
+        <arg name="z" value="$(arg z)"/>
+    </include>
+
+    <!-- REGION Code modified from $(find racecar_control)/launch/racecar_control.launch -->
+    <!-- Load joint controller configurations from YAML file to parameter server -->
+    <rosparam file="$(find racecar_control)/config/racecar_control.yaml" command="load" />
+    <!-- Load the controllers -->
+    <!-- XXX $(find racecar_control)/config/racecar_control.yaml defines all ROS names under racecar/*.
+         We therefore need this racecar namespace group -->
+    <group ns="racecar">
+        <node name="controller_manager" pkg="controller_manager" type="spawner" respawn="false"
+              output="screen" args="left_rear_wheel_velocity_controller right_rear_wheel_velocity_controller
+                                    left_front_wheel_velocity_controller right_front_wheel_velocity_controller
+                                    left_steering_hinge_position_controller right_steering_hinge_position_controller
+                                    joint_state_controller" />
+
+        <!-- convert joint states to TF transforms for rviz, etc -->
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen">
+        </node>
+
+        <!-- servo node -->
+        <!-- TODO we should define our own servo_commands.py without absolute names -->
+        <node pkg="racecar_control" type="servo_commands.py" name="servo_commands" output="screen">
+            <remap from="/racecar/ackermann_cmd_mux/output"
+                     to="ackermann_cmd_mux/output"/>
+            <remap from="/racecar/left_front_wheel_velocity_controller/command"
+                     to="left_front_wheel_velocity_controller/command"/>
+            <remap from="/racecar/left_rear_wheel_velocity_controller/command"
+                     to="left_rear_wheel_velocity_controller/command"/>
+            <remap from="/racecar/left_steering_hinge_position_controller/command"
+                     to="left_steering_hinge_position_controller/command"/>
+            <remap from="/racecar/right_front_wheel_velocity_controller/command"
+                     to="right_front_wheel_velocity_controller/command"/>
+            <remap from="/racecar/right_rear_wheel_velocity_controller/command"
+                     to="right_rear_wheel_velocity_controller/command"/>
+            <remap from="/racecar/right_steering_hinge_position_controller/command"
+                     to="right_steering_hinge_position_controller/command"/>
+        </node>
+    </group>
+    <!-- ENDREGION -->
+</launch>
