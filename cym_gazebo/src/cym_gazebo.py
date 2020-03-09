@@ -43,6 +43,14 @@ def gen_launch_element_tree(device_list: List[DeviceInitInfo]) -> ET.ElementTree
         include, 'arg',
         attrib={'name': 'world_name', 'value': '$(find cym_gazebo)/worlds/irl_arena.world'})
 
+    # Gazebo Marker node
+    ET.SubElement(
+        root, 'node',
+        attrib={'name': 'marker_node',
+                'pkg': 'cym_marker',
+                'type': 'cym_marker'}
+    )
+
     id_str_list = []
 
     # add devices

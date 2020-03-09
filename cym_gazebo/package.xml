@@ -2,7 +2,7 @@
 <package format="2">
   <name>cym_gazebo</name>
   <version>0.0.0</version>
-  <description>The cymulator_gazebo package</description>
+  <description>Package for setting up simulated devices in Gazebo for Cymulator</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
@@ -52,8 +52,10 @@
   <build_depend>rospy</build_depend>
   <build_export_depend>rospy</build_export_depend>
   <exec_depend>rospy</exec_depend>
+  <exec_depend>roslaunch</exec_depend>
   <exec_depend>gazebo_ros</exec_depend>
   <exec_depend>cym_device</exec_depend>
+  <exec_depend>cym_marker</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
