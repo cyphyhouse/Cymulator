@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="use_sim_time" value="true"/>
+        <arg name="world_name" value="$(find cym_gazebo)/worlds/irl_arena.world"/>
+    </include>
+    <node name="marker_node" pkg="cym_marker" type="cym_marker" output="screen"/>
+</launch>
