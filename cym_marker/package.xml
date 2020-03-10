@@ -54,10 +54,12 @@
   <depend>roscpp</depend>
   <depend>rosgraph_msgs</depend>
   <depend>std_msgs</depend>
-  <depend>visualization_msgs</depend>
 
   <build_depend>ignition-msgs1</build_depend>
   <build_depend>ignition-transport4</build_depend>
+
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
 
   <exec_depend>gazebo</exec_depend>
   <exec_depend>gazebo_ros</exec_depend>

@@ -14,6 +14,7 @@
 
 #include <algorithm>
 #include <exception>
+
 #include <ros/console.h>
 
 #include "ros_ign_bridge/convert_builtin_interfaces.hpp"
@@ -377,130 +378,6 @@ convert_ign_to_ros(
       break;
     }
   }
-}
-
-template<>
-void
-convert_ros_to_ign(
-  const visualization_msgs::Marker & ros_msg,
-  ignition::msgs::Marker & ign_msg)
-{
-  convert_ros_to_ign(ros_msg.header, (*ign_msg.mutable_header()));
-
-  if(ros_msg.action == visualization_msgs::Marker::ADD)
-  {
-    ign_msg.set_action(ignition::msgs::Marker::ADD_MODIFY);
-  }
-  else if (ros_msg.action == visualization_msgs::Marker::MODIFY)
-  {
-    ign_msg.set_action(ignition::msgs::Marker::ADD_MODIFY);
-  }
-  else if (ros_msg.action == visualization_msgs::Marker::DELETE)
-  {
-    ign_msg.set_action(ignition::msgs::Marker::DELETE_MARKER);
-  }
-  else if (ros_msg.action == visualization_msgs::Marker::DELETEALL)
-  {
-    ign_msg.set_action(ignition::msgs::Marker::DELETE_ALL);
-  }
-  else
-  {
-    ROS_ERROR_STREAM("Unsupported marker action [" << ros_msg.action << "]"
-              << std::endl);
-  }
-
-  ign_msg.set_ns(ros_msg.ns);
-  ign_msg.set_id(ros_msg.id);
-  // ign_msg.set_layer(0);  // No layer in visualization_msgs::Marker
-
-  if(ros_msg.type == visualization_msgs::Marker::ARROW)
-  {
-    // TODO
-  }
-  else if (ros_msg.type == visualization_msgs::Marker::CUBE)
-  {
-    ign_msg.set_type(ignition::msgs::Marker::BOX);
-  }
-  else if (ros_msg.type == visualization_msgs::Marker::SPHERE)
-  {
-    ign_msg.set_type(ignition::msgs::Marker::SPHERE);
-  }
-  else if (ros_msg.type == visualization_msgs::Marker::CYLINDER)
-  {
-    ign_msg.set_type(ignition::msgs::Marker::CYLINDER);
-  }
-  else if (ros_msg.type == visualization_msgs::Marker::LINE_STRIP)
-  {
-    ign_msg.set_type(ignition::msgs::Marker::LINE_STRIP);
-  }
-  else if (ros_msg.type == visualization_msgs::Marker::LINE_LIST)
-  {
-    ign_msg.set_type(ignition::msgs::Marker::LINE_LIST);
-  }
-  else if (ros_msg.type == visualization_msgs::Marker::CUBE_LIST)
-  {
-    // TODO
-  }
-  else if (ros_msg.type == visualization_msgs::Marker::SPHERE_LIST)
-  {
-    // TODO
-  }
-  else if (ros_msg.type == visualization_msgs::Marker::POINTS)
-  {
-    ign_msg.set_type(ignition::msgs::Marker::POINTS);
-  }
-  else if (ros_msg.type == visualization_msgs::Marker::TEXT_VIEW_FACING)
-  {
-    ign_msg.set_type(ignition::msgs::Marker::TEXT);
-  }
-  else if (ros_msg.type == visualization_msgs::Marker::MESH_RESOURCE)
-  {
-    // TODO
-  }
-  else if (ros_msg.type == visualization_msgs::Marker::TRIANGLE_LIST)
-  {
-    ign_msg.set_type(ignition::msgs::Marker::TRIANGLE_LIST);
-  }
-  else
-  {
-    ROS_ERROR_STREAM("Unsupported marker type [" << ros_msg.type << "]"
-              << std::endl);
-  }
-
-
-  if (!ros_msg.lifetime.isZero())
-  {
-    ign_msg.mutable_lifetime()->set_sec(ros_msg.lifetime.sec);
-    ign_msg.mutable_lifetime()->set_nsec(ros_msg.lifetime.nsec);
-    ROS_WARN_STREAM(
-        "Gazebo marker lifetime is unstable due to inconsistent SimTime inside Gazebo. "
-        << "Please use with caution."
-        << std::endl);
-  }
-
-  convert_ros_to_ign(ros_msg.pose, *ign_msg.mutable_pose());
-  convert_ros_to_ign(ros_msg.scale, *ign_msg.mutable_scale());
-
-  //TODO ign_msg.set_material();
-
-  // TODO Test if array works
-  for(size_t i=0; i < ros_msg.points.size(); ++i)
-  {
-    convert_ros_to_ign(ros_msg.points[i], *ign_msg.add_point());
-  }
-
-  ign_msg.set_text(ros_msg.text);
-  // ign_msg.set_parent("");  // No parent in visualization_msgs::Marker
-  ign_msg.set_visibility(ignition::msgs::Marker::GUI);  // Only users see markers
-}
-
-template<>
-void
-convert_ign_to_ros(
-  const ignition::msgs::Marker & ign_msg,
-  visualization_msgs::Marker & ros_msg)
-{
-    //TODO
 }
 
 }  // namespace ros_ign_bridge

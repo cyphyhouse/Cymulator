@@ -30,7 +30,6 @@
 #include <std_msgs/Float32.h>
 #include <std_msgs/Header.h>
 #include <std_msgs/String.h>
-#include <visualization_msgs/Marker.h>
 
 // include Ignition builtin messages
 #include <ignition/msgs.hh>
@@ -210,18 +209,6 @@ void
 convert_ign_to_ros(
   const ignition::msgs::Pose & ign_msg,
   geometry_msgs::TransformStamped & ros_msg);
-
-template<>
-void
-convert_ros_to_ign(
-  const visualization_msgs::Marker & ros_msg,
-  ignition::msgs::Marker & ign_msg);
-
-template<>
-void
-convert_ign_to_ros(
-  const ignition::msgs::Marker & ign_msg,
-  visualization_msgs::Marker & ros_msg);
 
 }  // namespace ros_ign_bridge
 

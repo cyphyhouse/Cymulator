@@ -9,10 +9,10 @@ project(cym_marker)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
+  message_generation
   roscpp
   rosgraph_msgs
   std_msgs
-  visualization_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -49,11 +49,12 @@ find_package(ignition-transport4 REQUIRED)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+   FILES
+   Marker.msg
+   Material.msg
+   Script.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -70,10 +71,12 @@ find_package(ignition-transport4 REQUIRED)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+generate_messages(
+   DEPENDENCIES
+   geometry_msgs
+   rosgraph_msgs
+   std_msgs  # Or other packages containing msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -107,7 +110,8 @@ find_package(ignition-transport4 REQUIRED)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES cym_marker
-#  CATKIN_DEPENDS
+  CATKIN_DEPENDS
+    message_runtime
 #    roscpp
 #    gazebo_ros
 #  DEPENDS system_lib
@@ -141,6 +145,7 @@ include_directories(
 add_executable(${PROJECT_NAME}
     src/cym_marker.cpp
     src/ros_ign_bridge/convert_builtin_interfaces.cpp
+    src/ros_ign_bridge/convert_marker_interfaces.cpp
 )
 
 ## Add cmake target dependencies of the executable

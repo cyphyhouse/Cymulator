@@ -11,16 +11,14 @@
 #include <string>
 
 #include <ignition/transport.hh>
-#include <ignition/math.hh>
 #include <ignition/msgs.hh>
 
 #include <ros/ros.h>
-#include <visualization_msgs/Marker.h>
 
-#include <ros_ign_bridge/convert_builtin_interfaces.hpp>
+#include <ros_ign_bridge/convert_marker_interfaces.hpp>
 
 class GazeboMarker {
-    typedef visualization_msgs::Marker ROSMarker;
+    typedef cym_marker::Marker ROSMarker;
     typedef ignition::msgs::Marker IGNMarker;
 public:
     GazeboMarker(){}
