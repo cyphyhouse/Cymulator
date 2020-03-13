@@ -65,6 +65,7 @@ def main(argv: List[str]) -> None:
     #  On the other hand, if the model is never spawned or deleted then waiting can be problematic.
     rate = rospy.Rate(100)  # 10hz TODO Pass sleep rate as a parameter?
     while not rospy.is_shutdown():
+        rate.sleep()
         for tracker_id in tracker_list:
             position = get_position(tracker_id)
             if not position:
@@ -74,7 +75,6 @@ def main(argv: List[str]) -> None:
                 pose, twist = position
                 pub[tracker_id].pose.publish(pose)
                 pub[tracker_id].twist.publish(twist)
-            rate.sleep()
 
 
 if __name__ == "__main__":

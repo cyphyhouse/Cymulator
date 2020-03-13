@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name= "name" doc="Name for this simulated drone" />
+  <arg name= "x" />
+  <arg name= "y" />
+  <arg name= "z" />
+  <include file="$(find hector_quadrotor_gazebo)/launch/spawn_quadrotor.launch">
+      <arg name="name" value="$(arg name)" />
+      <arg name="controllers" value="controller/attitude controller/velocity controller/position" />
+      <arg name="x" value="$(arg x)" />
+      <arg name="y" value="$(arg y)" />
+      <arg name="z" value="$(arg z)" />
+  </include>
+
+  <node name="waypoint_node" pkg="cym_device" type="cym_waypoint_driver_drone.py" args="$(arg name)"/>
+</launch>

@@ -50,10 +50,10 @@ class __DeviceState(object):
                       currState.pose.orientation.w)
 
         r = R.from_quat(quaternion)
-        euler = r.as_euler('zyx', degrees=True)
+        euler = r.as_euler('zyx')
 
-        self.twist.linear.x = vel * math.cos(math.radians(euler[0]))
-        self.twist.linear.y = vel * math.sin(math.radians(euler[0]))
+        self.twist.linear.x = vel * math.cos(euler[0])
+        self.twist.linear.y = vel * math.sin(euler[0])
         self.twist.angular.z = vel * (math.tan(steering_angle)/self.CAR_LENGTH)
 
 

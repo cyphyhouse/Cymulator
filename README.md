@@ -1,8 +1,10 @@
 Cymulator: Gazebo based Simulator for CyPhyHouse
 ================================================
 
-Cymulator is a [Gazebo](url-gazebo) based simulation environment for CyPhyHouse
-project. In Cymulator, the same distributed [Koord](url-koord) program can be
+[![License](https://img.shields.io/github/license/cyphyhouse/Cymulator)](LICENSE)
+
+Cymulator is a [Gazebo][url-gazebo] based simulation environment for CyPhyHouse
+project. In Cymulator, the same distributed [Koord][url-koord] program can be
 deployed to multiple simulated drones and cars in Gazebo simulator. You can test
 and visualize your distributed robot control algorithms without buying drones
 and cars!
@@ -12,32 +14,17 @@ and cars!
 [url-middleware]: https://github.com/cyphyhouse/CyPyHous3
 
 
-Requirements
-------------
-
-Cymulator depends on the following three major frameworks:
-
-+ Python 3.5 or later
-+ ROS Kinetic
-+ Gazebo 9 or later
-
-Detail instructions for compilation and installation can be found in TODO
-
-
-Quick Start
------------
-
-TODO
-
-
 Website and Documentation
 -------------------------
 
-Broad overview of Cymulator and it in CyPhyHouse project is available at the web site:
+Cymulator is part of the CyPhyHouse project and currently not executable as a
+standalone application. Please visit following websites for detail usage.
+
+Broad overview of CyPhyHouse project is available at:
 
   https://cyphyhouse.github.io/
 
-Or you can visit the documentation:
+Or you can visit our website for documentation:
 
   https://cyphyhouse.rtfd.io/
 

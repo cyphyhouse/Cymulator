@@ -43,6 +43,14 @@ def gen_launch_element_tree(device_list: List[DeviceInitInfo]) -> ET.ElementTree
         include, 'arg',
         attrib={'name': 'world_name', 'value': '$(find cym_gazebo)/worlds/iccps2020.world'})
 
+    # Gazebo Marker node
+    ET.SubElement(
+        root, 'node',
+        attrib={'name': 'marker_node',
+                'pkg': 'cym_marker',
+                'type': 'cym_marker'}
+    )
+
     id_str_list = []
 
     # add devices
@@ -50,21 +58,21 @@ def gen_launch_element_tree(device_list: List[DeviceInitInfo]) -> ET.ElementTree
         id_str = device.bot_name
         id_str_list.append(id_str)
         if device.bot_type == "CAR":
-            cym_device_launch = "cym_car.launch"
+            cym_device_model = "f1tenth"
         elif device.bot_type == "QUAD":
-            cym_device_launch = "cym_drone.launch"
+            cym_device_model = "hector_quadrotor"
         else:
             raise ValueError("Unknown bot_type: " + device.bot_type)
 
         include = ET.SubElement(
             root, 'include',
-            attrib={'file': '$(find cym_device)/launch/' + cym_device_launch})
+            attrib={'file': '$(find cym_device)/launch/spawn_cym_device.launch'})
         ET.SubElement(
             include, 'arg',
             attrib={'name': 'name', 'value': id_str})
         ET.SubElement(
             include, 'arg',
-            attrib={'name': 'pos_tracker', 'value': id_str})  # FIXME distinguish pos_tracker with id_str
+            attrib={'name': 'device_model', 'value': cym_device_model})
         ET.SubElement(include, 'arg', attrib={'name': 'x', 'value': str(device.position.x)})
         ET.SubElement(include, 'arg', attrib={'name': 'y', 'value': str(device.position.y)})
         ET.SubElement(include, 'arg', attrib={'name': 'z', 'value': str(device.position.z)})

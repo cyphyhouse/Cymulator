@@ -39,7 +39,7 @@ sudo apt install -y \
     ros-kinetic-ackermann-msgs ros-kinetic-geographic-msgs ros-kinetic-serial \
     ros-kinetic-ros-control ros-kinetic-ros-controllers \
     ros-kinetic-hector-localization ros-kinetic-hector-models \
-    ros-kinetic-geometry2
+    ros-kinetic-tf2-bullet
 
 # Other System packages
 sudo apt install -y git

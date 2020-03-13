@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<launch>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch"/>
+  <include file="$(find cym_device)/launch/spawn_cym_device.launch">
+    <arg name="name" value="car1"/>
+    <arg name="device_model" value="boxcar"/>
+    <arg name="x" value="1"/>
+    <arg name="y" value="1"/>
+  </include>
+  <include file="$(find cym_device)/launch/spawn_cym_device.launch">
+    <arg name="name" value="car2"/>
+    <arg name="device_model" value="f1tenth"/>
+    <arg name="x" value="1"/>
+    <arg name="y" value="3"/>
+  </include>
+  <include file="$(find cym_device)/launch/spawn_cym_device.launch">
+    <arg name="name" value="drone1"/>
+    <arg name="device_model" value="hector_quadrotor"/>
+    <arg name="x" value="5"/>
+    <arg name="y" value="5"/>
+  </include>
+  <node name="vrpn_client_node" pkg="cym_device" type="cym_vrpn.py" args="car1 car2 drone1">
+  </node>
+</launch>

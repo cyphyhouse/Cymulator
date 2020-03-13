@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>cym_gazebo</name>
+  <name>cym_marker</name>
   <version>0.0.0</version>
-  <description>Package for setting up simulated devices in Gazebo for Cymulator</description>
+  <description>Package for adding visual markers in Cymulator</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
@@ -49,14 +49,20 @@
   <!-- Use doc_depend for packages you need only for building documentation: -->
   <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>rospy</build_depend>
-  <build_export_depend>rospy</build_export_depend>
-  <exec_depend>rospy</exec_depend>
-  <exec_depend>roslaunch</exec_depend>
-  <exec_depend>gazebo_ros</exec_depend>
-  <exec_depend>cym_device</exec_depend>
-  <exec_depend>cym_marker</exec_depend>
 
+  <depend>geometry_msgs</depend>
+  <depend>roscpp</depend>
+  <depend>rosgraph_msgs</depend>
+  <depend>std_msgs</depend>
+
+  <build_depend>ignition-msgs1</build_depend>
+  <build_depend>ignition-transport4</build_depend>
+
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
+
+  <exec_depend>gazebo</exec_depend>
+  <exec_depend>gazebo_ros</exec_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

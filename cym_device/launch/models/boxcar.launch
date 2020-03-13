@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="name" doc="Unique namespace for spawning this car"/>
+    <arg name="x"/>
+    <arg name="y"/>
+    <arg name="z"/>
+
+    <include file="$(find cym_device)/launch/models/racecar.template.launch">
+        <arg name="name" value="$(arg name)"/>
+        <arg name="x" value="$(arg x)"/>
+        <arg name="y" value="$(arg y)"/>
+        <arg name="z" value="$(arg z)"/>
+    </include>
+
+    <!-- Our boxcar servo -->
+    <node ns="racecar" name="ackermann_servo_node" pkg="cym_device" type="cym_ackermann_servo_boxcar.py" args="$(arg name)"/>
+</launch>
