@@ -54,10 +54,13 @@ def gen_launch_element_tree(device_list: List[DeviceInitInfo]) -> ET.ElementTree
     id_str_list = []
 
     # add devices
+    KNOWN_DEVICE = ["f1tenth", "boxcar", "hector_quadrotor"]
     for device in device_list:
         id_str = device.bot_name
         id_str_list.append(id_str)
-        if device.bot_type == "CAR":
+        if device.bot_type in KNOWN_DEVICE:
+            cym_device_model = device.bot_type
+        elif device.bot_type == "CAR":
             cym_device_model = "f1tenth"
         elif device.bot_type == "QUAD":
             cym_device_model = "hector_quadrotor"
