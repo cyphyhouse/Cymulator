@@ -3,7 +3,6 @@
 import rospy, time
 from gazebo_msgs.srv    import SpawnModel, SpawnModelRequest, SpawnModelResponse, DeleteModel
 from copy               import deepcopy
-from tf.transformations import quaternion_from_euler
 from geometry_msgs.msg  import Point, PointStamped, Twist, Pose, PoseStamped
 from std_msgs.msg       import Float64, String
 
@@ -89,7 +88,7 @@ class Spawn:
         req = self.create_cube_request("waypoint"+str(idx),
                                    x, y, z,  # position
                                    0.0, 0.0, 0.0,  # rotation
-                                   0.2, 0.2, 0.01)  # size
+                                   2.5, 2.5, 2.5)  # size
         self.spawn_model(req)
         self.count += 1
         rospy.sleep(0.01)
@@ -120,42 +119,39 @@ class Spawn:
         req.initial_pose.position.y = py
         req.initial_pose.position.z = pz
 
-        q = quaternion_from_euler(rr, rp, ry)
-        req.initial_pose.orientation.x = q[0]
-        req.initial_pose.orientation.y = q[1]
-        req.initial_pose.orientation.z = q[2]
-        req.initial_pose.orientation.w = q[3]
+        # q = quaternion_from_euler(rr, rp, ry)
+        req.initial_pose.orientation.x = 0
+        req.initial_pose.orientation.y = 0
+        req.initial_pose.orientation.z = 0
+        req.initial_pose.orientation.w = 0
 
         return req
 
 
 # ----------------------------------------------------
-def remove(msg, args):
-    if('TRUE' in str(msg) ):
-        print("_____________remove___________________")
-        track = args
-        for point in range(track.count):
-            track.delete_point(point)
-            time.sleep(0.5)
+# def remove(msg, args):
+#     if('TRUE' in str(msg) ):
+#         print("_____________remove___________________")
+#         track = args
+#         for point in range(track.count):
+#             track.delete_point(point)
+#             time.sleep(0.5)
     
 
-def add(msg, args):
-    print("_____________add___________________")
-    track = args
-    pos_x = msg.pose.position.x
-    pos_y = msg.pose.position.y
-    pos_z = msg.pose.position.z
-    track.create_point(pos_x, pos_y, pos_z, track.count)
+# def add(msg, args):
+#     print("_____________add___________________")
+#     track = args
+#     pos_x = msg.pose.position.x
+#     pos_y = msg.pose.position.y
+#     pos_z = msg.pose.position.z
+#     track.create_point(pos_x, pos_y, pos_z, track.count)
 
 
 
 def main():
     rospy.init_node("Spawn_model", anonymous=True)
-
-    track = Spawn()
-    remover = rospy.Subscriber("/car1/reached", String, remove, (track))
-    adder   = rospy.Subscriber("/car1/waypoint", PoseStamped, add, (track))
-
+    s = Spawn()
+    s.create_point(1, 1, 1, 1)
     rospy.spin()
 
 

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch"/>
+  <include file="$(find cym_device)/launch/cym_drone.launch">
+    <arg name="name" value="drone1"/>
+    <arg name="pos_tracker" value="drone1"/>
+    <arg name="x" value="1"/>
+    <arg name="y" value="1"/>
+  </include>
+  <node name="vrpn_client_node" pkg="cym_device" type="cym_vrpn.py" args="drone1">
+  </node>
+</launch>

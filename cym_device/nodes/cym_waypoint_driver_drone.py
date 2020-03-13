@@ -12,6 +12,7 @@ from geometry_msgs.msg import PoseStamped, Twist, TwistStamped
 from hector_uav_msgs.srv import EnableMotors
 import rospy
 from std_msgs.msg import Bool, String
+from gazebo_msgs.msg import ModelState
 
 
 class __DroneStates:
@@ -84,6 +85,10 @@ class __DroneStates:
         assert self._curr_waypoint
         pose_cmd = deepcopy(self._curr_waypoint)
         pose_cmd.header.frame_id = "world"
+        pose_cmd.pose.orientation.x = 0
+        pose_cmd.pose.orientation.y = 0
+        pose_cmd.pose.orientation.z = 0
+        pose_cmd.pose.orientation.w = 0
         return pose_cmd
 
 
@@ -103,6 +108,8 @@ def main(argv) -> None:
     # FIXME Should use actionlib server provided by hector quadrotor instead
     pub_cmd_pose = rospy.Publisher("command/pose", PoseStamped, queue_size=10)  # FIXME how to decide queue_size
     pub_estop = rospy.Publisher("estop", Bool, queue_size=1)
+    # NOTE set drone state to prevent pitching and rolling 
+    pub_model_state = rospy.Publisher("/gazebo/set_model_state", ModelState, queue_size=10)  # FIXME how to decide queue_size
 
     # Register subscribers
     # Wait for positioning system to start
@@ -146,6 +153,15 @@ def main(argv) -> None:
     is_driving = False
     while not rospy.is_shutdown():
         rate.sleep()
+
+        # newState = ModelState()
+        # newState.model_name = tracker_id
+        # newState.pose.orientation.x = 0
+        # newState.pose.orientation.y = 0
+        # newState.pose.orientation.z = 0
+        # newState.pose.orientation.w = 0
+        # pub_model_state.publish(newState)
+
         # Simple controller code for drones # TODO Need better controller
         if not is_driving:  # IDLE
             if not ds._waypoints.empty():  # FIXME accessing protected member

@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<launch>
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find cym_gazebo)/worlds/iccps2020.world"/>
+        <!-- more default parameters can be changed here -->
+    </include>
+    <include file="$(find cym_device)/launch/cym_car.launch">
+      <arg name="name" value="car1"/>
+      <arg name="pos_tracker" value="car1"/>
+      <arg name="car_model" value="boxcar"/>
+      <arg name= "x" default="-5.0" />
+      <arg name= "y" default="5.0" />
+    </include>
+    <include file="$(find cym_device)/launch/cym_car.launch">
+      <arg name="name" value="car2"/>
+      <arg name="pos_tracker" value="car2"/>
+      <arg name="car_model" value="boxcar"/>
+      <arg name= "x" default="5.0" />
+      <arg name= "y" default="-5.0" />
+    </include>
+    <node name="vrpn_client_node" pkg="cym_device" type="cym_vrpn.py" args="car1 car2"/>
+</launch>
