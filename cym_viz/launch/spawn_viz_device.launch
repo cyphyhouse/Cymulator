@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name= "name" doc="Tracker name in Vicon system"/>
+  <arg name= "device_model" doc="Choose launch file under models/ directory"/>
+  <arg name= "x" doc="Initial x-axis"/>
+  <arg name= "y" doc="Initial y-axis"/>
+  <arg name= "z" default="0.3" doc="Initial z-axis"/>
+  <group ns="$(arg name)">
+    <include file="$(find cym_viz)/launch/models/$(arg device_model).launch">
+      <arg name="name" value="$(arg name)"/>
+      <arg name="x" value="$(arg x)"/>
+      <arg name="y" value="$(arg y)"/>
+      <arg name="z" value="$(arg z)"/>
+    </include>
+    <node name="vrpn_to_model_state" pkg="topic_tools" type="transform"
+        args="/vrpn_client_node/$(arg name)/pose
+              /gazebo/set_model_state
+              gazebo_msgs/ModelState
+              'gazebo_msgs.msg.ModelState(model_name=&quot;$(arg name)&quot;, pose=m.pose)'
+              --import gazebo_msgs --wait-for-start" />
+  </group>
+</launch>

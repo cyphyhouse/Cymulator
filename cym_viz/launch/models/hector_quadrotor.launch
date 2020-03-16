@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name= "name" doc="Name for this simulated drone" />
+  <arg name= "model" default="$(find hector_quadrotor_description)/urdf/quadrotor.urdf.xacro"/>
+
+  <arg name= "x" />
+  <arg name= "y" />
+  <arg name= "z" default="0.3"/>
+
+  <!-- send the robot XML to param server -->
+  <param name="robot_description" command="$(find xacro)/xacro '$(arg model)'" />
+
+  <!-- push robot_description to factory and spawn robot in gazebo -->
+  <node name="spawn_robot" pkg="gazebo_ros" type="spawn_model"
+        args="-param robot_description
+           -urdf
+           -x $(arg x)
+           -y $(arg y)
+           -z $(arg z)
+           -model $(arg name)"
+        respawn="false" output="screen"/>
+</launch>
