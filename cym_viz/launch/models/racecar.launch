@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name= "name" doc="Name for this simulated drone" />
+  <arg name= "model" default="$(find racecar_description)/urdf/racecar.xacro"/>
+
+  <arg name= "x" />
+  <arg name= "y" />
+  <arg name= "z" default="0.05"/>
+
+  <!-- Disable LIDAR if user does not specify DISABLE_GAZEBO_LASER -->
+  <env name="DISABLE_GAZEBO_LASER" value="$(optenv DISABLE_GAZEBO_LASER true)" />
+
+  <!-- send the robot XML to param server -->
+  <param name="robot_description" command="$(find xacro)/xacro '$(arg model)'" />
+
+  <!-- push robot_description to factory and spawn robot in gazebo -->
+  <node name="spawn_robot" pkg="gazebo_ros" type="spawn_model"
+        args="-param robot_description
+           -urdf
+           -x $(arg x)
+           -y $(arg y)
+           -z $(arg z)
+           -model $(arg name)"
+        respawn="false" output="screen"/>
+</launch>
