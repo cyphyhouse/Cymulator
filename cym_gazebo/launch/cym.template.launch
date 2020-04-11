@@ -2,10 +2,14 @@
 <launch>
   <arg name="enable_statistics" default="false" />
   <arg name="enable_cym_marker" default="true" />
+  <arg name="enable_cym_vrpn" default="true" />
+  <arg name="enable_cym_diag_relay" default="true" />
 
   <arg name="world_name" default="$(find cym_gazebo)/worlds/irl_arena.world" />
   <arg name="use_sim_time" default="true" />
   <arg name="gui" default="true" />
+
+  <arg name="id_list" default=""/>
 
   <param name="enable_statistics" value="$(arg enable_statistics)" />
   <node if="$(arg enable_cym_marker)"
@@ -16,4 +20,11 @@
     <arg name="use_sim_time" value="$(arg use_sim_time)"/>
     <arg name="gui" value="$(arg gui)"/>
   </include>
+
+  <node if="$(arg enable_cym_vrpn)"
+        name="vrpn_client_node" pkg="cym_gazebo" type="cym_vrpn.py" args="$(arg id_list)" output="screen" />>
+  <!-- TODO
+  <node if="$(arg enable_cym_diag_relay)"
+        name="diag_relay_node" pkg="cym_gazebo" type="cym_diag_relay.py" args="$(arg id_list)" output="screen" />>
+  -->
 </launch>

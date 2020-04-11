@@ -50,6 +50,11 @@ def main(argv: List[str]) -> None:
     """
     # TODO Read from parameter server instead
     tracker_list = argv[1:]
+    if not tracker_list:
+        rospy.logwarn("No tracker id is specified for position tracking. "
+                      "Shutting down.")
+        return
+
     rospy.init_node('vrpn_client_node')
     # Queue size is 1 since old positions are not needed
     pub = {}

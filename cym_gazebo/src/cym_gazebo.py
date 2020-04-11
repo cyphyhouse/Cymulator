@@ -29,14 +29,14 @@ def gen_launch_element_tree(device_list: List[DeviceInitInfo]) -> ET.ElementTree
     include = ET.SubElement(
         root, 'include',
         attrib={'file': '$(find cym_gazebo)/launch/cym.template.launch'})
-
-    id_str_list = []
+    id_list_str = ' '.join(device.bot_name for device in device_list)
+    ET.SubElement(
+        include, 'arg',
+        attrib={'name': 'id_list', 'value': id_list_str})
 
     # add devices
     KNOWN_DEVICE = ["f1tenth", "boxcar", "hector_quadrotor"]
     for device in device_list:
-        id_str = device.bot_name
-        id_str_list.append(id_str)
         if device.bot_type in KNOWN_DEVICE:
             cym_device_model = device.bot_type
         elif device.bot_type == "CAR":
@@ -51,22 +51,13 @@ def gen_launch_element_tree(device_list: List[DeviceInitInfo]) -> ET.ElementTree
             attrib={'file': '$(find cym_device)/launch/spawn_cym_device.launch'})
         ET.SubElement(
             include, 'arg',
-            attrib={'name': 'name', 'value': id_str})
+            attrib={'name': 'name', 'value': device.bot_name})
         ET.SubElement(
             include, 'arg',
             attrib={'name': 'device_model', 'value': cym_device_model})
         ET.SubElement(include, 'arg', attrib={'name': 'x', 'value': str(device.position.x)})
         ET.SubElement(include, 'arg', attrib={'name': 'y', 'value': str(device.position.y)})
         ET.SubElement(include, 'arg', attrib={'name': 'z', 'value': str(device.position.z)})
-
-    # add VRPN
-    ET.SubElement(
-        root, 'node',
-        attrib={'name': 'vrpn_client_node',
-                'pkg': 'cym_device',
-                'type': 'cym_vrpn.py',
-                'args': ' '.join(id_str_list)}  # FIXME Pass pos_trackers as ROS param
-    )
 
     return ET.ElementTree(root)
 
