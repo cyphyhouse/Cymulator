@@ -1,5 +1,5 @@
 /*
- * ROS node providing marker service in Gazeboby sending corresponding requests
+ * ROS node providing marker service in Gazebo by sending corresponding requests
  * to Inginition Transport nodes
  *
  * Code modified from
@@ -34,7 +34,7 @@ void GazeboMarker::sendMarkerRequest(const ROSMarker& ros_msg)
     IGNMarker ign_msg;
     ros_ign_bridge::convert_ros_to_ign(ros_msg, ign_msg);
     if (!this->_ign_node.Request("/marker", ign_msg)) {
-        std::cerr << "Unable to send marker request to Gazebo." << std::endl;
+        ROS_ERROR("Unable to send the marker request to Gazebo.");
         return;
     }
     // else
