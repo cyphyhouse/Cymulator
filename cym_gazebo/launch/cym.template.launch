@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="enable_statistics" default="false" />
+  <arg name="enable_cym_marker" default="true" />
+
+  <arg name="world_name" default="$(find cym_gazebo)/worlds/irl_arena.world" />
+  <arg name="use_sim_time" default="true" />
+  <arg name="gui" default="true" />
+
+  <param name="enable_statistics" value="$(arg enable_statistics)" />
+  <node if="$(arg enable_cym_marker)"
+        name="cym_marker_node" pkg="cym_marker" type="cym_marker" output="screen" />
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(arg world_name)"/>
+    <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+    <arg name="gui" value="$(arg gui)"/>
+  </include>
+</launch>

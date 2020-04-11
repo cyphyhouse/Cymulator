@@ -25,31 +25,10 @@ def gen_launch_element_tree(device_list: List[DeviceInitInfo]) -> ET.ElementTree
     :return: an ElementTree representing desired XML for launch config
     """
     root = ET.Element('launch')
-    # enable statistics
-    _ = ET.SubElement(
-        root, 'param',
-        attrib={'name': 'enable_statistics', 'type': 'bool', 'value': 'false'})
     # include world file
     include = ET.SubElement(
         root, 'include',
-        attrib={'file': '$(find gazebo_ros)/launch/empty_world.launch'})
-    _ = ET.SubElement(
-        include, 'arg',
-        attrib={'name': 'gui', 'value': 'true'})
-    _ = ET.SubElement(
-        include, 'arg',
-        attrib={'name': 'use_sim_time', 'value': 'true'})
-    _ = ET.SubElement(
-        include, 'arg',
-        attrib={'name': 'world_name', 'value': '$(find cym_gazebo)/worlds/irl_arena.world'})
-
-    # Gazebo Marker node
-    ET.SubElement(
-        root, 'node',
-        attrib={'name': 'marker_node',
-                'pkg': 'cym_marker',
-                'type': 'cym_marker'}
-    )
+        attrib={'file': '$(find cym_gazebo)/launch/cym.template.launch'})
 
     id_str_list = []
 
