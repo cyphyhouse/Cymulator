@@ -6,22 +6,30 @@
 .gitignore text
 Makefile text
 LICENSE text
-*.c text
-*.h text
-*.py text
-*.krd text
-*.iml text
+*.c text diff=c
+*.h text diff=c
+*.cpp text diff=cpp
+*.hpp text diff=cpp
+*.py text diff=python
+*.bash
+*.sh
 *.xml text
+*.yaml text
 *.yml text
 *.md text
 *.rst text
 *.txt text
-*.dfy text
-*.bpl text
-*.smt2 text
-*.ioa text
-*.tioa text
-*.Dockerfile text
+
+# ROS + Gazebo
+*.msg text
+*.srv text
+*.gazebo text
+*.launch text
+*.xacro text
+*.test text
+*.sdf text
+*.urdf text
+*.world text
 
 # Declare files that will always have CRLF line endings on checkout.
 *.bat text eol=crlf
@@ -30,4 +38,3 @@ LICENSE text
 *.png binary
 *.jpg binary
 *.pdf binary
-
