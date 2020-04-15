@@ -12,8 +12,6 @@
   <arg name="id_list" default=""/>
 
   <param name="enable_statistics" value="$(arg enable_statistics)" />
-  <node if="$(arg enable_cym_marker)"
-        name="cym_marker_node" pkg="cym_marker" type="cym_marker" output="screen" />
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(arg world_name)"/>
@@ -21,10 +19,11 @@
     <arg name="gui" value="$(arg gui)"/>
   </include>
 
+  <node if="$(arg enable_cym_marker)"
+        name="cym_marker_node" pkg="cym_marker" type="cym_marker" output="screen" />
   <node if="$(arg enable_cym_vrpn)"
         name="vrpn_client_node" pkg="cym_gazebo" type="cym_vrpn.py" args="$(arg id_list)" output="screen" />>
-  <!-- TODO
   <node if="$(arg enable_cym_diag_relay)"
         name="diag_relay_node" pkg="cym_gazebo" type="cym_diag_relay.py" args="$(arg id_list)" output="screen" />>
-  -->
+
 </launch>
