@@ -8,6 +8,8 @@ project(cym_marker)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  diagnostic_aggregator
+  diagnostic_msgs
   geometry_msgs
   message_generation
   roscpp
@@ -16,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## System dependencies are found with CMake's conventions
+find_package(yaml-cpp REQUIRED)
 find_package(ignition-msgs1 REQUIRED)
 find_package(ignition-transport4 REQUIRED)
 
@@ -126,6 +129,7 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${yaml-cpp_INCLUDE_DIRS}
   ${ignition-transport4_INCLUDE_DIRS}
 )
 
@@ -155,6 +159,7 @@ add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EX
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}
    ${catkin_LIBRARIES}
+   ${yaml-cpp_LIBRARIES}
    ${ignition-transport4_LIBRARIES}
 )
 

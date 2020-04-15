@@ -50,11 +50,14 @@
   <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
 
+  <depend>diagnostic_aggregator</depend>
+  <depend>diagnostic_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>roscpp</depend>
   <depend>rosgraph_msgs</depend>
   <depend>std_msgs</depend>
 
+  <build_depend>yaml-cpp</build_depend>
   <build_depend>ignition-msgs1</build_depend>
   <build_depend>ignition-transport4</build_depend>
 
