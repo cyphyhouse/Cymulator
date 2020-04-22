@@ -5,8 +5,14 @@
   <arg name="enable_cym_vrpn" default="true" />
   <arg name="enable_cym_diag_relay" default="true" />
 
-  <arg name="world_name" default="$(find cym_gazebo)/worlds/irl_arena.world" />
+  <arg name="world_name" default="$(find cym_gazebo)/worlds/eceb.world" />
   <arg name="use_sim_time" default="true" />
+  <!-- Extra Gazebo arguments are used to switch between physics profile here.
+       Check the .world file for available physics profile names.
+       If there is no such profile name, Gazebo will silently ignore it and
+       use the first or the default physics.
+  -->
+  <arg name="extra_gazebo_args" default="--profile r_750"/>
   <arg name="gui" default="true" />
 
   <arg name="id_list" default=""/>
@@ -17,6 +23,7 @@
     <arg name="world_name" value="$(arg world_name)"/>
     <arg name="use_sim_time" value="$(arg use_sim_time)"/>
     <arg name="gui" value="$(arg gui)"/>
+    <arg name="extra_gazebo_args" value="$(arg extra_gazebo_args)"/>
   </include>
 
   <node if="$(arg enable_cym_marker)"
