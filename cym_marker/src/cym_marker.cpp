@@ -60,6 +60,15 @@ void addHollowBox(IGNMarker& msg,
     return;
 }
 
+const std::map<std::string, std::string> PREDEFINED_SCRIPT = {
+    {"drone0", "Gazebo/OrangeTransparent"},
+    {"drone1", "Gazebo/YellowTransparent"},
+    {"drone2", "Gazebo/BlueTransparent"},
+    {"drone3", "Gazebo/DarkMagentaTransparent"},
+    {"drone4", "Gazebo/GreyTransparent"},
+    {"drone5", "Gazebo/BlackTransparent"},
+};
+
 bool setIGNMarker(IGNMarker& msg,
                   const diagnostic_aggregator::StatusItem& status_item)
 {
@@ -68,7 +77,19 @@ bool setIGNMarker(IGNMarker& msg,
     msg.set_type(IGNMarker::LINE_LIST);
     auto& mat = *msg.mutable_material();
     auto& script = *mat.mutable_script();
-    script.set_name("Gazebo/GreenTransparent");
+
+    if(status_item.getLevel() == diagnostic_aggregator::DiagnosticLevel::Level_OK)
+    {
+        if(PREDEFINED_SCRIPT.count(status_item.getHwId()))
+        {   script.set_name(PREDEFINED_SCRIPT.at(status_item.getHwId()));}
+        else
+        {   script.set_name("Gazebo/RedTransparent");}
+    }
+    else
+    {
+        script.set_name("Gazebo/RedTransparent");
+    }
+
     try 
     {
         YAML::Node state_list = YAML::Load(status_item.getValue("data"));
