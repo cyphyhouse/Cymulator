@@ -69,6 +69,103 @@ const std::map<std::string, std::string> PREDEFINED_SCRIPT = {
     {"drone5", "Gazebo/BlackTransparent"},
 };
 
+
+void addReachSet(IGNMarker& msg, const YAML::Node& state_list)
+{
+    // TODO Generalize to other kinds of reachset representations
+    for(auto it = state_list.begin(); it != state_list.end(); ++it)
+    {
+        const YAML::Node& state_bound0 = *it;
+        ++it;
+        if(it == state_list.end())
+        {   break;}
+        const YAML::Node& state_bound1 = *it;
+        // TODO think about how to use time step
+        // const double& step = state_bound0[0].as<double>();
+        std::array<IGNPoint, 2> p;
+        p[0].set_x(state_bound0[1].as<double>());
+        p[0].set_y(state_bound0[2].as<double>());
+        p[0].set_z(state_bound0[3].as<double>());
+
+        p[1].set_x(state_bound1[1].as<double>());
+        p[1].set_y(state_bound1[2].as<double>());
+        p[1].set_z(state_bound1[3].as<double>());
+
+        addHollowBox(msg, p);
+    }
+}
+
+void addContract(IGNMarker& msg, const YAML::Node& set_repr)
+{
+    if(!set_repr.IsMap())
+        return;
+    for(auto it = set_repr.begin(); it != set_repr.end(); ++it)
+    {
+        const YAML::Node& set_type = it->first;
+        if(set_type.as<std::string>() == "BoxesMap")
+        {
+            if(!it->second.IsSequence()){
+                ROS_WARN_STREAM("Unexpected " << it->first << ":" << it->second << std::endl);
+                continue;
+            }
+            for(auto box : it->second)
+            {
+                std::array<IGNPoint, 2> p;
+                p[0].set_x(box[0][0].as<double>());
+                p[0].set_y(box[0][1].as<double>());
+                p[0].set_z(box[0][2].as<double>());
+                p[1].set_x(box[1][0].as<double>());
+                p[1].set_y(box[1][1].as<double>());
+                p[1].set_z(box[1][2].as<double>());
+
+                addHollowBox(msg, p);
+            }
+        }
+        if(set_type.as<std::string>() == "ContiguousUnion")
+        {
+            if(!it->second.IsSequence())
+            {
+                ROS_WARN_STREAM("Unexpected " << it->first << ":" << it->second << std::endl);
+                continue;
+            }
+            const auto& t_r_list = it->second;
+            // TODO binary search to find iterator
+            auto it=t_r_list.begin();
+            YAML::Node prev_region(YAML::NodeType::Map);
+            for(; it!= t_r_list.end(); ++it)
+            {
+                auto op = *it;
+                double t = op[0].as<double>();
+                if(t >= ros::Time::now().toSec())
+                    break;
+                prev_region = op[1];
+            }
+
+            addContract(msg, prev_region);
+            for(; it!= t_r_list.end(); ++it)
+            {
+                addContract(msg, (*it)[1]);
+            }
+        }
+        if(set_type.as<std::string>() == "Union")
+        {
+            if(!it->second.IsSequence())
+            {
+                ROS_WARN_STREAM("Unexpected " << it->first << ":" << it->second << std::endl);
+                continue;
+            }
+            for(auto op : it-> second)
+                addContract(msg, op);
+        }
+        else
+        {
+            // ROS_WARN_STREAM("Unexpected set type " << it->first << std::endl);
+            // TODO skip for now
+        }
+    }
+}
+
+
 bool setIGNMarker(IGNMarker& msg,
                   const diagnostic_aggregator::StatusItem& status_item)
 {
@@ -92,29 +189,17 @@ bool setIGNMarker(IGNMarker& msg,
 
     try 
     {
-        YAML::Node state_list = YAML::Load(status_item.getValue("data"));
-        // TODO Generalize to other kinds of reachset representations
-        for(auto it = state_list.begin(); it != state_list.end(); ++it)
+        YAML::Node yaml_node = YAML::Load(status_item.getValue("data"));
+        if(status_item.getName() == "reachset")
         {
-            const YAML::Node& state_bound0 = *it;
-            ++it;
-            if(it == state_list.end())
-            {   break;}
-            const YAML::Node& state_bound1 = *it;
-            // TODO think about how to use time step
-            // const double& step = state_bound0[0].as<double>();
-            std::array<IGNPoint, 2> p;
-            p[0].set_x(state_bound0[1].as<double>());
-            p[0].set_y(state_bound0[2].as<double>());
-            p[0].set_z(state_bound0[3].as<double>());
-
-            p[1].set_x(state_bound1[1].as<double>());
-            p[1].set_y(state_bound1[2].as<double>());
-            p[1].set_z(state_bound1[3].as<double>());
-
-            addHollowBox(msg, p);
+            addReachSet(msg, yaml_node);
+            return true;
         }
-        return true;
+        if (status_item.getName() == "contract")
+        {
+            addContract(msg, yaml_node);
+            return true;
+        }
     }
     catch(YAML::ParserException& e)
     {
@@ -186,7 +271,7 @@ void GazeboMarker::callbackDiagnosticsAgg(
     for(auto diag_status : diag_msg.status) {
         diagnostic_aggregator::StatusItem status_item(&diag_status);
         // TODO Generalize to check if the status items are supported markers
-        if(status_item.getName() != "reachset")
+        if(status_item.getName() != "reachset" && status_item.getName() != "contract")
         {   continue;}
         const auto& format = status_item.getValue("format");
         if(format != "yaml")
