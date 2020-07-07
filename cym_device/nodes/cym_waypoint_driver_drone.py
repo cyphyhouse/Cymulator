@@ -3,32 +3,36 @@
 """ROS node to drive a drone following given waypoints"""
 
 from copy import deepcopy
-from math import copysign
+from enum import Enum
 from queue import Queue
 from threading import RLock
-from typing import Tuple
 
-from geometry_msgs.msg import PoseStamped, Twist, TwistStamped
-from hector_uav_msgs.srv import EnableMotors
+from actionlib import SimpleActionClient
+from geometry_msgs.msg import PoseStamped
+from hector_uav_msgs.msg import PoseAction, PoseGoal, \
+    LandingAction, LandingGoal, TakeoffAction, TakeoffGoal
+
 import rospy
-from std_msgs.msg import Bool, String
+from std_msgs.msg import String
+
+
+class ReachedEnum(Enum):
+    NO = 0
+    YES = 1
+    YES_AND_REPORT = 2
 
 
 class __DroneStates:
 
-    def __init__(self,
-                 init_pose: PoseStamped,
-                 init_twist: TwistStamped):
-        assert init_pose
-        assert init_twist
+    def __init__(self):
 
-        self._pose_lock = RLock()
-        self._pose = init_pose
-        self._twist_lock = RLock()
-        self._twist = init_twist
+        # Thread safe Queue is required because pub and sub can be in
+        # different threads
+        self._waypoints = Queue()  # type: Queue
 
-        self._curr_waypoint = init_pose
-        self._waypoints = Queue()  # Thread safe Queue is required because pub and sub can be in different threads
+        self._var_lock = RLock()
+        self._curr_waypoint = None
+        self._reached = ReachedEnum.YES
 
     def store_waypoint(self, msg: PoseStamped) -> None:
         """
@@ -36,53 +40,46 @@ class __DroneStates:
         :param msg: PoseStamped type msg that contains the new waypoint
         :return: Nothing
         """
+        rospy.logdebug("Received waypoint %s" % str(msg.pose.position))
         self._waypoints.put(msg)
 
-    def store_pose(self, msg: PoseStamped) -> None:
-        """
-        Callback function to get drone's current pose
-        :param msg: PoseStamped type msg
-        :return: Nothing
-        """
-        with self._pose_lock:
-            self._pose = deepcopy(msg)  # In case `msg` is overwritten
-
-    def store_twist(self, msg: PoseStamped) -> None:
-        """
-        Callback function to get drone's current twist
-        :param msg: TwistStamped type msg
-        :return: Nothing
-        """
-        with self._twist_lock:
-            self._twist = deepcopy(msg)  # In case `msg` is overwritten
-
-    def has_reached(self) -> bool:
-        assert self._curr_waypoint
-        goal = self._curr_waypoint.pose.position
-
-        with self._pose_lock:
-            curr = self._pose.pose.position
-
-        # FIXME pass a function to decide whether the waypoint is reached?
-        dist_2 = (goal.x - curr.x) ** 2 + \
-                 (goal.y - curr.y) ** 2 + \
-                 (goal.z - curr.z) ** 2
-        return dist_2 < (0.25 ** 2)  # sqrt(dist_2) < 0.25
-
     def set_curr_waypoint(self):
-        assert not self._waypoints.empty()
-        self._curr_waypoint = self._waypoints.get()
+        with self._var_lock:
+            assert not self._waypoints.empty()
+            self._curr_waypoint = self._waypoints.get()
+            self._reached = ReachedEnum.NO
 
     @property
     def curr_waypoint(self):
-        return self._curr_waypoint
+        with self._var_lock:
+            return self._curr_waypoint
 
     def reset_curr_waypoint(self):
-        self._curr_waypoint = None
+        with self._var_lock:
+            assert self._curr_waypoint is not None
+            assert isinstance(self._curr_waypoint, PoseStamped)
+            if self._curr_waypoint.header.frame_id == "1":
+                self._reached = ReachedEnum.YES_AND_REPORT
+            else:
+                self._reached = ReachedEnum.YES
+            self._curr_waypoint = None
 
-    def cmd_pose(self) -> PoseStamped:
-        assert self._curr_waypoint
-        pose_cmd = deepcopy(self._curr_waypoint)
+    @property
+    def reached(self) -> ReachedEnum:
+        with self._var_lock:
+            return self._reached
+
+    def report_reached(self) -> str:
+        with self._var_lock:
+            if self._reached == ReachedEnum.YES_AND_REPORT:
+                self._reached = ReachedEnum.YES
+                return str(True)
+        return ""
+
+    def target_pose(self) -> PoseStamped:
+        with self._var_lock:
+            assert self._curr_waypoint
+            pose_cmd = deepcopy(self._curr_waypoint)
         pose_cmd.header.frame_id = "world"
         return pose_cmd
 
@@ -94,72 +91,67 @@ def main(argv) -> None:
         since we want to avoid pub/sub being instantiated more than once.
     :param argv:
     """
-    tracker_id = argv[1]  # TODO Read from parameter server instead
-
     rospy.init_node('waypoint_node')
     # Register publishers first
-    pub_reached = rospy.Publisher("~reached", String, queue_size=1)  # FIXME how to decide queue_size
-    # For driving the simulated drone
-    # FIXME Should use actionlib server provided by hector quadrotor instead
-    pub_cmd_pose = rospy.Publisher("command/pose", PoseStamped, queue_size=10)  # FIXME how to decide queue_size
-    pub_estop = rospy.Publisher("estop", Bool, queue_size=1)
+    pub_reached = rospy.Publisher("~reached", String,
+                                  queue_size=1)  # FIXME decide queue_size
 
     # Register subscribers
-    # Wait for positioning system to start
-    pose_topic_name = "/vrpn_client_node/" + tracker_id + "/pose"
-    twist_topic_name = "/vrpn_client_node/" + tracker_id + "/twist"
-    waypoint_topc_name = "~waypoint"
-    init_pose = rospy.wait_for_message(pose_topic_name, PoseStamped)
-    init_twist = rospy.wait_for_message(twist_topic_name, TwistStamped)
-
-    ds = __DroneStates(init_pose, init_twist)
-    # For positioning
-    _ = rospy.Subscriber(pose_topic_name, PoseStamped, ds.store_pose)
-    _ = rospy.Subscriber(twist_topic_name, TwistStamped, ds.store_twist)
+    ds = __DroneStates()
     # For middleware
-    _ = rospy.Subscriber(waypoint_topc_name, PoseStamped, ds.store_waypoint)
+    waypoint_topic_name = "~waypoint"
+    _ = rospy.Subscriber(waypoint_topic_name, PoseStamped, ds.store_waypoint)
 
-    # Enable motors using ROS service
-    service_name = "enable_motors"
-    rospy.wait_for_service(service_name)
-    try:
-        # Set 'enable_motors' to be True
-        enable_motor = rospy.ServiceProxy(service_name, EnableMotors)
-        resp = enable_motor(True)
-        if not resp.success:
-            pass  # TODO What to do if motor is not enabled
-    except rospy.ServiceException as e:
-        rospy.loginfo("Service call failed with %s", e)
+    # Register actionlib clients
+    takeoff_topic = rospy.resolve_name("action/takeoff")
+    takeoff_client = SimpleActionClient(takeoff_topic, TakeoffAction)
+    landing_topic = rospy.resolve_name("action/landing")
+    landing_client = SimpleActionClient(landing_topic, LandingAction)
+
+    pose_topic = rospy.resolve_name("action/pose")
+    pose_client = SimpleActionClient(pose_topic, PoseAction)
+
+    def action_pose_done_cb(goal_state, goal_result):
+        rospy.logdebug("Reached\n %s" % str(ds.curr_waypoint.pose.position))
+        ds.reset_curr_waypoint()
 
     def shutdown() -> None:  # TODO Better place for this code
         """Stop the drone when this ROS node shuts down"""
-        pub_estop.publish(Bool(True))  # Emergency stop
         # TODO Safe landing
-        rospy.loginfo("Stop the drone")
+        pass
 
     rospy.on_shutdown(shutdown)
 
     # TODO Wait for hector quadrotor controllers to spawn
     rospy.sleep(1)
 
-    rate = rospy.Rate(50)  # TODO Pass sleep rate as a parameter?
+    rate = rospy.Rate(100)  # 100Hz TODO Pass sleep rate as a parameter?
+
     is_driving = False
     while not rospy.is_shutdown():
         rate.sleep()
         # Simple controller code for drones # TODO Need better controller
         if not is_driving:  # IDLE
-            if not ds._waypoints.empty():  # FIXME accessing protected member
+            if ds._waypoints.empty():  # FIXME accessing protected member
+                pass  # Keep idling
+            else:
                 ds.set_curr_waypoint()
+                pose_client.wait_for_server()
+
+                pose_goal = PoseGoal(target_pose=ds.target_pose())
+                rospy.logdebug("Sending pose goal\n %s" % str(pose_goal))
+
+                pose_client.send_goal(PoseGoal(target_pose=ds.target_pose()),
+                                      done_cb=action_pose_done_cb)
                 is_driving = True
-            # else: is_driving = False  # Keep idling
         else:  # DRIVING
-            pub_cmd_pose.publish(ds.cmd_pose())
-            if ds.has_reached():
-                assert ds.curr_waypoint
-                if ds.curr_waypoint.header.frame_id == "1":
-                    pub_reached.publish(str(True))
+            if ds.reached == ReachedEnum.NO:
+                pass  # Keep driving
+            else:
+                if ds.reached == ReachedEnum.YES_AND_REPORT:
+                    pub_reached.publish(ds.report_reached())
                 is_driving = False
-            # else: is_driving = True  # Keep driving
+
 
 
 if __name__ == "__main__":
