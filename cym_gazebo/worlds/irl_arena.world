@@ -10,7 +10,7 @@
     <model name='irl_arena_border'>
       <static>1</static>
       <link name='bound_x_upper'>
-        <pose>10 0 0 -0 0</pose>
+        <pose>10 0 0 0 -0 0</pose>
         <visual name='visual'>
           <pose>0 0 1.25 0 -0 0</pose>
           <geometry>
@@ -36,7 +36,7 @@
         </collision>
       </link>
       <link name='bound_x_lower'>
-        <pose>-10 0 0 -0 0</pose>
+        <pose>-10 0 0 0 -0 0</pose>
         <visual name='visual'>
           <pose>0 0 1.25 0 -0 0</pose>
           <geometry>
@@ -62,7 +62,7 @@
         </collision>
       </link>
       <link name='bound_y_upper'>
-        <pose>0 10 0 -0 0</pose>
+        <pose>0 10 0 0 -0 0</pose>
         <visual name='visual'>
           <pose>0 0 1.25 0 -0 0</pose>
           <geometry>
@@ -88,7 +88,7 @@
         </collision>
       </link>
       <link name='bound_y_lower'>
-        <pose>0 -10 0 -0 0</pose>
+        <pose>0 -10 0 0 -0 0</pose>
         <visual name='visual'>
           <pose>0 0 1.25 0 -0 0</pose>
           <geometry>
