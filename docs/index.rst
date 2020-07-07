@@ -1,6 +1,9 @@
-====================
-Gazebo-ROS Simulator
-====================
+=====================================
+Cymulator: ROS-Gazebo based Simulator
+=====================================
+
+.. todo::
+    The whole page is outdated.
 
 Requirements
 ------------
