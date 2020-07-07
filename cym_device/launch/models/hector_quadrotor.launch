@@ -4,6 +4,8 @@
   <arg name= "x" />
   <arg name= "y" />
   <arg name= "z" />
+  <arg name= "enable_waypoint_control" default="true" />
+
   <include file="$(find hector_quadrotor_gazebo)/launch/spawn_quadrotor.launch">
       <arg name="name" value="$(arg name)" />
       <arg name="controllers" value="controller/attitude controller/velocity controller/position" />
@@ -12,5 +14,6 @@
       <arg name="z" value="$(arg z)" />
   </include>
 
-  <node name="waypoint_node" pkg="cym_device" type="cym_waypoint_driver_drone.py" args="$(arg name)"/>
+  <node if="$(arg enable_waypoint_control)"
+        name="waypoint_node" pkg="cym_device" type="cym_waypoint_driver_drone.py" args="$(arg name)"/>
 </launch>
