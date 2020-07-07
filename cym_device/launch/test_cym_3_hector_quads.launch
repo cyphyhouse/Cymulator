@@ -19,5 +19,4 @@
     <arg name="x" value="3"/>
     <arg name="y" value="3"/>
   </include>
-  <node name="vrpn_client_node" pkg="cym_device" type="cym_vrpn.py" args="drone1 drone2 drone3"/>
 </launch>

@@ -8,5 +8,4 @@
       <arg name= "x" value="0.0" />
       <arg name= "y" value="0.0" />
     </include>
-    <node name="vrpn_client_node" pkg="cym_device" type="cym_vrpn.py" args="$(arg name)"/>
 </launch>
