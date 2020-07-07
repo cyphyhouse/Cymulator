@@ -10,6 +10,14 @@
       <max_step_size>0.001</max_step_size>
       <real_time_update_rate>750</real_time_update_rate>
     </physics>
+    <physics name="r_500" type="ode">
+      <max_step_size>0.001</max_step_size>
+      <real_time_update_rate>500</real_time_update_rate>
+    </physics>
+    <physics name="r_250" type="ode">
+      <max_step_size>0.001</max_step_size>
+      <real_time_update_rate>250</real_time_update_rate>
+    </physics>
 
     <include>
       <uri>model://ground_plane</uri>
