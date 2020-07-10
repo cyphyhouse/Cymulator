@@ -1,4 +1,4 @@
-# This is an auto generated Dockerfile for gazebo:gzweb9
+# This is modified from an auto generated Dockerfile for gazebo:gzweb9
 # generated from docker_images/create_gzweb_image.Dockerfile.em
 FROM gazebo:libgazebo9-xenial
 
