@@ -76,7 +76,7 @@ class _MyROSLaunch(roslaunch.scriptapi.ROSLaunch):
         self.parent = roslaunch.parent.ROSLaunchParent(
             uuid,
             [],
-            is_core=True,  # is_core=True: throw error if ROS master is already running in background
+            is_core=False,  # is_core=True: throw error if ROS master is already running in background
             roslaunch_strs=launch_strs)
         self.started = False
 
