@@ -35,3 +35,59 @@ License
 Cymulator is licensed under the terms of the NCSA License (see the file
 [LICENSE](LICENSE)).
 
+
+Installation
+------------
+
+The installation steps below are also assembled in [this shell script](./installation/install.sh) that should work for Ubuntu 16.04.
+These commands requires `sudo` permission. Please run them with caution.
+
+1. Install ROS Kinetic and create a workspace for catkin. We assume it is under `catkin_ws`.
+	- [ROS Kinetic Ubuntu](http://wiki.ros.org/kinetic/Installation/Ubuntu)
+	- [Creating a workspace for catkin](http://wiki.ros.org/catkin/Tutorials/create_a_workspace)
+1. Install Gazebo 9 fo ROS Kinetic
+   ```shell
+   sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
+   wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
+   sudo apt-get update
+   sudo apt install -y \
+        ros-kinetic-gazebo9-ros ros-kinetic-gazebo9-ros-control \
+        ros-kinetic-gazebo9-plugins ros-kinetic-gazebo9-ros-pkgs
+   ```
+1. Install required ROS packages available on APT
+   ```shell
+   sudo apt install -y \
+        ros-kinetic-ackermann-msgs ros-kinetic-geographic-msgs ros-kinetic-serial \
+        ros-kinetic-ros-control ros-kinetic-ros-controllers \
+        ros-kinetic-hector-localization ros-kinetic-hector-models \
+        ros-kinetic-geometry2 ros-kinetic-robot
+   ```
+1. Install other system packages available on APT
+   ```shell
+   sudo apt install -y git
+   sudo apt install -y cppad coinor-libipopt-dev  # For MPC controller
+   sudo apt install -y python3 python3-pip
+   ```
+1. Install required Python packages available on PyPI
+   ```shell
+   pip3 install --user pip --upgrade
+   pip3 install --user \
+        catkin_pkg rospkg \
+        empy numpy scipy\
+        defusedxml netifaces \
+        pathlib pyyaml
+   ```
+1. Inside the `catkin_ws/src` directory of your catkin workspace clone the following repos:
+   ```shell
+   git clone https://github.com/tu-darmstadt-ros-pkg/hector_quadrotor.git --branch kinetic-devel
+   git clone https://github.com/tu-darmstadt-ros-pkg/hector_gazebo.git --branch kinetic-devel
+   git clone https://github.com/RacecarJ/racecar.git --branch RacecarJTransitory
+   git clone https://github.com/cyphyhouse/racecar_gazebo.git --branch master
+   git clone https://github.com/cyphyhouse/Decawave.git --branch for-cymulator
+   git clone https://github.com/cyphyhouse/Cymulator.git --branch master
+   ```
+1. Run the following commands under your `catkin_ws` directory to compile relevant ROS packages in the cloned repositories.
+   ```shell
+   source /opt/ros/kinetic/setup.bash
+   catkin_make --only-pkg-with-deps cym_gazebo --cmake-args -DPYTHON_VERSION=3.5  # Build only cym_gazebo with Python>=3.5 
+   ```
