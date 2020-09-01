@@ -86,8 +86,15 @@ These commands requires `sudo` permission. Please run them with caution.
    git clone https://github.com/cyphyhouse/Decawave.git --branch for-cymulator
    git clone https://github.com/cyphyhouse/Cymulator.git --branch master
    ```
-1. Run the following commands under your `catkin_ws` directory to compile relevant ROS packages in the cloned repositories.
+### Compile using catkin_make
+7. Run these commands under your `catkin_ws` directory to compile relevant ROS packages in the cloned repositories.
    ```shell
    source /opt/ros/kinetic/setup.bash
    catkin_make --only-pkg-with-deps cym_gazebo --cmake-args -DPYTHON_VERSION=3.5  # Build only cym_gazebo with Python>=3.5 
+   ```
+### Compile using colcon
+7. Run these commands under your `catkin_ws` directory to compile only relevant ROS packages in `catkin_ws/src`.
+   ```shell
+   source /opt/ros/kinetic/setup.bash
+   colcon build --base-paths src/* --packages-up-to cym_gazebo --cmake-args -DPYTHON_VERSION=3.5 
    ```
