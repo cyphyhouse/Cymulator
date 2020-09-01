@@ -63,7 +63,7 @@ cd catkin_ws3/src
 # TODO look into using .rosinstall to automatically download these repositories
 git clone https://github.com/tu-darmstadt-ros-pkg/hector_quadrotor.git --branch kinetic-devel
 git clone https://github.com/tu-darmstadt-ros-pkg/hector_gazebo.git --branch kinetic-devel
-git clone https://github.com/RacecarJ/racecar.git --branch RacecarJTransitory
+git clone https://github.com/cyphyhouse/racecar.git --branch RacecarJTransitory
 git clone https://github.com/cyphyhouse/racecar_gazebo.git --branch master
 git clone https://github.com/cyphyhouse/Decawave.git --branch for-cymulator
 git clone https://github.com/cyphyhouse/Cymulator.git --branch master
