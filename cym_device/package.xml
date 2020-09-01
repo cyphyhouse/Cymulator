@@ -65,7 +65,9 @@
   <exec_depend>cyphy_car_mpc</exec_depend>
   <exec_depend>hector_quadrotor_description</exec_depend>
   <exec_depend>hector_quadrotor_gazebo</exec_depend>
+  <exec_depend>racecar</exec_depend>
   <exec_depend>racecar_control</exec_depend>
+  <exec_depend>racecar_description</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
