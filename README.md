@@ -45,7 +45,7 @@ These commands requires `sudo` permission. Please run them with caution.
 1. Install ROS Kinetic and create a workspace for catkin. We assume it is under `catkin_ws`.
 	- [ROS Kinetic Ubuntu](http://wiki.ros.org/kinetic/Installation/Ubuntu)
 	- [Creating a workspace for catkin](http://wiki.ros.org/catkin/Tutorials/create_a_workspace)
-1. Install Gazebo 9 fo ROS Kinetic
+1. Install Gazebo 9 for ROS Kinetic
    ```shell
    sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
    wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
