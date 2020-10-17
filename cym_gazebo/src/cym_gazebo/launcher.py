@@ -18,7 +18,8 @@ DeviceInitInfo = NamedTuple(
 )
 
 
-def gen_launch_element_tree(device_list: List[DeviceInitInfo]) -> ET.ElementTree:
+def _gen_launch_element_tree(world_name: str,
+                             device_list: List[DeviceInitInfo]) -> ET.ElementTree:
     """
     This creates a .launch XML for a given list of device info
     :param device_list: List initial info about a device
@@ -29,6 +30,9 @@ def gen_launch_element_tree(device_list: List[DeviceInitInfo]) -> ET.ElementTree
     include = ET.SubElement(
         root, 'include',
         attrib={'file': '$(find cym_gazebo)/launch/cym.template.launch'})
+    ET.SubElement(
+        include, 'arg',
+        attrib={'name': 'world_name', 'value': world_name})
     id_list_str = ' '.join(device.bot_name for device in device_list)
     ET.SubElement(
         include, 'arg',
@@ -81,6 +85,6 @@ class _MyROSLaunch(roslaunch.scriptapi.ROSLaunch):
         self.started = False
 
 
-def create_roslaunch_instance(device_list: List[DeviceInitInfo]) -> roslaunch.scriptapi.ROSLaunch:
-    xml = gen_launch_element_tree(device_list)
+def create_roslaunch_instance(world_name: str, device_list: List[DeviceInitInfo]) -> roslaunch.scriptapi.ROSLaunch:
+    xml = _gen_launch_element_tree(world_name, device_list)
     return _MyROSLaunch(xml)
