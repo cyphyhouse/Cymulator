@@ -3,9 +3,9 @@
   <arg name="enable_statistics" default="false" />
   <arg name="enable_cym_marker" default="true" />
   <arg name="enable_cym_vrpn" default="true" />
-  <arg name="enable_cym_diag_relay" default="true" />
+  <arg name="enable_cym_diag_relay" default="false" />
 
-  <arg name="world_name" default="$(find cym_gazebo)/worlds/eceb.world" />
+  <arg name="world_name" default="$(find cym_gazebo)/worlds/irl_arena.world" />
   <arg name="use_sim_time" default="true" />
   <!-- Extra Gazebo arguments are used to switch between physics profile here.
        Check the .world file for available physics profile names.
