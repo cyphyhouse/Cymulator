@@ -2,7 +2,7 @@
 <package format="2">
   <name>cym_viz</name>
   <version>0.0.0</version>
-  <description>cym_viz package is the near real-time visualization package to relay and visualize position and velocity information received by ROS VRN clients in Gazebo simulation</description>
+  <description>cym_viz package is the near real-time visualization package to relay and visualize position and velocity information received by ROS VRPN clients in Gazebo simulation</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
