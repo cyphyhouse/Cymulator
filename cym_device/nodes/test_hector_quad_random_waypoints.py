@@ -65,13 +65,13 @@ def gen_random_waypoints(n: int, dist_range: Tuple[float, float],
 
 
 def main():
-    num_waypoints = rospy.get_param("num_waypoints", 10)
-    dist_range = (rospy.get_param("dist_min", 1.0), rospy.get_param("dist_max", 5.0))
-    area = (Point(rospy.get_param('x_min', 0.0), rospy.get_param('y_min', 0.0), rospy.get_param('z_min', 0.5)),
-            Point(rospy.get_param('x_max', 4.0), rospy.get_param('y_max', 4.0), rospy.get_param('z_max', 4.5)))
+    rospy.init_node("random_waypoints", anonymous=True)
+    num_waypoints = rospy.get_param("~num_waypoints", 10)
+    dist_range = (rospy.get_param("~dist_min", 1.0), rospy.get_param("~dist_max", 5.0))
+    area = (Point(rospy.get_param("~x_min", 0.0), rospy.get_param("~y_min", 0.0), rospy.get_param("~z_min", 0.5)),
+            Point(rospy.get_param("~x_max", 4.0), rospy.get_param("~y_max", 4.0), rospy.get_param("~z_max", 4.5)))
     waypoint_seq = gen_random_waypoints(num_waypoints, dist_range, area)
 
-    rospy.init_node("random_waypoints", anonymous=True)
     pose_topic = rospy.resolve_name("action/pose")
     pose_client = SimpleActionClient(pose_topic, PoseAction)
 
