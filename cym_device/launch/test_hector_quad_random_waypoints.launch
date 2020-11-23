@@ -17,6 +17,8 @@
 
     <!-- Configuration for randomly generating waypoints -->
     <arg name="num_waypoints" default="10"/>
+    <arg name="time_itvl_min" default="1.0"
+         doc="Minimum time interval between assigning consecutive waypoints"/>
     <arg name="dist_min" default="1.0"
          doc="Minimum distance between consecutive waypoints"/>
     <arg name="dist_max" default="5.0"
@@ -56,6 +58,7 @@
     <node ns="$(arg name)" name="$(anon rand_gen_wps)" pkg="cym_device" type="test_hector_quad_random_waypoints.py"
           required="true">
         <param name="num_waypoints" type="int" value="$(arg num_waypoints)"/>
+        <param name="time_itvl_min" type="double" value="$(arg time_itvl_min)"/>
         <param name="dist_min" type="double" value="$(arg dist_min)"/>
         <param name="dist_max" type="double" value="$(arg dist_max)"/>
         <param name="x_min" type="double" value="$(arg x_min)"/>
