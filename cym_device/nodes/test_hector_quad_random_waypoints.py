@@ -28,14 +28,26 @@ def in_rect(p: Point, rect: Tuple[Point, Point]):
                for x, x_min, x_max in zip(p, rect[0], rect[1]))
 
 
-def gen_random_waypoints(n: int, dist_range: Tuple[float, float],
+def gen_random_waypoints(n: int, center: Point, dist_range: Tuple[float, float],
                          area: Tuple[Point, Point]) \
         -> Sequence[Point]:
+    """
+    Generate a sequence of points following the rules below.
+
+    + Odd index: a random point in the hollow sphere defined by the center and
+      distance range and also within the area.
+    + Even index: the center point
+
+    Returns
+    -------
+    ret : Sequence [Point]
+        A sequence of points
+    """
+    assert n > 0
     ret = []  # type: List[Point]
     r_min = dist_range[0]
-    prev = Point(0.0, 0.0, 0.0)
-    for _ in range(n):
-        r_max = min(dist_range[1], max(dist_to_corners(prev, area)))
+    for _ in range(n // 2 + 1):
+        r_max = min(dist_range[1], max(dist_to_corners(center, area)))
         assert r_min <= r_max
         r = random.uniform(r_min, r_max)
 
@@ -50,14 +62,16 @@ def gen_random_waypoints(n: int, dist_range: Tuple[float, float],
             unit_x = 2 * x1 * math.sqrt(1 - x1**2 - x2**2)
             unit_y = 2 * x2 * math.sqrt(1 - x1**2 - x2**2)
             unit_z = 1 - 2 * (x1**2 + x2**2)
-            pick = Point(prev.x + r*unit_x,
-                         prev.y + r*unit_y,
-                         prev.z + r*unit_z)
+            pick = Point(center.x + r*unit_x,
+                         center.y + r*unit_y,
+                         center.z + r*unit_z)
             if not in_rect(pick, area):
                 continue  # Pick again
             ret.append(pick)
+            ret.append(center)
             break
-    assert len(ret) == n
+    assert len(ret) == (n // 2 + 1) * 2
+    ret = ret[:n]  # Take only first n elements
 
     assert all(in_rect(p, area) for p in ret)
 
@@ -68,10 +82,11 @@ def main():
     rospy.init_node("random_waypoints", anonymous=True)
     num_waypoints = rospy.get_param("~num_waypoints", 10)
     time_itvl_min = rospy.get_param("~time_itvl_min", 1.0)
+    center = Point(*rospy.get_param("~center", [0.0, 0.0, 2.5]))
     dist_range = (rospy.get_param("~dist_min", 1.0), rospy.get_param("~dist_max", 5.0))
     area = (Point(rospy.get_param("~x_min", 0.0), rospy.get_param("~y_min", 0.0), rospy.get_param("~z_min", 0.5)),
             Point(rospy.get_param("~x_max", 4.0), rospy.get_param("~y_max", 4.0), rospy.get_param("~z_max", 4.5)))
-    waypoint_seq = gen_random_waypoints(num_waypoints, dist_range, area)
+    waypoint_seq = gen_random_waypoints(num_waypoints, center, dist_range, area)
 
     pose_topic = rospy.resolve_name("action/pose")
     pose_client = SimpleActionClient(pose_topic, PoseAction)
