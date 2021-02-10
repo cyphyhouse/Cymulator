@@ -134,4 +134,4 @@ if __name__ == "__main__":
     try:
         main()
     except rospy.exceptions.ROSInterruptException:
-        rospy.loginfo("Shutting down CymWaypointDriveDrone")
+        rospy.loginfo("Shutting down TestHectorQuadRandomWaypoints")
