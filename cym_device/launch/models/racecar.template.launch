@@ -12,6 +12,7 @@
  
     <arg name="x"/>
     <arg name="y"/>
+    <arg name="yaw"/>
     <arg name="z"/>
  
     <!-- urdf xml robot description loaded on the Parameter Server, converting the xacro into a proper urdf file-->
@@ -24,6 +25,7 @@
             -x $(arg x)
             -y $(arg y)
             -z $(arg z)
+            -Y $(arg yaw)
             -robot_namespace $(arg name)/racecar
             -model $(arg name)" respawn="false" />
  

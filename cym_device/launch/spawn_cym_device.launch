@@ -4,12 +4,14 @@
   <arg name= "device_model"/>
   <arg name= "x" doc="Initial x-axis"/>
   <arg name= "y" doc="Initial y-axis"/>
+  <arg name= "yaw" default="0.0" doc="Initial heading angle in Euler angle following REP-103"/>
   <arg name= "z" default="0.3" doc="Initial z-axis"/>
   <group ns="$(arg name)">
     <include file="$(find cym_device)/launch/models/$(arg device_model).launch">
       <arg name="name" value="$(arg name)"/>
       <arg name="x" value="$(arg x)"/>
       <arg name="y" value="$(arg y)"/>
+      <arg name="yaw" value="$(arg yaw)"/>
       <arg name="z" value="$(arg z)"/>
     </include>
   </group>

@@ -3,6 +3,7 @@
   <arg name= "name" doc="Name for this simulated drone" />
   <arg name= "x" />
   <arg name= "y" />
+  <arg name= "yaw" doc="Silently ignored" />
   <arg name= "z" />
   <arg name= "enable_waypoint_control" default="true" />
 
