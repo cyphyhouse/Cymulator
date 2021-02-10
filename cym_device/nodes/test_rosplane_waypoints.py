@@ -24,27 +24,24 @@ def to_rosplane_waypoint(p: Point, chi_d: float = math.radians(45),
     )
 
 
-def gen_waypoints(num_waypoints, xy_mode, z_mode) -> Sequence:
-    return [(Point(200, 0, -50), math.radians(45)),
-            (Point(0, 200, -50), math.radians(45)),
-            (Point(200, 200, -50), math.radians(225))]
+def gen_waypoints(waypoints: Sequence[Sequence[float]]) -> Sequence:
+    for p in waypoints:
+        if len(p) != 4:
+            rospy.logwarn("The size of waypoint %s != 4. "
+                          "Discard all waypoints." % str(p))
+            return []
+
+    return [(Point(*p[0:3]), math.radians(p[3])) for p in waypoints]
 
 
 def main():
     rospy.init_node("rosplane_waypoints", anonymous=True)
-    num_waypoints = rospy.get_param("~num_waypoints", 10)
-    time_itvl_min = rospy.get_param("~time_itvl_min", 10.0)
-    center = Point(*rospy.get_param("~center", [0.0, 0.0, 2.5]))
-    dist_range = (rospy.get_param("~dist_min", 1.0), rospy.get_param("~dist_max", 5.0))
-    area = (Point(rospy.get_param("~x_min", 0.0), rospy.get_param("~y_min", 0.0), rospy.get_param("~z_min", 0.5)),
-            Point(rospy.get_param("~x_max", 4.0), rospy.get_param("~y_max", 4.0), rospy.get_param("~z_max", 4.5)))
-    xy_mode = rospy.get_param("~xy_mode", "RSR")
-    z_mode = rospy.get_param("~z_mode", "low")
+    waypoints = rospy.get_param("~waypoints", [])
 
     waypoint_topic = rospy.resolve_name("waypoint_path")
     waypoint_pub = rospy.Publisher(waypoint_topic, Waypoint, queue_size=10)
 
-    waypoint_seq = gen_waypoints(num_waypoints, xy_mode, z_mode)
+    waypoint_seq = gen_waypoints(waypoints)
 
     rospy.sleep(2.0)
     waypoint_pub.publish(to_rosplane_waypoint(p=waypoint_seq[0][0],

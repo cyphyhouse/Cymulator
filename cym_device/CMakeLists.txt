@@ -161,6 +161,7 @@ catkin_install_python(PROGRAMS
   nodes/cym_waypoint_driver_drone.py
   nodes/cym_ackermann_servo_boxcar.py
   nodes/test_hector_quad_random_waypoints.py
+  nodes/test_rosplane_waypoints.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

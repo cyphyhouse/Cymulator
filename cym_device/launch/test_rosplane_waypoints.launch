@@ -15,23 +15,6 @@
     <arg name= "y" default="0.0"/>
     <arg name= "z" default="0.3"/>
 
-    <!-- Configuration for randomly generating waypoints -->
-    <arg name="num_waypoints" default="10"/>
-    <arg name="time_itvl_min" default="1.0"
-         doc="Minimum time interval between assigning consecutive waypoints"/>
-    <arg name="center" default="[0.0, 0.0, 2.5]"
-         doc="Center for generating random points on a sphere"/>
-    <arg name="dist_min" default="1.0"
-         doc="Minimum distance between consecutive waypoints"/>
-    <arg name="dist_max" default="5.0"
-         doc="Maximum distance between consecutive waypoints"/>
-    <arg name="x_min" default="0.0"/>
-    <arg name="x_max" default="4.0"/>
-    <arg name="y_min" default="0.0"/>
-    <arg name="y_max" default="4.0"/>
-    <arg name="z_min" default="0.5"/>
-    <arg name="z_max" default="4.5"/>
-
     <!-- Configurations for recording a ROSBag-->
     <arg name="record_topics" default="current_path state"/>
     <arg name="duration" default="90m"/>
@@ -47,43 +30,25 @@
       <arg name="extra_gazebo_args" value="--profile $(arg profile) --seed $(arg seed)"/>
     </include>
 
-    <!-- Spawn a device -->
-    <!-- Spawn MAV -->
-    <include file="$(find rosplane_sim)/launch/spawn_mav.launch">
-        <arg name="mav_name" value="$(arg name)" />
-        <arg name="model" value="$(find rosplane_sim)/xacro/fixedwing.xacro" />
+    <!---->
+    <include file="$(find cym_device)/launch/spawn_cym_device.launch">
+        <arg name= "name" value="$(arg name)"/>
+        <arg name= "device_model" value="$(arg device_model)"/>
+        <arg name= "x" value="$(arg x)"/>
+        <arg name= "y" value="$(arg y)"/>
+        <arg name= "z" value="$(arg z)"/>
     </include>
-
-    <group ns="$(arg name)">
-        <!-- Load Global Parameters for this MAV -->
-        <rosparam command="load" file="$(find rosplane_sim)/params/fixedwing.yaml"/>
-        <node name="autopilot" pkg="rosplane" type="rosplane_controller" />
-
-        <node name="estimator" pkg="rosplane" type="rosplane_estimator" output="screen"/>
-        <!-- Must publish a status: armed to estimate states -->
-        <node name="status_publisher" pkg="rostopic" type="rostopic" output="screen"
-              args="pub status rosflight_msgs/Status '{header: {seq: 0, stamp: 0, frame_id: 'none'},
-                    armed: 'true', failsafe: 'false', rc_override: 'false', offboard: 'false',
-                    control_mode: 0, error_code: 0, num_errors: 0, loop_time_us: 0}'"/>
-
-        <node name="pathfollower" pkg="rosplane" type="rosplane_path_follower" />
-        <node name="pathmanager" pkg="rosplane" type="rosplane_path_manager" output="screen" />
-    </group>
 
     <!-- Run Python testing scripts that assign random waypoints -->
     <node ns="$(arg name)" name="$(anon rand_gen_wps)" pkg="cym_device" type="test_rosplane_waypoints.py"
           required="true">
-        <param name="num_waypoints" type="int" value="$(arg num_waypoints)"/>
-        <param name="time_itvl_min" type="double" value="$(arg time_itvl_min)"/>
-        <rosparam param="center" subst_value="true">$(arg center)</rosparam>
-        <param name="dist_min" type="double" value="$(arg dist_min)"/>
-        <param name="dist_max" type="double" value="$(arg dist_max)"/>
-        <param name="x_min" type="double" value="$(arg x_min)"/>
-        <param name="x_max" type="double" value="$(arg x_max)"/>
-        <param name="y_min" type="double" value="$(arg y_min)"/>
-        <param name="y_max" type="double" value="$(arg y_max)"/>
-        <param name="z_min" type="double" value="$(arg z_min)"/>
-        <param name="z_max" type="double" value="$(arg z_max)"/>
+        <!-- waypoints are specified as a Yaml list of lists [x, y, z, yaw]
+             with x, y, z in meters in NED coordinate and yaw in degrees -->
+        <rosparam param="waypoints">
+            - [200, 0, -50, 45]
+            - [0, 200, -50, 45]
+            - [200, 200, -50, 225]
+        </rosparam>
     </node>
 
     <group ns="$(arg name)" if="$(eval arg('record_topics')!='')">

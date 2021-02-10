@@ -1,0 +1,33 @@
+<?xml  version="1.0"?>
+<launch>
+    <arg name="name" doc="Name for this simulated ROSplane" />
+    <arg name= "x" default="0.0"/>
+    <arg name= "y" default="0.0"/>
+    <arg name= "yaw" default="0.0"/>
+    <arg name= "z" default="0.1"/>
+
+    <!-- Spawn a device -->
+    <!-- Spawn MAV -->
+    <include file="$(find rosplane_sim)/launch/spawn_mav.launch">
+        <arg name="mav_name" value="$(arg name)" />
+        <arg name="model" value="$(find rosplane_sim)/xacro/fixedwing.xacro" />
+        <arg name= "x" value="$(arg x)" />
+        <arg name= "y" value="$(arg y)" />
+        <arg name= "yaw" value="$(arg yaw)" />
+        <arg name= "z" value="$(arg z)" />
+    </include>
+
+    <!-- Load Global Parameters for this MAV -->
+    <rosparam command="load" file="$(find rosplane_sim)/params/fixedwing.yaml"/>
+    <node name="autopilot" pkg="rosplane" type="rosplane_controller" />
+
+    <node name="estimator" pkg="rosplane" type="rosplane_estimator" output="screen"/>
+    <!-- Must publish a status: armed to estimate states -->
+    <node name="status_publisher" pkg="rostopic" type="rostopic" output="screen"
+            args="pub status rosflight_msgs/Status '{header: {seq: 0, stamp: 0, frame_id: 'none'},
+                armed: 'true', failsafe: 'false', rc_override: 'false', offboard: 'false',
+                control_mode: 0, error_code: 0, num_errors: 0, loop_time_us: 0}'"/>
+
+    <node name="pathfollower" pkg="rosplane" type="rosplane_path_follower" />
+    <node name="pathmanager" pkg="rosplane" type="rosplane_path_manager" output="screen" />
+</launch>

@@ -68,6 +68,8 @@
   <exec_depend>racecar</exec_depend>
   <exec_depend>racecar_control</exec_depend>
   <exec_depend>racecar_description</exec_depend>
+  <exec_depend>rosplane</exec_depend>
+  <exec_depend>rosplane_sim</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
