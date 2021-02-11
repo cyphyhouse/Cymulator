@@ -1,5 +1,5 @@
 """
-APIs creating a ROSLaunch instance that after starting it will launch Gazebo
+APIs creating a ROSLaunch XML tree that after starting it will launch Gazebo
  with desired number of cars, drones, and specified obstacles
 """
 
@@ -7,9 +7,6 @@ from typing import List, NamedTuple
 import xml.etree.ElementTree as ET
 
 from geometry_msgs.msg import Point
-import roslaunch
-import roslaunch.parent
-import roslaunch.rlutil
 
 
 DeviceInitInfo = NamedTuple(
@@ -18,13 +15,26 @@ DeviceInitInfo = NamedTuple(
 )
 
 
-def _gen_launch_element_tree(world_name: str,
-                             device_list: List[DeviceInitInfo]) -> ET.ElementTree:
+def gen_launch_element_tree(cfg) -> ET.ElementTree:
     """
     This creates a .launch XML for a given list of device info
-    :param device_list: List initial info about a device
+    :param cfg: Configuration specifying the devices and world.
     :return: an ElementTree representing desired XML for launch config
     """
+    if isinstance(cfg, list):
+        world_name = "irl_arena.world"
+        cfg_devices = cfg
+    elif isinstance(cfg, dict):
+        world_name = cfg['world_name']
+        cfg_devices = cfg['devices']
+    else:
+        raise ValueError("Unexpected value in YAML file")
+
+    device_list = [
+        DeviceInitInfo(device["bot_name"], device["bot_type"], Point(*device["init_pos"]))
+        for device in cfg_devices
+    ]
+
     root = ET.Element('launch')
     # include world file
     include = ET.SubElement(
@@ -64,27 +74,3 @@ def _gen_launch_element_tree(world_name: str,
         ET.SubElement(include, 'arg', attrib={'name': 'z', 'value': str(device.position.z)})
 
     return ET.ElementTree(root)
-
-
-class _MyROSLaunch(roslaunch.scriptapi.ROSLaunch):
-    def __init__(self, launch_xml: ET.ElementTree):
-        """
-        Create a ROSLaunch instance from a given ElementTree.
-            This overrides the original __init__ to avoid waiting for ROS master
-        :param launch_xml: Launch xml tree
-        :return: ROSLaunch instance load from the launch file
-        """
-        uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
-        roslaunch.configure_logging(uuid)
-        launch_strs = [ET.tostring(launch_xml.getroot(), encoding='unicode')]
-        self.parent = roslaunch.parent.ROSLaunchParent(
-            uuid,
-            [],
-            is_core=False,  # is_core=True: throw error if ROS master is already running in background
-            roslaunch_strs=launch_strs)
-        self.started = False
-
-
-def create_roslaunch_instance(world_name: str, device_list: List[DeviceInitInfo]) -> roslaunch.scriptapi.ROSLaunch:
-    xml = _gen_launch_element_tree(world_name, device_list)
-    return _MyROSLaunch(xml)
