@@ -153,11 +153,10 @@ def main(argv) -> None:
                 is_driving = False
 
 
-
 if __name__ == "__main__":
     import sys
 
     try:
         main(rospy.myargv(argv=sys.argv))
     except rospy.exceptions.ROSInterruptException:
-        rospy.loginfo("Shutting down CymWaypointDriveDrone")
+        rospy.loginfo("Shutting down CymWaypointFollowHectorQuad")

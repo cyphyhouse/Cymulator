@@ -16,5 +16,5 @@
   </include>
 
   <node if="$(arg enable_waypoint_control)"
-        name="waypoint_node" pkg="cym_device" type="cym_waypoint_driver_drone.py" args="$(arg name)"/>
+        name="waypoint_node" pkg="cym_device" type="cym_waypoint_follow_hector_quad.py" args="$(arg name)"/>
 </launch>

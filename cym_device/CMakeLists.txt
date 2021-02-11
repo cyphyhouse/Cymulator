@@ -158,7 +158,7 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-  nodes/cym_waypoint_driver_drone.py
+  nodes/cym_waypoint_follow_hector_quad.py
   nodes/cym_ackermann_servo_boxcar.py
   nodes/test_hector_quad_random_waypoints.py
   nodes/test_rosplane_waypoints.py
