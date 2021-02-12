@@ -1,0 +1,33 @@
+repositories:
+  hector_quadrotor:
+    type: git
+    url: https://github.com/tu-darmstadt-ros-pkg/hector_quadrotor.git
+    version: kinetic-devel
+  hector_gazebo:
+    type: git
+    url: https://github.com/tu-darmstadt-ros-pkg/hector_gazebo.git
+    version: kinetic-devel
+  racecar:
+    type: git
+    url: https://github.com/cyphyhouse/racecar.git
+    version: RacecarJTransitory
+  racecar_gazebo:
+    type: git
+    url: https://github.com/cyphyhouse/racecar_gazebo.git
+    version: master
+  roslplane:
+    type: git
+    url: https://github.com/byu-magicc/rosplane.git
+    version: RC1.0
+  rosflight_plugins:
+    type: git
+    url: https://github.com/byu-magicc/rosflight_plugins.git
+    version: master
+  rosflight:
+    type: git
+    url: https://github.com/rosflight/rosflight.git
+    version: master
+  Cymulator:
+    type: git
+    url: https://github.com/cyphyhouse/Cymulator.git
+    version: master
