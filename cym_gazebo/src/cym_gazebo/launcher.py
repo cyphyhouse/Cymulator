@@ -49,16 +49,19 @@ def gen_launch_element_tree(cfg) -> ET.ElementTree:
         attrib={'name': 'id_list', 'value': id_list_str})
 
     # add devices
-    KNOWN_DEVICE = ["f1tenth", "boxcar", "hector_quadrotor"]
+    KNOWN_DEVICES = ["f1tenth", "boxcar", "hector_quadrotor", "rosplane"]
     for device in device_list:
-        if device.bot_type in KNOWN_DEVICE:
-            cym_device_model = device.bot_type
-        elif device.bot_type == "CAR":
+        if device.bot_type.lower() in KNOWN_DEVICES:
+            cym_device_model = device.bot_type.lower()
+        elif device.bot_type.upper() in ["CAR", "RACECAR"]:
             cym_device_model = "f1tenth"
-        elif device.bot_type == "QUAD":
+        elif device.bot_type.upper() in ["QUAD", "DRONE"]:
             cym_device_model = "hector_quadrotor"
+        elif device.bot_type.upper() in ["PLANE", "FIXEDWING"]:
+            cym_device_model = "rosplane"
         else:
             raise ValueError("Unknown bot_type: " + device.bot_type)
+        assert cym_device_model in KNOWN_DEVICES
 
         include = ET.SubElement(
             root, 'include',
