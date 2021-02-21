@@ -15,7 +15,7 @@ repositories:
     type: git
     url: https://github.com/cyphyhouse/racecar_gazebo.git
     version: master
-  roslplane:
+  rosplane:
     type: git
     url: https://github.com/byu-magicc/rosplane.git
     version: RC1.0
