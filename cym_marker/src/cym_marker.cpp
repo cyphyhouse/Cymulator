@@ -170,7 +170,7 @@ bool setIGNMarker(IGNMarker& msg,
                   const diagnostic_aggregator::StatusItem& status_item)
 {
     msg.set_ns(status_item.getHwId());
-    msg.set_id(0);
+    msg.set_id(1);  // Any non zero id to denote updating the same marker instead of creating new markers
     msg.set_type(IGNMarker::LINE_LIST);
     auto& mat = *msg.mutable_material();
     auto& script = *mat.mutable_script();

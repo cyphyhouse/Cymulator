@@ -19,8 +19,21 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 find_package(YAML_CPP REQUIRED NAMES yaml-cpp YAML_CPP)
-find_package(ignition-msgs1 REQUIRED)
-find_package(ignition-transport4 REQUIRED)
+find_package(gazebo REQUIRED)
+
+if(gazebo_VERSION_MAJOR EQUAL 9 OR gazebo_VERSION_MAJOR EQUAL 10)
+   find_package(ignition-msgs1 REQUIRED)
+   find_package(ignition-transport4 REQUIRED)
+   set(IGN_TRANSPORT_INCLUDE_DIRS ${ignition-transport4_INCLUDE_DIRS})
+   set(IGN_TRANSPORT_LIBRARIES ${ignition-transport4_LIBRARIES})
+elseif(gazebo_VERSION_MAJOR EQUAL 11)
+   find_package(ignition-msgs5 REQUIRED)
+   find_package(ignition-transport8 REQUIRED)
+   set(IGN_TRANSPORT_INCLUDE_DIRS ${ignition-transport8_INCLUDE_DIRS})
+   set(IGN_TRANSPORT_LIBRARIES ${ignition-transport8_LIBRARIES})
+else()
+   message(SEND_ERROR "Unsupported Gazebo version ${gazebo_VERSION}")
+endif()
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -130,7 +143,7 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${YAML_CPP_INCLUDE_DIRS}
-  ${ignition-transport4_INCLUDE_DIRS}
+  ${IGN_TRANSPORT_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -160,7 +173,7 @@ add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EX
 target_link_libraries(${PROJECT_NAME}
    ${catkin_LIBRARIES}
    ${YAML_CPP_LIBRARIES}
-   ${ignition-transport4_LIBRARIES}
+   ${IGN_TRANSPORT_LIBRARIES}
 )
 
 #############

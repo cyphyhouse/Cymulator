@@ -52,19 +52,15 @@
 
   <depend>diagnostic_aggregator</depend>
   <depend>diagnostic_msgs</depend>
+  <depend>gazebo</depend>
   <depend>geometry_msgs</depend>
   <depend>roscpp</depend>
   <depend>rosgraph_msgs</depend>
   <depend>std_msgs</depend>
 
   <build_depend>yaml-cpp</build_depend>
-  <build_depend>ignition-msgs1</build_depend>
-  <build_depend>ignition-transport4</build_depend>
-
   <build_depend>message_generation</build_depend>
   <exec_depend>message_runtime</exec_depend>
-
-  <exec_depend>gazebo</exec_depend>
   <exec_depend>gazebo_ros</exec_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
