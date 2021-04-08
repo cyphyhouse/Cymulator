@@ -84,7 +84,7 @@ void addHollowEllipsoid(IGNMarker& msg, const std::array<IGNPoint, 2>& corner)
     if(draw != "xy")
     {   /* skip drawing very thin ellipses */ }
     else {
-        for(double step_z=-r_z; step_z<=r_z; step_z+=STEP) {
+        for(double step_z=r_z; step_z>=-r_z; step_z-=STEP) {
             // Create ellipise for xy-plane
             IGNPoint p;
             p.set_x(center.x() + r_x);
@@ -108,7 +108,7 @@ void addHollowEllipsoid(IGNMarker& msg, const std::array<IGNPoint, 2>& corner)
     if(draw != "yz")
     {   /* skip */ }
     else {
-        for(double step_x=-r_x; step_x<=r_x; step_x+=STEP) {
+        for(double step_x=r_x; step_x>=-r_x; step_x-=STEP) {
             // Create ellipise for yz-plane
             IGNPoint p;
             p.set_x(center.x() + step_x);
@@ -132,7 +132,7 @@ void addHollowEllipsoid(IGNMarker& msg, const std::array<IGNPoint, 2>& corner)
     if(draw != "zx")
     {   /* skip */ }
     else {
-        for(double step_y=-r_y; step_y<=r_y; step_y+=STEP) {
+        for(double step_y=r_y; step_y>=-r_y; step_y-=STEP) {
             // Create ellipise for zx-plane
             IGNPoint p;
             p.set_x(center.x());
