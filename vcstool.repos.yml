@@ -7,6 +7,9 @@ repositories:
     type: git
     url: https://github.com/tu-darmstadt-ros-pkg/hector_gazebo.git
     version: kinetic-devel
+  hector_localization:
+    type: git
+    url: https://github.com/tu-darmstadt-ros-pkg/hector_localization.git
   racecar:
     type: git
     url: https://github.com/cyphyhouse/racecar.git
