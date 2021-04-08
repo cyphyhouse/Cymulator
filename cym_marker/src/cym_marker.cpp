@@ -9,6 +9,7 @@
 
 #include <bitset>
 #include <iostream>
+#include <cmath>
 #include <string>
 
 #include <ignition/transport.hh>
@@ -60,6 +61,116 @@ void addHollowBox(IGNMarker& msg,
     return;
 }
 
+void addHollowEllipsoid(IGNMarker& msg, const std::array<IGNPoint, 2>& corner)
+{
+    const size_t N = 32;  // Number of points to approximate ellipses
+    const double STEP = 0.375; // meter
+    IGNPoint center;
+    center.set_x((corner[0].x() + corner[1].x()) / 2);
+    center.set_y((corner[0].y() + corner[1].y()) / 2);
+    center.set_z((corner[0].z() + corner[1].z()) / 2);
+
+    const double r_x = std::abs(corner[0].x() - corner[1].x()) / 2;
+    const double r_y = std::abs(corner[0].y() - corner[1].y()) / 2;
+    const double r_z = std::abs(corner[0].z() - corner[1].z()) / 2;
+
+    const double xy_ratio = std::max(r_x, r_y)/std::min(r_x, r_y);
+    const double yz_ratio = std::max(r_y, r_z)/std::min(r_y, r_z);
+    const double zx_ratio = std::max(r_z, r_x)/std::min(r_z, r_x);
+
+    const std::string draw = (xy_ratio <= yz_ratio && xy_ratio <= zx_ratio)? "xy" :
+                             (yz_ratio <= zx_ratio)? "yz" : "zx";
+
+    if(draw != "xy")
+    {   /* skip drawing very thin ellipses */ }
+    else {
+        for(double step_z=-r_z; step_z<=r_z; step_z+=STEP) {
+            // Create ellipise for xy-plane
+            IGNPoint p;
+            p.set_x(center.x() + r_x);
+            p.set_y(center.y());
+            p.set_z(center.z() + step_z);
+            for(size_t i=1; i<=N; ++i) {
+                msg.add_point()->CopyFrom(p);  // Append the previous point to start the line segment
+                const double theta = (double(i)/N)*2*M_PI;
+                const double x = r_x * std::cos(theta);
+                const double y = r_y * std::sin(theta);
+
+                p.set_x(center.x() + x);
+                p.set_y(center.y() + y);
+                p.set_z(center.z() + step_z);
+
+                msg.add_point()->CopyFrom(p);  // Append current point to end the line segment
+            }
+        }
+    }
+
+    if(draw != "yz")
+    {   /* skip */ }
+    else {
+        for(double step_x=-r_x; step_x<=r_x; step_x+=STEP) {
+            // Create ellipise for yz-plane
+            IGNPoint p;
+            p.set_x(center.x() + step_x);
+            p.set_y(center.y() + r_y);
+            p.set_z(center.z());
+            for(size_t i=1; i<=N; ++i) {
+                msg.add_point()->CopyFrom(p);  // Append the previous point to start the line segment
+                const double theta =(double(i)/N)*2*M_PI;
+                const double y = r_y * std::cos(theta);
+                const double z = r_z * std::sin(theta);
+
+                p.set_x(center.x() + step_x);
+                p.set_y(center.y() + y);
+                p.set_z(center.z() + z);
+
+                msg.add_point()->CopyFrom(p);  // Append current point to end the line segment
+            }
+        }
+    }
+
+    if(draw != "zx")
+    {   /* skip */ }
+    else {
+        for(double step_y=-r_y; step_y<=r_y; step_y+=STEP) {
+            // Create ellipise for zx-plane
+            IGNPoint p;
+            p.set_x(center.x());
+            p.set_y(center.y() + step_y);
+            p.set_z(center.z() + r_z);
+            for(size_t i=1; i<=N; ++i) {
+                msg.add_point()->CopyFrom(p);  // Append the previous point to start the line segment
+                const double theta = (double(i)/N)*2*M_PI;
+                const double z = r_z * std::cos(theta);
+                const double x = r_x * std::sin(theta);
+
+                p.set_x(center.x() + x);
+                p.set_y(center.y() + step_y);
+                p.set_z(center.z() + z);
+
+                msg.add_point()->CopyFrom(p);  // Append current point to end the line segment
+            }
+        }
+    }
+}
+
+void addBoundingCylinders(IGNMarker& msg,
+                          const YAML::Node& box_seq)
+{
+    assert(box_seq.IsSequence());
+    for(auto box : box_seq)
+    {
+        std::array<IGNPoint, 2> p;  // p[0] is p_min and p[1] is p_max
+        p[0].set_x(box[0][0].as<double>());
+        p[0].set_y(box[0][1].as<double>());
+        p[0].set_z(box[0][2].as<double>());
+        p[1].set_x(box[1][0].as<double>());
+        p[1].set_y(box[1][1].as<double>());
+        p[1].set_z(box[1][2].as<double>());
+        addHollowEllipsoid(msg, p);
+    }
+}
+
 const std::map<std::string, std::string> PREDEFINED_SCRIPT = {
     {"drone0", "Gazebo/OrangeTransparent"},
     {"drone1", "Gazebo/YellowTransparent"},
@@ -90,8 +201,6 @@ void addReachSet(IGNMarker& msg, const YAML::Node& state_list)
         p[1].set_x(state_bound1[1].as<double>());
         p[1].set_y(state_bound1[2].as<double>());
         p[1].set_z(state_bound1[3].as<double>());
-
-        addHollowBox(msg, p);
     }
 }
 
@@ -103,6 +212,14 @@ void addContract(IGNMarker& msg, const YAML::Node& set_repr)
     {
         const YAML::Node& set_type = it->first;
         if(set_type.as<std::string>() == "BoxesMap")
+        {
+            if(!it->second.IsSequence()){
+                ROS_WARN_STREAM("Unexpected " << it->first << ":" << it->second << std::endl);
+                continue;
+            }
+            addBoundingCylinders(msg, it->second);
+        }
+        else if(set_type.as<std::string>() == "BoxesMap")
         {
             if(!it->second.IsSequence()){
                 ROS_WARN_STREAM("Unexpected " << it->first << ":" << it->second << std::endl);
@@ -121,7 +238,7 @@ void addContract(IGNMarker& msg, const YAML::Node& set_repr)
                 addHollowBox(msg, p);
             }
         }
-        if(set_type.as<std::string>() == "ContiguousUnion")
+        else if(set_type.as<std::string>() == "ContiguousUnion")
         {
             if(!it->second.IsSequence())
             {
@@ -147,7 +264,7 @@ void addContract(IGNMarker& msg, const YAML::Node& set_repr)
                 addContract(msg, (*it)[1]);
             }
         }
-        if(set_type.as<std::string>() == "Union")
+        else if(set_type.as<std::string>() == "Union")
         {
             if(!it->second.IsSequence())
             {
@@ -159,7 +276,7 @@ void addContract(IGNMarker& msg, const YAML::Node& set_repr)
         }
         else
         {
-            // ROS_WARN_STREAM("Unexpected set type " << it->first << std::endl);
+            ROS_WARN_STREAM("Unexpected set type " << it->first << std::endl);
             // TODO skip for now
         }
     }
