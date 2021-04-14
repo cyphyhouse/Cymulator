@@ -31,6 +31,8 @@ typedef ignition::msgs::Vector3d IGNPoint;
 void addHollowBox(IGNMarker& msg,
                   const std::array<IGNPoint, 2>& corner)
 {
+    msg.set_type(IGNMarker::LINE_LIST);
+
     typedef std::bitset<3> Vertex3d;
 
     // Construct 4 x 3 = 12 edges of the rectangle
@@ -61,8 +63,136 @@ void addHollowBox(IGNMarker& msg,
     return;
 }
 
+void addBoxFaces(IGNMarker& msg, const std::array<IGNPoint, 2>& corner)
+{
+    msg.set_type(IGNMarker::TRIANGLE_LIST);
+    typedef std::bitset<3> Vertex3d;
+
+    // Construct 6 faces of the rectangle with 4*3 = 12 triangles
+    const std::array<const Vertex3d, 4> vertice = {0b000, 0b110, 0b101, 0b011};
+    for(const auto src: vertice)
+    {
+        // Create source point
+        IGNPoint p0;
+        p0.set_x(corner[ src[0] ].x());
+        p0.set_y(corner[ src[1] ].y());
+        p0.set_z(corner[ src[2] ].z());
+
+        const std::array<const Vertex3d, 3> targets = {
+            Vertex3d(src).flip(0),
+            Vertex3d(src).flip(1),
+            Vertex3d(src).flip(2)};
+        for(size_t i=0; i<3; ++i)
+        {
+            // Add source point by copying
+            *msg.add_point() = p0;
+            // Create and directly set target point
+            IGNPoint& p1 = *msg.add_point(); 
+            p1.set_x(corner[ targets[i][0] ].x());
+            p1.set_y(corner[ targets[i][1] ].y());
+            p1.set_z(corner[ targets[i][2] ].z());
+
+            IGNPoint& p2 = *msg.add_point();
+            size_t j = (i+1)%3;
+            p2.set_x(corner[ targets[j][0] ].x());
+            p2.set_y(corner[ targets[j][1] ].y());
+            p2.set_z(corner[ targets[j][2] ].z());
+        }
+    }
+    return;
+}
+
+void addCylinder(IGNMarker& msg, const std::array<IGNPoint, 2>& corner)
+{
+    msg.set_type(IGNMarker::TRIANGLE_STRIP);
+
+    const size_t N = 32;  // Number of points to approximate ellipses
+    typedef std::array<double, 3> PointT;
+
+    const double r_x = std::abs(corner[0].x() - corner[1].x()) / 2;
+    const double r_y = std::abs(corner[0].y() - corner[1].y()) / 2;
+    const double r_z = std::abs(corner[0].z() - corner[1].z()) / 2;
+
+    const double xy_ratio = std::max(r_x, r_y)/std::min(r_x, r_y);
+    const double yz_ratio = std::max(r_y, r_z)/std::min(r_y, r_z);
+    const double zx_ratio = std::max(r_z, r_x)/std::min(r_z, r_x);
+
+    std::vector<PointT> top_point_vec, bot_point_vec, side_point_vec;
+    top_point_vec.reserve(2*(N+1));
+    bot_point_vec.reserve(2*(N+1));
+    side_point_vec.reserve(2*(N+1));
+    if (xy_ratio <= yz_ratio && xy_ratio <= zx_ratio || xy_ratio <= 3.0) { // prefer aligning cylinder with z-axis
+        // Create points for top, bottom, and side of cylinder
+        // Notice the order of points beind added
+        for(size_t i=0; i<=N; ++i) {
+            const double theta = (double(i)/N)*2*M_PI;
+            const double x = r_x * std::cos(theta);
+            const double y = r_y * std::sin(theta);
+
+            top_point_vec.push_back({0.0, 0.0, r_z});
+            top_point_vec.push_back({x, y, r_z});
+            side_point_vec.push_back({x, y, r_z});
+            side_point_vec.push_back({x, y, -r_z});
+            bot_point_vec.push_back({x, y, -r_z});
+            bot_point_vec.push_back({0.0, 0.0, -r_z});
+        }
+    }
+    else if (yz_ratio <= zx_ratio) {
+        for(size_t i=0; i<=N; ++i) {
+            const double theta = (double(i)/N)*2*M_PI;
+            const double y = r_y * std::cos(theta);
+            const double z = r_z * std::sin(theta);
+
+            top_point_vec.push_back({r_x, 0.0, 0.0});
+            top_point_vec.push_back({r_x, y, z});
+            side_point_vec.push_back({r_x, y, z});
+            side_point_vec.push_back({-r_x, y, z});
+            bot_point_vec.push_back({-r_x, y, z});
+            bot_point_vec.push_back({-r_x, 0.0, 0.0});
+        }
+    }
+    else {
+        for(size_t i=0; i<=N; ++i) {
+            const double theta = (double(i)/N)*2*M_PI;
+            const double z = r_z * std::cos(theta);
+            const double x = r_x * std::sin(theta);
+
+            top_point_vec.push_back({0.0, r_y, 0.0});
+            top_point_vec.push_back({x, r_y, z});
+            side_point_vec.push_back({x, r_y, z});
+            side_point_vec.push_back({x, -r_y, z});
+            bot_point_vec.push_back({x, -r_y, z});
+            bot_point_vec.push_back({0.0, -r_y, 0.0});
+        }
+
+    }
+
+    const double center_x = (corner[0].x() + corner[1].x()) / 2;
+    const double center_y = (corner[0].y() + corner[1].y()) / 2;
+    const double center_z = (corner[0].z() + corner[1].z()) / 2;
+    for(auto p: top_point_vec) {
+        IGNPoint& ign_p = *msg.add_point();
+        ign_p.set_x(center_x + p[0]);
+        ign_p.set_y(center_y + p[1]);
+        ign_p.set_z(center_z + p[2]);
+    }
+    for(auto p: side_point_vec) {
+        IGNPoint& ign_p = *msg.add_point();
+        ign_p.set_x(center_x + p[0]);
+        ign_p.set_y(center_y + p[1]);
+        ign_p.set_z(center_z + p[2]);
+    }
+    for(auto p: bot_point_vec) {
+        IGNPoint& ign_p = *msg.add_point();
+        ign_p.set_x(center_x + p[0]);
+        ign_p.set_y(center_y + p[1]);
+        ign_p.set_z(center_z + p[2]);
+    }
+}
+
 void addHollowEllipsoid(IGNMarker& msg, const std::array<IGNPoint, 2>& corner)
 {
+    msg.set_type(IGNMarker::LINE_LIST);
     const size_t N = 32;  // Number of points to approximate ellipses
     const double STEP = 0.375; // meter
     IGNPoint center;
@@ -167,14 +297,14 @@ void addBoundingCylinders(IGNMarker& msg,
         p[1].set_x(box[1][0].as<double>());
         p[1].set_y(box[1][1].as<double>());
         p[1].set_z(box[1][2].as<double>());
-        addHollowEllipsoid(msg, p);
+        addCylinder(msg, p);
     }
 }
 
 const std::map<std::string, std::string> PREDEFINED_SCRIPT = {
-    {"drone0", "Gazebo/OrangeTransparent"},
+    {"drone0", "Gazebo/OrangeTransparentOverlay"},
     {"drone1", "Gazebo/YellowTransparent"},
-    {"drone2", "Gazebo/BlueTransparent"},
+    {"drone2", "Gazebo/BlueTransparentOverlay"},
     {"drone3", "Gazebo/DarkMagentaTransparent"},
     {"drone4", "Gazebo/GreyTransparent"},
     {"drone5", "Gazebo/BlackTransparent"},
@@ -235,7 +365,7 @@ void addContract(IGNMarker& msg, const YAML::Node& set_repr)
                 p[1].set_y(box[1][1].as<double>());
                 p[1].set_z(box[1][2].as<double>());
 
-                addHollowBox(msg, p);
+                addBoxFaces(msg, p);
             }
         }
         else if(set_type.as<std::string>() == "ContiguousUnion")
@@ -288,7 +418,6 @@ bool setIGNMarker(IGNMarker& msg,
 {
     msg.set_ns(status_item.getHwId());
     msg.set_id(1);  // Any non zero id to denote updating the same marker instead of creating new markers
-    msg.set_type(IGNMarker::LINE_LIST);
     auto& mat = *msg.mutable_material();
     auto& script = *mat.mutable_script();
 
@@ -297,11 +426,11 @@ bool setIGNMarker(IGNMarker& msg,
         if(PREDEFINED_SCRIPT.count(status_item.getHwId()))
         {   script.set_name(PREDEFINED_SCRIPT.at(status_item.getHwId()));}
         else
-        {   script.set_name("Gazebo/RedTransparent");}
+        {   script.set_name("Gazebo/GreenTransparentOverlay");}
     }
     else
     {
-        script.set_name("Gazebo/RedTransparent");
+        script.set_name("Gazebo/RedTransparentOverlay");
     }
 
     try 
