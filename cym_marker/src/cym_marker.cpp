@@ -31,12 +31,11 @@ typedef ignition::msgs::Vector3d IGNPoint;
 void addHollowBox(IGNMarker& msg,
                   const std::array<IGNPoint, 2>& corner)
 {
-    msg.set_type(IGNMarker::LINE_LIST);
-
+    const double DELTA = 1.0;  // meter
     typedef std::bitset<3> Vertex3d;
-
-    // Construct 4 x 3 = 12 edges of the rectangle
-    const std::array<const Vertex3d, 4> vertice = {0b000, 0b110, 0b101, 0b011};
+    const std::array<const Vertex3d, 8> vertice = {
+        0b000, 0b011, 0b110, 0b101,
+        0b001, 0b010, 0b100, 0b111};
     for(const auto src: vertice)
     {
         // Create source point
@@ -49,23 +48,44 @@ void addHollowBox(IGNMarker& msg,
             Vertex3d(src).flip(0),
             Vertex3d(src).flip(1),
             Vertex3d(src).flip(2)};
-        for(auto tgt: targets)
+        for(size_t i=0; i<3; ++i)
         {
-            // Add source point by copying
+            IGNPoint p1;
+            {
+                const double x_d = std::copysign(DELTA, corner[ targets[i][0] ].x()-p0.x());
+                const double y_d = std::copysign(DELTA, corner[ targets[i][1] ].y()-p0.y());
+                const double z_d = std::copysign(DELTA, corner[ targets[i][2] ].z()-p0.z());
+                p1.set_x(p0.x() + x_d);
+                p1.set_y(p0.y() + y_d);
+                p1.set_z(p0.z() + z_d);
+            }
+
+            IGNPoint p2;
+            {
+                size_t j = (i+1)%3;
+                const double x_d = std::copysign(DELTA, corner[ targets[j][0] ].x()-p0.x());
+                const double y_d = std::copysign(DELTA, corner[ targets[j][1] ].y()-p0.y());
+                const double z_d = std::copysign(DELTA, corner[ targets[j][2] ].z()-p0.z());
+                p2.set_x(p0.x() + x_d);
+                p2.set_y(p0.y() + y_d);
+                p2.set_z(p0.z() + z_d);
+            }
+
+            *msg.add_point() = p0;  // This will copy points
+            *msg.add_point() = p1;
+            *msg.add_point() = p2;
+            // Add three points in different order so we can see from the other side
             *msg.add_point() = p0;
-            // Create and directly set target point
-            IGNPoint& p1 = *msg.add_point(); 
-            p1.set_x(corner[ tgt[0] ].x());
-            p1.set_y(corner[ tgt[1] ].y());
-            p1.set_z(corner[ tgt[2] ].z());
+            *msg.add_point() = p2;
+            *msg.add_point() = p1;
         }
+
     }
     return;
 }
 
 void addBoxFaces(IGNMarker& msg, const std::array<IGNPoint, 2>& corner)
 {
-    msg.set_type(IGNMarker::TRIANGLE_LIST);
     typedef std::bitset<3> Vertex3d;
 
     // Construct 6 faces of the rectangle with 4*3 = 12 triangles
@@ -104,8 +124,6 @@ void addBoxFaces(IGNMarker& msg, const std::array<IGNPoint, 2>& corner)
 
 void addCylinder(IGNMarker& msg, const std::array<IGNPoint, 2>& corner)
 {
-    msg.set_type(IGNMarker::TRIANGLE_LIST);
-
     const size_t N = 32;  // Number of points to approximate ellipses
     typedef std::array<double, 3> PointT;
 
@@ -227,7 +245,6 @@ void addCylinder(IGNMarker& msg, const std::array<IGNPoint, 2>& corner)
 
 void addHollowEllipsoid(IGNMarker& msg, const std::array<IGNPoint, 2>& corner)
 {
-    msg.set_type(IGNMarker::LINE_LIST);
     const size_t N = 32;  // Number of points to approximate ellipses
     const double STEP = 0.375; // meter
     IGNPoint center;
@@ -320,7 +337,7 @@ void addHollowEllipsoid(IGNMarker& msg, const std::array<IGNPoint, 2>& corner)
 }
 
 void addBoundingCylinders(IGNMarker& msg,
-                          const YAML::Node& box_seq)
+                          const YAML::Node& box_seq, bool hollow)
 {
     assert(box_seq.IsSequence());
     for(auto box : box_seq)
@@ -332,7 +349,11 @@ void addBoundingCylinders(IGNMarker& msg,
         p[1].set_x(box[1][0].as<double>());
         p[1].set_y(box[1][1].as<double>());
         p[1].set_z(box[1][2].as<double>());
-        addCylinder(msg, p);
+
+        if(hollow)
+            addHollowBox(msg, p);
+        else
+            addCylinder(msg, p);
     }
 }
 
@@ -360,7 +381,7 @@ void addReachSet(IGNMarker& msg, const YAML::Node& state_list)
     }
 }
 
-void addContract(IGNMarker& msg, const YAML::Node& set_repr)
+void addContract(IGNMarker& msg, const YAML::Node& set_repr, bool hollow)
 {
     if(!set_repr.IsMap())
         return;
@@ -373,7 +394,7 @@ void addContract(IGNMarker& msg, const YAML::Node& set_repr)
                 ROS_WARN_STREAM("Unexpected " << it->first << ":" << it->second << std::endl);
                 continue;
             }
-            addBoundingCylinders(msg, it->second);
+            addBoundingCylinders(msg, it->second, hollow);
         }
         else if(set_type.as<std::string>() == "BoxesMap")
         {
@@ -391,7 +412,10 @@ void addContract(IGNMarker& msg, const YAML::Node& set_repr)
                 p[1].set_y(box[1][1].as<double>());
                 p[1].set_z(box[1][2].as<double>());
 
-                addBoxFaces(msg, p);
+                if(hollow)
+                    addHollowBox(msg, p);
+                else
+                    addBoxFaces(msg, p);
             }
         }
         else if(set_type.as<std::string>() == "ContiguousUnion")
@@ -414,10 +438,14 @@ void addContract(IGNMarker& msg, const YAML::Node& set_repr)
                 prev_region = op[1];
             }
 
-            addContract(msg, prev_region);
+            addContract(msg, prev_region, hollow);
+            for(size_t i=0; it!= t_r_list.end() && i<15; ++it, ++i)
+            {
+                addContract(msg, (*it)[1], hollow);
+            }
             for(; it!= t_r_list.end(); ++it)
             {
-                addContract(msg, (*it)[1]);
+                addContract(msg, (*it)[1], true);
             }
         }
         else if(set_type.as<std::string>() == "Union")
@@ -428,7 +456,7 @@ void addContract(IGNMarker& msg, const YAML::Node& set_repr)
                 continue;
             }
             for(auto op : it-> second)
-                addContract(msg, op);
+                addContract(msg, op, hollow);
         }
         else
         {
@@ -452,7 +480,7 @@ bool setIGNMarker(IGNMarker& msg,
         }
         if (status_item.getName() == "contract")
         {
-            addContract(msg, yaml_node);
+            addContract(msg, yaml_node, false);
             return true;
         }
     }
@@ -481,6 +509,7 @@ buildIGNMarkers(const diagnostic_aggregator::StatusItem& status_item)
     std::vector<IGNMarker> vec;
     vec.push_back(IGNMarker());
     IGNMarker& msg = vec.back();
+    msg.set_type(IGNMarker::TRIANGLE_LIST);
     msg.set_ns(status_item.getHwId());
     msg.set_id(1);  // Any non zero id to denote updating the same marker instead of creating new markers
     auto& mat = *msg.mutable_material();
