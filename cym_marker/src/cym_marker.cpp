@@ -336,15 +336,6 @@ void addBoundingCylinders(IGNMarker& msg,
     }
 }
 
-const std::map<std::string, std::string> PREDEFINED_SCRIPT = {
-    {"drone0", "Gazebo/OrangeTransparentOverlay"},
-    {"drone1", "Gazebo/YellowTransparent"},
-    {"drone2", "Gazebo/BlueTransparentOverlay"},
-    {"drone3", "Gazebo/DarkMagentaTransparent"},
-    {"drone4", "Gazebo/GreyTransparent"},
-    {"drone5", "Gazebo/BlackTransparent"},
-};
-
 
 void addReachSet(IGNMarker& msg, const YAML::Node& state_list)
 {
@@ -451,23 +442,6 @@ void addContract(IGNMarker& msg, const YAML::Node& set_repr)
 bool setIGNMarker(IGNMarker& msg,
                   const diagnostic_aggregator::StatusItem& status_item)
 {
-    msg.set_ns(status_item.getHwId());
-    msg.set_id(1);  // Any non zero id to denote updating the same marker instead of creating new markers
-    auto& mat = *msg.mutable_material();
-    auto& script = *mat.mutable_script();
-
-    if(status_item.getLevel() == diagnostic_aggregator::DiagnosticLevel::Level_OK)
-    {
-        if(PREDEFINED_SCRIPT.count(status_item.getHwId()))
-        {   script.set_name(PREDEFINED_SCRIPT.at(status_item.getHwId()));}
-        else
-        {   script.set_name("Gazebo/GreenTransparentOverlay");}
-    }
-    else
-    {
-        script.set_name("Gazebo/RedTransparentOverlay");
-    }
-
     try 
     {
         YAML::Node yaml_node = YAML::Load(status_item.getValue("data"));
@@ -499,6 +473,29 @@ bool setIGNMarker(IGNMarker& msg,
     // Some exception occurred
     return false;
 }
+
+
+std::vector<IGNMarker>
+buildIGNMarkers(const diagnostic_aggregator::StatusItem& status_item)
+{
+    std::vector<IGNMarker> vec;
+    vec.push_back(IGNMarker());
+    IGNMarker& msg = vec.back();
+    msg.set_ns(status_item.getHwId());
+    msg.set_id(1);  // Any non zero id to denote updating the same marker instead of creating new markers
+    auto& mat = *msg.mutable_material();
+    auto& script = *mat.mutable_script();
+
+    const std::string& color = status_item.getValue("color");
+    if(color != "")
+        script.set_name(color);
+    else
+        script.set_name("Gazebo/GreenTransparentOverlay");
+
+    setIGNMarker(msg, status_item);
+    return vec;
+}
+
 }
 
 class GazeboMarker {
@@ -559,13 +556,15 @@ void GazeboMarker::callbackDiagnosticsAgg(
         {  // XXX Support other serialization formats possibly with compression. E.g., json
            continue;
         }
-        
-        IGNMarker ign_msg;
-        ros_ign_bridge::convert_ros_to_ign(diag_msg.header,
-                                           *ign_msg.mutable_header());
-        if( setIGNMarker(ign_msg, status_item) )
+
+        std::vector<IGNMarker> ign_msg_vec = buildIGNMarkers(status_item);
+        if( !ign_msg_vec.empty() )
         {   // XXX Can Gazebo handle multple marker requests in short time?
-            this->_sendMarkerRequest(ign_msg);
+            for(auto ign_msg: ign_msg_vec) {
+                ros_ign_bridge::convert_ros_to_ign(diag_msg.header,
+                                                   *ign_msg.mutable_header());
+                this->_sendMarkerRequest(ign_msg);
+            }
         }
     }
     ROS_DEBUG_STREAM("Duration to convert to Gazebo markers: " << (ros::Time::now() - t_begin).toSec());
