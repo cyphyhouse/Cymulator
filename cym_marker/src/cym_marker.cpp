@@ -486,9 +486,9 @@ buildIGNMarkers(const diagnostic_aggregator::StatusItem& status_item)
     auto& mat = *msg.mutable_material();
     auto& script = *mat.mutable_script();
 
-    const std::string& color = status_item.getValue("color");
-    if(color != "")
-        script.set_name(color);
+    const std::string& material = status_item.getValue("material");
+    if(material != "")
+        script.set_name(material);
     else
         script.set_name("Gazebo/GreenTransparentOverlay");
 
