@@ -11,9 +11,10 @@
 
     <!-- Configurations for spawning a device -->
     <arg name="name" default="test_device0"/>
-    <arg name= "x" default="0.0"/>
+    <arg name= "x" default="-400.0"/>
     <arg name= "y" default="0.0"/>
     <arg name= "z" default="0.3"/>
+    <arg name= "yaw" default="0.0"/>
 
     <!-- Configurations for recording a ROSBag-->
     <arg name="record_topics" default="current_path state"/>
@@ -43,11 +44,33 @@
     <node ns="$(arg name)" name="$(anon rand_gen_wps)" pkg="cym_device" type="test_rosplane_waypoints.py"
           required="true">
         <!-- waypoints are specified as a Yaml list of lists [x, y, z, yaw]
-             with x, y, z in meters in NED coordinate and yaw in degrees -->
+             with x, y, z in meters in Gazebo world coordinate and yaw in degrees -->
+        <rosparam param="init_pose" subst_value="True">[$(arg x), $(arg y), $(arg z), $(arg yaw)]</rosparam>
         <rosparam param="waypoints">
-            - [200, 0, -50, 45]
-            - [0, 200, -50, 45]
-            - [200, 200, -50, 225]
+            - [-50,  0, 50, 0]
+            - [  0,-50, 50, 0]
+            - [ 50,  0, 50, 0]
+            - [  0, 50, 50, 0]
+            - [-50,  0, 50, 0]
+            - [  0,-50, 50, 0]
+            - [ 50,  0, 50, 0]
+            - [  0, 50, 50, 0]
+            - [-50,  0, 50, 0]
+            - [  0,-50, 50, 0]
+            - [ 50,  0, 50, 0]
+            - [  0, 50, 50, 0]
+            - [-50,  0, 50, 0]
+            - [  0,-50, 50, 0]
+            - [ 50,  0, 50, 0]
+            - [  0, 50, 50, 0]
+            - [-50,  0, 50, 0]
+            - [  0,-50, 50, 0]
+            - [ 50,  0, 50, 0]
+            - [150,  0, 40, 0]
+            - [250,  0, 20, 0]
+            - [350,  0, 10, 0]
+            - [0,   50, 10, 0]
+            - [-400, 0, 10, 0]
         </rosparam>
     </node>
 

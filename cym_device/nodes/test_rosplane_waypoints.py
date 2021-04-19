@@ -14,14 +14,21 @@ def dist(p0: Sequence[float], p1: Sequence[float]) -> float:
     return math.sqrt(sum((x0 - x1)**2 for x0, x1 in zip(p0, p1)))
 
 
-def to_rosplane_waypoint(p: Point, chi_d: float = math.radians(45),
-                         chi_valid: bool = True,
-                         Va_d: float = 12, set_current: bool = True,
-                         clear_wp_list: bool = False) -> Waypoint:
-    return Waypoint(
-        w=tuple(p), chi_d=chi_d, chi_valid=chi_valid, Va_d=Va_d,
-        set_current=set_current, clear_wp_list=clear_wp_list
-    )
+class ToROSplaneWaypoint:
+    def __init__(self, init_pose=(0.0, 0.0, 0.3, 0.0)):
+        self._init_pose = tuple(init_pose)
+
+    def to_rosplane_waypoint(self, p: Point, chi_d: float = math.radians(45),
+                             chi_valid: bool = False,
+                             Va_d: float = 12, set_current: bool = True,
+                             clear_wp_list: bool = False) -> Waypoint:
+        n =   p[0] - self._init_pose[0]
+        e = -(p[1] - self._init_pose[1])
+        d = -(p[2] - self._init_pose[2])
+        return Waypoint(
+            w=(n, e, d), chi_d=chi_d, chi_valid=chi_valid, Va_d=Va_d,
+            set_current=set_current, clear_wp_list=clear_wp_list
+        )
 
 
 def gen_waypoints(waypoints: Sequence[Sequence[float]]) -> Sequence:
@@ -36,6 +43,7 @@ def gen_waypoints(waypoints: Sequence[Sequence[float]]) -> Sequence:
 
 def main():
     rospy.init_node("rosplane_waypoints", anonymous=True)
+    init_pose = rospy.get_param("~init_pose", [0.0, 0.0, 0.3, 0.0])
     waypoints = rospy.get_param("~waypoints", [])
 
     waypoint_topic = rospy.resolve_name("waypoint_path")
@@ -44,13 +52,15 @@ def main():
     waypoint_seq = gen_waypoints(waypoints)
 
     rospy.sleep(2.0)
-    waypoint_pub.publish(to_rosplane_waypoint(p=waypoint_seq[0][0],
-                                              chi_d=waypoint_seq[0][1],
-                                              set_current=True))
+    converter = ToROSplaneWaypoint(init_pose)
+
+    waypoint_pub.publish(converter.to_rosplane_waypoint(p=waypoint_seq[0][0],
+                                                        chi_d=waypoint_seq[0][1],
+                                                        set_current=True))
     for point, chi_d in waypoint_seq[1:]:
         rospy.sleep(2.0)
-        waypoint_pub.publish(to_rosplane_waypoint(p=point, chi_d=chi_d,
-                                                  set_current=False))
+        waypoint_pub.publish(converter.to_rosplane_waypoint(p=point, chi_d=chi_d,
+                                                            set_current=False))
 
     rospy.spin()
 
