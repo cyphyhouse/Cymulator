@@ -104,7 +104,7 @@ void addBoxFaces(IGNMarker& msg, const std::array<IGNPoint, 2>& corner)
 
 void addCylinder(IGNMarker& msg, const std::array<IGNPoint, 2>& corner)
 {
-    msg.set_type(IGNMarker::TRIANGLE_STRIP);
+    msg.set_type(IGNMarker::TRIANGLE_LIST);
 
     const size_t N = 32;  // Number of points to approximate ellipses
     typedef std::array<double, 3> PointT;
@@ -118,53 +118,88 @@ void addCylinder(IGNMarker& msg, const std::array<IGNPoint, 2>& corner)
     const double zx_ratio = std::max(r_z, r_x)/std::min(r_z, r_x);
 
     std::vector<PointT> top_point_vec, bot_point_vec, side_point_vec;
-    top_point_vec.reserve(2*(N+1));
-    bot_point_vec.reserve(2*(N+1));
-    side_point_vec.reserve(2*(N+1));
+    top_point_vec.reserve(3*(N+1));
+    bot_point_vec.reserve(3*(N+1));
+    side_point_vec.reserve(6*(N+1));
     if (xy_ratio <= yz_ratio && xy_ratio <= zx_ratio || xy_ratio <= 3.0) { // prefer aligning cylinder with z-axis
         // Create points for top, bottom, and side of cylinder
         // Notice the order of points beind added
-        for(size_t i=0; i<=N; ++i) {
-            const double theta = (double(i)/N)*2*M_PI;
-            const double x = r_x * std::cos(theta);
-            const double y = r_y * std::sin(theta);
+        for(size_t i=0; i<N; ++i) {
+            const double theta0 = (double(i)/N)*2*M_PI;
+            const double theta1 = (double(i+1)/N)*2*M_PI;
+            const double x0 = r_x * std::cos(theta0);
+            const double y0 = r_y * std::sin(theta0);
+            const double x1 = r_x * std::cos(theta1);
+            const double y1 = r_y * std::sin(theta1);
 
             top_point_vec.push_back({0.0, 0.0, r_z});
-            top_point_vec.push_back({x, y, r_z});
-            side_point_vec.push_back({x, y, r_z});
-            side_point_vec.push_back({x, y, -r_z});
-            bot_point_vec.push_back({x, y, -r_z});
+            top_point_vec.push_back({x0, y0, r_z});
+            top_point_vec.push_back({x1, y1, r_z});
+
+            side_point_vec.push_back({x0, y0, r_z});
+            side_point_vec.push_back({x0, y0, -r_z});
+            side_point_vec.push_back({x1, y1, -r_z});
+
+            side_point_vec.push_back({x1, y1, r_z});
+            side_point_vec.push_back({x0, y0, r_z});
+            side_point_vec.push_back({x1, y1, -r_z});
+
             bot_point_vec.push_back({0.0, 0.0, -r_z});
+            bot_point_vec.push_back({x1, y1, -r_z});
+            bot_point_vec.push_back({x0, y0, -r_z});
         }
     }
     else if (yz_ratio <= zx_ratio) {
-        for(size_t i=0; i<=N; ++i) {
-            const double theta = (double(i)/N)*2*M_PI;
-            const double y = r_y * std::cos(theta);
-            const double z = r_z * std::sin(theta);
+        for(size_t i=0; i<N; ++i) {
+            const double theta0 = (double(i)/N)*2*M_PI;
+            const double theta1 = (double(i+1)/N)*2*M_PI;
+            const double y0 = r_y * std::cos(theta0);
+            const double z0 = r_z * std::sin(theta0);
+            const double y1 = r_y * std::cos(theta1);
+            const double z1 = r_z * std::sin(theta1);
 
             top_point_vec.push_back({r_x, 0.0, 0.0});
-            top_point_vec.push_back({r_x, y, z});
-            side_point_vec.push_back({r_x, y, z});
-            side_point_vec.push_back({-r_x, y, z});
-            bot_point_vec.push_back({-r_x, y, z});
+            top_point_vec.push_back({r_x, y0, z0});
+            top_point_vec.push_back({r_x, y1, z1});
+
+            side_point_vec.push_back({r_x, y0, z0});
+            side_point_vec.push_back({-r_x, y0, z0});
+            side_point_vec.push_back({-r_x, y1, z1});
+
+            side_point_vec.push_back({r_x, y1, z1});
+            side_point_vec.push_back({r_x, y0, z0});
+            side_point_vec.push_back({-r_x, y1, z1});
+
             bot_point_vec.push_back({-r_x, 0.0, 0.0});
+            bot_point_vec.push_back({-r_x, y1, z1});
+            bot_point_vec.push_back({-r_x, y0, z0});
         }
     }
     else {
-        for(size_t i=0; i<=N; ++i) {
-            const double theta = (double(i)/N)*2*M_PI;
-            const double z = r_z * std::cos(theta);
-            const double x = r_x * std::sin(theta);
+        for(size_t i=0; i<N; ++i) {
+            const double theta0 = (double(i)/N)*2*M_PI;
+            const double theta1 = (double(i+1)/N)*2*M_PI;
+            const double z0 = r_z * std::cos(theta0);
+            const double x0 = r_x * std::sin(theta0);
+            const double z1 = r_z * std::cos(theta1);
+            const double x1 = r_x * std::sin(theta1);
 
             top_point_vec.push_back({0.0, r_y, 0.0});
-            top_point_vec.push_back({x, r_y, z});
-            side_point_vec.push_back({x, r_y, z});
-            side_point_vec.push_back({x, -r_y, z});
-            bot_point_vec.push_back({x, -r_y, z});
-            bot_point_vec.push_back({0.0, -r_y, 0.0});
-        }
+            top_point_vec.push_back({x0, r_y, z0});
+            top_point_vec.push_back({x1, r_y, z1});
 
+            side_point_vec.push_back({x0, r_y, z0});
+            side_point_vec.push_back({x0, -r_y, z0});
+            side_point_vec.push_back({x1, -r_y, z1});
+
+            side_point_vec.push_back({x1, r_y, z1});
+            side_point_vec.push_back({x0, r_y, z0});
+            side_point_vec.push_back({x1, -r_y, z1});
+
+            bot_point_vec.push_back({0.0, -r_y, 0.0});
+            bot_point_vec.push_back({x1, -r_y, z1});
+            bot_point_vec.push_back({x0, -r_y, z0});
+        }
     }
 
     const double center_x = (corner[0].x() + corner[1].x()) / 2;
