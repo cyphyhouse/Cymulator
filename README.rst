@@ -97,24 +97,28 @@ These commands requires ``sudo`` permission. Please run them with caution.
            catkin_pkg rospkg \
            empy numpy scipy \
            defusedxml netifaces \
-           pathlib pyyaml
+           pathlib pyyaml \
+           vcstool
 
-#. Inside the ``catkin_ws/src`` directory of your catkin workspace, clone the following repos:
+
+Clone required Git repositories
+===============================
+
+6. Inside the ``catkin_ws/src`` directory of your catkin workspace, clone Cymulator repository.
+   Then, clone dependent git repositories specified in ``vcstool.repos.yml`` using `vcstool <https://pypi.org/project/vcstool/>`_:
 
    .. code-block:: shell
 
-      git clone https://github.com/tu-darmstadt-ros-pkg/hector_quadrotor.git --branch kinetic-devel
-      git clone https://github.com/tu-darmstadt-ros-pkg/hector_gazebo.git --branch kinetic-devel
-      git clone https://github.com/cyphyhouse/racecar.git --branch RacecarJTransitory
-      git clone https://github.com/cyphyhouse/racecar_gazebo.git --branch master
-      git clone https://github.com/cyphyhouse/Decawave.git --branch for-cymulator
       git clone https://github.com/cyphyhouse/Cymulator.git --branch master
+      vcs import --input Cymulator/vcstool.repos.yml
+
+Alternatively, you can manually clone the repositories at the versions specified in ``vcstool.repos.yml`` without using ``vcstool``.
 
 
 Compile using catkin_make
 =========================
 
-7. Run these commands under your ``catkin_ws`` directory to compile relevant ROS packages in the cloned repositories.
+1. Run these commands under your ``catkin_ws`` directory to compile relevant ROS packages in the cloned repositories.
 
    .. code-block:: shell
 

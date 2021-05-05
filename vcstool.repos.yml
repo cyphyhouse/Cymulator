@@ -30,7 +30,3 @@ repositories:
     type: git
     url: https://github.com/rosflight/rosflight.git
     version: master
-  Cymulator:
-    type: git
-    url: https://github.com/cyphyhouse/Cymulator.git
-    version: master

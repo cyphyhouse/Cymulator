@@ -40,7 +40,8 @@ pip3 install --user \
     catkin_pkg rospkg \
     empy numpy scipy\
     defusedxml netifaces \
-    pathlib pyyaml
+    pathlib pyyaml \
+    vcstool
 
 echo "-------------------- System dependency installation finished -------------------------"
 
@@ -48,14 +49,8 @@ echo "-------------------- System dependency installation finished -------------
 # Download source code of all needed ROS packages
 mkdir -p catkin_ws3/src
 cd catkin_ws3/src
-# TODO look into using .rosinstall to automatically download these repositories
-git clone https://github.com/tu-darmstadt-ros-pkg/hector_quadrotor.git --branch kinetic-devel
-git clone https://github.com/tu-darmstadt-ros-pkg/hector_gazebo.git --branch kinetic-devel
-git clone https://github.com/tu-darmstadt-ros-pkg/hector_localization.git
-git clone https://github.com/cyphyhouse/racecar.git --branch RacecarJTransitory
-git clone https://github.com/cyphyhouse/racecar_gazebo.git --branch master
-git clone https://github.com/cyphyhouse/Decawave.git --branch for-cymulator
 git clone https://github.com/cyphyhouse/Cymulator.git --branch master
+vcs import --input Cymulator/vcstool.repos.yml
 
 # Compile all ROS packages
 cd ..  # Go back to catkin workspace
