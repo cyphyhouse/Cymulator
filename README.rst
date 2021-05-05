@@ -50,10 +50,11 @@ Cymulator is licensed under the terms of the NCSA License (see the file
 Installation
 ************
 
-The installation steps below are also assembled in `this shell script <installation/install.sh>`_ that should work for Ubuntu 16.04.
-These commands requires `sudo` permission. Please run them with caution.
+The installation steps below are assembled in ``installation/install-kinetic.sh`` which we tested on Ubuntu 16.04.
+We also provide scripts for few different combinations of ROS, Gazebo, and Ubuntu versions under ``installation/`` folder.
+These commands requires ``sudo`` permission. Please run them with caution.
 
-#. Install ROS Kinetic and create a workspace for catkin. We assume it is under `catkin_ws`.
+#. Install ROS Kinetic and create a workspace for catkin. We assume it is under ``catkin_ws``.
 
    - `ROS Kinetic Ubuntu <http://wiki.ros.org/kinetic/Installation/Ubuntu>`_
    - `Creating a workspace for catkin <http://wiki.ros.org/catkin/Tutorials/create_a_workspace>`_
@@ -98,7 +99,7 @@ These commands requires `sudo` permission. Please run them with caution.
            defusedxml netifaces \
            pathlib pyyaml
 
-#. Inside the `catkin_ws/src` directory of your catkin workspace clone the following repos:
+#. Inside the ``catkin_ws/src`` directory of your catkin workspace, clone the following repos:
 
    .. code-block:: shell
 
@@ -113,7 +114,7 @@ These commands requires `sudo` permission. Please run them with caution.
 Compile using catkin_make
 =========================
 
-7. Run these commands under your `catkin_ws` directory to compile relevant ROS packages in the cloned repositories.
+7. Run these commands under your ``catkin_ws`` directory to compile relevant ROS packages in the cloned repositories.
 
    .. code-block:: shell
 
@@ -121,10 +122,13 @@ Compile using catkin_make
       catkin_make --only-pkg-with-deps cym_gazebo --cmake-args -DPYTHON_VERSION=3.5  # Build only cym_gazebo with Python>=3.5
 
 
-Compile using colcon
-====================
+(Alternative) Compile using colcon
+==================================
 
-7. Run these commands under your `catkin_ws` directory to compile only relevant ROS packages in `catkin_ws/src`.
+`Colcon <https://colcon.readthedocs.io>`_ is an alternative build system used by `Amazon AWS RoboMaker <https://aws.amazon.com/robomaker/>`_.
+Here are the commands to build with ``colcon``.
+
+7. Run these commands under your ``catkin_ws`` directory to compile only relevant ROS packages in ``catkin_ws/src``.
 
    .. code-block:: shell
 
