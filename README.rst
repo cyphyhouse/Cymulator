@@ -118,7 +118,7 @@ Alternatively, you can manually clone the repositories at the versions specified
 Compile using catkin_make
 =========================
 
-1. Run these commands under your ``catkin_ws`` directory to compile relevant ROS packages in the cloned repositories.
+7. Run these commands under your ``catkin_ws`` directory to compile relevant ROS packages in the cloned repositories.
 
    .. code-block:: shell
 
