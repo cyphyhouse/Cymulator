@@ -104,7 +104,7 @@ These commands requires ``sudo`` permission. Please run them with caution.
 Clone required Git repositories
 ===============================
 
-6. Inside the ``catkin_ws/src`` directory of your catkin workspace, clone Cymulator repository.
+6. Inside the ``catkin_ws/src`` directory, clone Cymulator repository.
    Then, clone dependent git repositories specified in ``vcstool.repos.yml`` using `vcstool <https://pypi.org/project/vcstool/>`_:
 
    .. code-block:: shell
