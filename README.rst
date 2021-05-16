@@ -139,3 +139,11 @@ Here are the commands to build with ``colcon``.
       source /opt/ros/kinetic/setup.bash
       colcon build --base-paths src/* --packages-up-to cym_gazebo --cmake-args -DPYTHON_VERSION=3.5
 
+
+(Optional) Additional Gazebo Worlds
+===================================
+
+You can download other Gazebo worlds. Cymulator relies on ROS Gazebo package to load Gazebo simulator, and it should be able to load your custom world.
+Some interesting world files from other opensource projects are provided below
+
+* https://docs.px4.io/master/en/simulation/gazebo_worlds.html
