@@ -56,7 +56,7 @@ vcs import --input Cymulator/vcstool.repos.yml
 # Compile all ROS packages
 cd ..  # Go back to catkin workspace
 source /opt/ros/noetic/setup.bash
-catkin_make --only-pkg-with-deps cym_gazebo --cmake-args -DPYTHON_VERSION=3.5  # Build only cym_gazebo with Python>=3.5
+catkin_make --only-pkg-with-deps cym_gazebo  # Build only cym_gazebo
 
 
 # (Optional) Development Environment setup
