@@ -50,35 +50,28 @@ Cymulator is licensed under the terms of the NCSA License (see the file
 Installation
 ************
 
-The installation steps below are assembled in ``installation/install-kinetic.sh`` which we tested on Ubuntu 16.04.
+The installation steps below are assembled in ``installation/install-noetic.sh`` which we tested on Ubuntu 20.04.
 We also provide scripts for few different combinations of ROS, Gazebo, and Ubuntu versions under ``installation/`` folder.
 These commands requires ``sudo`` permission. Please run them with caution.
 
-#. Install ROS Kinetic and create a workspace for catkin. We assume it is under ``catkin_ws``.
+#. Install ROS Noetic with Gazebo 11 and create a workspace for catkin. We assume it is under ``cym_ws``.
 
-   - `ROS Kinetic Ubuntu <http://wiki.ros.org/kinetic/Installation/Ubuntu>`_
+   - `Ubuntu Install of ROS Noetic  <http://wiki.ros.org/noetic/Installation/Ubuntu>`_
+   
+     * Desktop-Full Install: (Recommended) : Everything in Desktop plus 2D/3D simulators and 2D/3D perception packages
+   
    - `Creating a workspace for catkin <http://wiki.ros.org/catkin/Tutorials/create_a_workspace>`_
-
-#. Install Gazebo 9 for ROS Kinetic
-
-   .. code-block:: shell
-
-      sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
-      wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
-      sudo apt-get update
-      sudo apt install -y \
-           ros-kinetic-gazebo9-ros ros-kinetic-gazebo9-ros-control \
-           ros-kinetic-gazebo9-plugins ros-kinetic-gazebo9-ros-pkgs
 
 #. Install required ROS packages available on APT
 
    .. code-block:: shell
 
       sudo apt install -y \
-           ros-kinetic-ackermann-msgs ros-kinetic-geographic-msgs ros-kinetic-serial \
-           ros-kinetic-ros-control ros-kinetic-ros-controllers \
-           ros-kinetic-hector-localization ros-kinetic-hector-models \
-           ros-kinetic-geometry2 ros-kinetic-robot
+          ros-noetic-ackermann-msgs ros-noetic-geographic-msgs \
+          ros-noetic-eigen-stl-containers \
+          ros-noetic-ros-control ros-noetic-ros-controllers \
+          ros-noetic-hector-models \
+          ros-noetic-geometry2 ros-noetic-robot
 
 #. Install other system packages available on APT
 
@@ -104,7 +97,7 @@ These commands requires ``sudo`` permission. Please run them with caution.
 Clone required Git repositories
 ===============================
 
-6. Inside the ``catkin_ws/src`` directory, clone Cymulator repository.
+6. Inside the ``cym_ws/src`` directory, clone Cymulator repository.
    Then, clone dependent git repositories specified in ``vcstool.repos.yml`` using `vcstool <https://pypi.org/project/vcstool/>`_:
 
    .. code-block:: shell
@@ -118,12 +111,12 @@ Alternatively, you can manually clone the repositories at the versions specified
 Compile using catkin_make
 =========================
 
-7. Run these commands under your ``catkin_ws`` directory to compile relevant ROS packages in the cloned repositories.
+7. Run these commands under your ``cym_ws`` directory to compile relevant ROS packages in the cloned repositories.
 
    .. code-block:: shell
 
       source /opt/ros/kinetic/setup.bash
-      catkin_make --only-pkg-with-deps cym_gazebo --cmake-args -DPYTHON_VERSION=3.5  # Build only cym_gazebo with Python>=3.5
+      catkin_make --only-pkg-with-deps cym_gazebo  # Build only packages required by cym_gazebo
 
 
 (Alternative) Compile using colcon
@@ -132,12 +125,12 @@ Compile using catkin_make
 `Colcon <https://colcon.readthedocs.io>`_ is an alternative build system used by `Amazon AWS RoboMaker <https://aws.amazon.com/robomaker/>`_.
 Here are the commands to build with ``colcon``.
 
-7. Run these commands under your ``catkin_ws`` directory to compile only relevant ROS packages in ``catkin_ws/src``.
+7. Run these commands under your ``cym_ws`` directory to compile only relevant ROS packages in ``cym_ws/src``.
 
    .. code-block:: shell
 
       source /opt/ros/kinetic/setup.bash
-      colcon build --base-paths src/* --packages-up-to cym_gazebo --cmake-args -DPYTHON_VERSION=3.5
+      colcon build --base-paths src/* --packages-up-to cym_gazebo
 
 
 (Optional) Additional Gazebo Worlds
